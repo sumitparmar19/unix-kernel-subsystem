@@ -1,0 +1,24 @@
+project:  threads
+passed:   7 / 27
+runtime:  225 s (make check, -j4, --qemu)
+failing:
+  tests/threads/alarm-priority
+  tests/threads/mlfqs-block
+  tests/threads/mlfqs-load-1
+  tests/threads/mlfqs-load-60
+  tests/threads/mlfqs-load-avg
+  tests/threads/mlfqs-nice-10
+  tests/threads/mlfqs-nice-2
+  tests/threads/mlfqs-recent-1
+  tests/threads/priority-change
+  tests/threads/priority-condvar
+  tests/threads/priority-donate-chain
+  tests/threads/priority-donate-lower
+  tests/threads/priority-donate-multiple
+  tests/threads/priority-donate-multiple2
+  tests/threads/priority-donate-nest
+  tests/threads/priority-donate-one
+  tests/threads/priority-donate-sema
+  tests/threads/priority-fifo
+  tests/threads/priority-preempt
+  tests/threads/priority-sema
