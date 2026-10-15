@@ -6,8 +6,11 @@
 #include "devices/timer.h"
 #include "threads/io.h"
 #include "threads/thread.h"
+#include "threads/kstat.h"
+#include "threads/trace.h"
 #ifdef USERPROG
 #include "userprog/exception.h"
+#include "userprog/syscall.h"
 #endif
 #ifdef FILESYS
 #include "devices/block.h"
@@ -137,5 +140,8 @@ print_stats (void)
   kbd_print_stats ();
 #ifdef USERPROG
   exception_print_stats ();
+  syscall_print_stats ();
 #endif
+  kstat_print ();
+  trace_dump ();
 }

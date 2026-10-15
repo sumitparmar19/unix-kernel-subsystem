@@ -9,7 +9,7 @@ and `analysis/IMPLEMENTATION_PLAN.md`. One branch (`kernel-v2`), one draft PR, u
 | M1 correctness | done | 27/27 | 76/80 | | | | 4 left are M2's pointer tests |
 | M2 user-pointer validation | done | 27/27 | 80/80 | 89/113 | | | 3 known panics gone |
 | M3 IPC (pipes, redirection) | done | 27/27 | 80/80 | 89/113 | 11/11 | – | pipes, exec_redirect, dup2, minish |
-| M4 fuzzer, stress, stats, tracing, CI | – | | | | | | |
+| M4 fuzzer, stress, stats, tracing, CI | done | 27/27 | 80/80 | 89/113 | 11/11 | – | 125k fuzzed calls, 0 panics; CI+CodeQL/cppcheck |
 | M5 resource limits | – | | | | | | |
 | M6 virtual memory | – | | | | | | |
 | M7 benchmarks | – | | | | | | |
@@ -73,3 +73,22 @@ and `analysis/IMPLEMENTATION_PLAN.md`. One branch (`kernel-v2`), one draft PR, u
 - **`tests/ipc`** (new `src/ipc` project): 11/11. **`examples/minish`** runs pipelines, e.g.
   `minish echo one two three | upper | wc`, using two new filters, `upper` and `wc`.
 - Results: `analysis/test-results/m3/`: ipc 11/11, userprog 80/80, threads 27/27, vm 89/113 (unchanged).
+
+## M4 notes
+- **Syscall fuzzer** (`src/examples/fuzz.c`, `scripts/fuzz.sh`): survivor children make only
+  non-blocking hostile calls and run to completion (confirmed call count); bomb children pass bad
+  pointers / unknown call numbers and must be killed by the kernel. Recorded run
+  (`analysis/test-results/m4/fuzz-userprog.txt`): **125,000 confirmed calls over 25 seeds, 20/20 bombs
+  killed, 0 leaked, 0 panics, 0 hangs, kernel healthy after.**
+- **Sanity check vs the course tag:** `sc-boundary-3` **panics** the course kernel
+  (`exception.c:91 in kill()`) and **passes** on kernel-v2 — the regression class the fuzzer guards.
+- **Stress runner** (`scripts/stress.sh`): 20 runs each of ipc, userprog, threads, varying `-j`;
+  results in `analysis/test-results/m4/stress.txt`.
+- **Kernel statistics** (`threads/kstat.[ch]`): per-syscall and event counters, printed as `KSTAT` /
+  `KSTAT-SYSCALLS` lines at power-off (after the checker's cut-off, so tests are unaffected).
+- **Tracing** (`threads/trace.[ch]`, `-trace` option): a ring buffer of events dumped over serial;
+  `scripts/trace2perfetto.py` converts it to Chrome trace JSON. Two samples in `traces/`.
+- **CI** (`.github/workflows/ci.yml`): Docker build; threads/userprog/ipc in parallel with a
+  regression gate against `analysis/expected-results.json` (`scripts/check_results.py`); a short fuzz;
+  cppcheck and CodeQL (scoped to kernel code). cppcheck/CodeQL run on GitHub runners (not installable
+  in this sandbox); the new modules already build under `-Werror`.

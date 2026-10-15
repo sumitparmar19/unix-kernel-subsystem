@@ -152,6 +152,7 @@ void thread_unblock (struct thread *);
 
 struct thread *thread_current (void);
 tid_t thread_tid (void);
+int running_thread_tid (void);
 const char *thread_name (void);
 
 void thread_exit (void) NO_RETURN;

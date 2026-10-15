@@ -5,6 +5,8 @@
 #include "threads/palloc.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
+#include "threads/kstat.h"
+#include "threads/trace.h"
 
 /* Capacity of a pipe in bytes. */
 #define PIPE_SIZE PGSIZE
@@ -58,7 +60,12 @@ pipe_read (struct pipe *p, void *buffer, unsigned size)
     return 0;
   lock_acquire (&p->lock);
   while (p->len == 0 && p->writers > 0)
-    cond_wait (&p->readable, &p->lock);
+    {
+      kstat_inc (KS_PIPE_BLOCKS);
+      trace_event (TR_PIPE_BLOCK, 0);
+      cond_wait (&p->readable, &p->lock);
+      trace_event (TR_PIPE_WAKE, 0);
+    }
 
   n = size < p->len ? size : p->len;
   first = n < PIPE_SIZE - p->head ? n : PIPE_SIZE - p->head;
@@ -94,7 +101,12 @@ pipe_write (struct pipe *p, const void *buffer, unsigned size)
       size_t tail, chunk, first;
 
       while (p->len == PIPE_SIZE && p->readers > 0)
-        cond_wait (&p->writable, &p->lock);
+        {
+          kstat_inc (KS_PIPE_BLOCKS);
+          trace_event (TR_PIPE_BLOCK, 1);
+          cond_wait (&p->writable, &p->lock);
+          trace_event (TR_PIPE_WAKE, 1);
+        }
       if (p->readers == 0)
         break;
 
@@ -107,6 +119,7 @@ pipe_write (struct pipe *p, const void *buffer, unsigned size)
       memcpy (p->buf, src + written + first, chunk - first);
       p->len += chunk;
       written += chunk;
+      kstat[KS_PIPE_BYTES] += chunk;
       cond_broadcast (&p->readable, &p->lock);
     }
   lock_release (&p->lock);

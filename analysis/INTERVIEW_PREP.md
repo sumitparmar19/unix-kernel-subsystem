@@ -329,3 +329,28 @@ fine), redirection, a three-process pipeline, `dup2` (shared offsets, stdout to 
 - *"What's the one deliberate deviation from POSIX?"* No `SIGPIPE` (Pintos has no signals), so writing to
   a pipe with no reader just returns −1. Also, closing the console descriptors is a no-op, to keep the
   stock Pintos contract.
+
+### M4 · Fuzzing, stress, observability and CI
+**Fuzzer.** A user program (`examples/fuzz.c`) that makes random system calls with hostile arguments
+(bad pointers, pointers straddling `PHYS_BASE`, junk descriptors, huge sizes, unknown call numbers).
+Children split in two: *survivors* make only non-blocking valid-but-hostile calls and run to completion
+(so their call count is real — 125,000 over 25 seeds), and *bombs* pass bad pointers and must be killed
+by the kernel. A kernel panic or a hang fails the run; a killed bomb is the kernel working.
+
+**Why both kinds?** A child that passes a bad pointer is killed on that call, so it can't also prove
+"thousands of calls ran". Separating the two gives an honest large call count *and* exercises the kill
+path. Verified the fuzzer's class catches real regressions: `sc-boundary-3` panics the course
+submission but passes on kernel-v2.
+
+**Observability.** Counters (`kstat`) and a `-trace` ring buffer dumped at power-off, after the test
+checker's cut-off line so tests are unaffected. `scripts/trace2perfetto.py` turns a dump into a
+Perfetto timeline; the committed `priority-donation.json` shows donation unblocking a chain.
+
+**CI** gates every push: it fails if any suite's pass count drops below the recorded baseline
+(`expected-results.json`), runs a short fuzz, and runs cppcheck and CodeQL on the kernel sources.
+
+**Interview question:** *"How do you know your fuzzer actually tests anything, rather than dying
+immediately?"* The survivor children are the answer: each completes a fixed number of calls and exits
+with a recognisable code, so the parent counts only calls that genuinely ran. 125,000 of them, zero
+panics. And the same harness panics the old kernel on `sc-boundary-3`, which shows the checks are what's
+holding the line.

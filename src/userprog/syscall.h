@@ -7,6 +7,7 @@
 extern struct lock filesys_lock;
 
 void syscall_init (void);
+void syscall_print_stats (void);
 
 #endif /* userprog/syscall.h */
 
