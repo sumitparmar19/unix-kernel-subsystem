@@ -7,7 +7,7 @@ and `analysis/IMPLEMENTATION_PLAN.md`. One branch (`kernel-v2`), one draft PR, u
 |---|---|---|---|---|---|---|---|
 | M0 baseline + tooling | done | 26/27 | 64/80 | 70/113 | – | – | see below |
 | M1 correctness | done | 27/27 | 76/80 | | | | 4 left are M2's pointer tests |
-| M2 user-pointer validation | – | | | | | | |
+| M2 user-pointer validation | done | 27/27 | 80/80 | 89/113 | | | 3 known panics gone |
 | M3 IPC (pipes, redirection) | – | | | | | | |
 | M4 fuzzer, stress, stats, tracing, CI | – | | | | | | |
 | M5 resource limits | – | | | | | | |
@@ -46,3 +46,17 @@ and `analysis/IMPLEMENTATION_PLAN.md`. One branch (`kernel-v2`), one draft PR, u
   `multi-oom`, `syn-read`, `syn-write`, `rox-*`, `bad-*`. The 4 failures left (`sc-bad-arg`,
   `sc-boundary-3`, `exec-bound-2/3`) are exactly the pointer-validation tests that M2 covers.
 - PR #3 (donation rewrite, from a parallel thread) was reviewed and fast-forwarded into `kernel-v2`.
+
+## M2 notes
+- **ADR-001, `userprog/umem.[ch]`:** `validate_range` checks **every page** of a user range against the
+  page directory (present, below `PHYS_BASE`, and writable when the kernel writes, via the new
+  `pagedir_is_writable`); `validate_string` checks each page a string scan enters; `copy_in`,
+  `copy_out` and `copy_in_string` validate first, then copy.
+- `syscall.c` was rewritten around a dispatch table: the syscall number and **each 4-byte argument**
+  are read with `copy_in`; paths (≤127 bytes) and command lines (≤1 page) are copied into kernel memory
+  before use; read/write buffers are validated in full. Unknown numbers kill the caller.
+- **Defence in depth:** a kernel-mode fault on a user address during a user process's system call ends
+  the process (exit −1, `filesys_lock` released) instead of panicking.
+- **Results** (`analysis/test-results/m2/`): userprog **80/80** (`sc-bad-arg`, `sc-boundary-3`,
+  `exec-bound-2`, `exec-bound-3` fixed; the 3 known kernel panics are gone); threads 27/27; vm 89/113
+  (VM itself is M6).

@@ -276,3 +276,22 @@ was worth more than the constant factor.
 finish first. If the parent frees it, an orphaned child would write into freed memory when it exits; if
 the child frees it, a parent that waits later reads freed memory. Two owners with a count is the
 smallest design where neither order breaks.
+
+### M2 · Page-table validation of every user pointer (ADR-001)
+**What changed.** One module, `userprog/umem.c`, is the only code that touches user memory for a
+system call. `validate_range (uaddr, size, write)` walks **every page** of the range and requires each
+to be below `PHYS_BASE`, present in the process's page directory, and writable if the kernel will write
+it. Strings are checked page by page while scanning for the NUL. The syscall dispatcher reads the
+number and every argument word through `copy_in`; paths and command lines are copied into kernel
+buffers before use; read/write buffers are validated in full before the copy.
+
+**Why the old code failed.** It checked one byte. An argument slot sitting above `PHYS_BASE` was read
+straight out of kernel memory (`sc-bad-arg` "exited" with a kernel word), and data crossing into an
+unmapped page faulted *inside the kernel*, which panicked the whole machine (`sc-boundary-3`,
+`exec-bound-2/3`).
+
+**Interview question:** *"Why validate and then copy, rather than just copying and catching the
+fault?"* Both are legitimate (Pintos documents the fault-based `get_user`). Validation keeps every
+access decision in one auditable function and states the invariant explicitly; it costs one page-table
+walk per page touched. The fault handler still keeps a safety net: a kernel fault on a user address
+kills only the process.
