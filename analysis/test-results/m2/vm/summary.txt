@@ -1,0 +1,28 @@
+project:  vm
+passed:   89 / 113
+runtime:  28 s (make check, -j4, --qemu)
+failing:
+  tests/vm/mmap-clean
+  tests/vm/mmap-close
+  tests/vm/mmap-exit
+  tests/vm/mmap-inherit
+  tests/vm/mmap-misalign
+  tests/vm/mmap-null
+  tests/vm/mmap-over-code
+  tests/vm/mmap-over-data
+  tests/vm/mmap-over-stk
+  tests/vm/mmap-overlap
+  tests/vm/mmap-read
+  tests/vm/mmap-remove
+  tests/vm/mmap-shuffle
+  tests/vm/mmap-twice
+  tests/vm/mmap-write
+  tests/vm/page-linear
+  tests/vm/page-merge-mm
+  tests/vm/page-merge-par
+  tests/vm/page-merge-seq
+  tests/vm/page-merge-stk
+  tests/vm/pt-big-stk-obj
+  tests/vm/pt-grow-pusha
+  tests/vm/pt-grow-stack
+  tests/vm/pt-grow-stk-sc

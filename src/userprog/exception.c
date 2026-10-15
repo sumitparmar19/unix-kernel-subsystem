@@ -2,6 +2,8 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include "userprog/gdt.h"
+#include "userprog/syscall.h"
+#include "threads/vaddr.h"
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 
@@ -140,6 +142,22 @@ page_fault (struct intr_frame *f)
   not_present = (f->error_code & PF_P) == 0;
   write = (f->error_code & PF_W) != 0;
   user = (f->error_code & PF_U) != 0;
+
+#ifdef USERPROG
+  /* Defence in depth (ADR-001): system calls validate every user
+     pointer first, so the kernel should never fault on a user
+     address.  If it does anyway, end the offending process instead
+     of the whole kernel.  Faults on kernel addresses still panic. */
+  if (!user && is_user_vaddr (fault_addr) && thread_current ()->is_user)
+    {
+      printf ("%s: kernel fault on user address %p, terminating\n",
+              thread_name (), fault_addr);
+      if (lock_held_by_current_thread (&filesys_lock))
+        lock_release (&filesys_lock);
+      thread_current ()->exit_status = -1;
+      thread_exit ();
+    }
+#endif
 
   /* To implement virtual memory, delete the rest of the function
      body, and replace it with code that brings in the page to
