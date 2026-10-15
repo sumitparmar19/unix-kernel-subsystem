@@ -295,3 +295,37 @@ fault?"* Both are legitimate (Pintos documents the fault-based `get_user`). Vali
 access decision in one auditable function and states the invariant explicitly; it costs one page-table
 walk per page touched. The fault handler still keeps a safety net: a kernel fault on a user address
 kills only the process.
+
+### M3 · Real IPC: pipes, `exec_redirect`, `dup2` (ADR-005)
+**What changed.**
+- A descriptor now points to a reference-counted **open-file object** (`userprog/ofile.c`): a file, a pipe
+  end, or the console. fd 0 and fd 1 are ordinary slots holding the console objects, so redirection just
+  puts a different object there. `read`/`write` dispatch on the object type, not the descriptor number.
+- **Pipe** (`userprog/pipe.c`): a 4096-byte ring buffer, one lock, and two condition variables
+  (`readable`, `writable`). `read` blocks while empty and a writer exists, and returns 0 at EOF. `write`
+  blocks while full and a reader exists, writes everything, and returns −1 if no reader exists. Closing an
+  end broadcasts both conditions so blocked peers re-check.
+- **`exec_redirect(cmd, in, out)`** is like `posix_spawn` with file actions: the child's fd 0/1 are the
+  parent's objects (shared, refcounted). **`dup2`** follows POSIX.
+- `minish` (`examples/minish.c`) runs `a | b | c`, closing its own pipe ends after each spawn so the next
+  stage sees EOF.
+
+**Proof.** `tests/ipc` 11/11: basic, EOF, a writer blocking on a full pipe, write with no reader,
+1 MB checksummed through a 4 KB pipe, three writers sharing one pipe, a bad pointer (killed, kernel
+fine), redirection, a three-process pipeline, `dup2` (shared offsets, stdout to a file and back), and
+550 pipes created and destroyed without leaking kernel memory.
+
+**Interview questions.**
+- *"How does the reader know the writer is done?"* EOF means no write-end **objects** remain. A pipe
+  counts objects, not descriptors: several descriptors (in several processes) can share one object, so
+  EOF arrives only when the last one closes. That's why `minish` must close its own copy of each write
+  end, or the last stage would wait forever.
+- *"Why condition variables in a `while` loop?"* Pintos condition variables are Mesa-style: a woken
+  thread re-acquires the lock later, and the state may have changed in between (another reader took the
+  data). The loop re-checks the condition.
+- *"Can pipes deadlock with the file system?"* No, by lock order: a thread holding a pipe lock never takes
+  `filesys_lock`, and the reverse never happens either. User buffers are validated **before** the pipe
+  lock is taken.
+- *"What's the one deliberate deviation from POSIX?"* No `SIGPIPE` (Pintos has no signals), so writing to
+  a pipe with no reader just returns −1. Also, closing the console descriptors is a no-op, to keep the
+  stock Pintos contract.

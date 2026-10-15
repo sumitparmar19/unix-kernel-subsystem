@@ -21,3 +21,10 @@ utils/squish-unix
 
 # Python bytecode
 __pycache__/
+
+# Built example programs (sources and Makefile stay tracked)
+/src/examples/*
+!/src/examples/*.c
+!/src/examples/Makefile
+!/src/examples/.gitignore
+!/src/examples/lib/

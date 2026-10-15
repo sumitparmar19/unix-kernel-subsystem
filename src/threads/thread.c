@@ -683,8 +683,6 @@ init_thread (struct thread *t, const char *name, int priority)
 #ifdef USERPROG
   t->exit_status = -1;
   list_init (&t->children);
-  list_init (&t->fd_list);
-  t->next_fd = 2;        /* 0 = stdin, 1 = stdout, others start at 2. */
 #endif
 
   if (thread_mlfqs && t != initial_thread) {

@@ -182,3 +182,21 @@ inumber (int fd)
 {
   return syscall1 (SYS_INUMBER, fd);
 }
+
+bool
+pipe (int fds[2])
+{
+  return syscall1 (SYS_PIPE, fds);
+}
+
+pid_t
+exec_redirect (const char *cmd_line, int stdin_fd, int stdout_fd)
+{
+  return (pid_t) syscall3 (SYS_EXEC_REDIRECT, cmd_line, stdin_fd, stdout_fd);
+}
+
+int
+dup2 (int oldfd, int newfd)
+{
+  return syscall2 (SYS_DUP2, oldfd, newfd);
+}

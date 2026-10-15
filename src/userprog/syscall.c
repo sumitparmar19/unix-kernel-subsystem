@@ -11,6 +11,8 @@
 #include "threads/palloc.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
+#include "userprog/ofile.h"
+#include "userprog/pipe.h"
 #include "userprog/process.h"
 #include "userprog/umem.h"
 
@@ -23,6 +25,9 @@ struct lock filesys_lock;
    NUL).  Longer names fail the call (like ENAMETOOLONG); the Pintos
    file system itself allows 14. */
 #define PATH_MAX_LEN 127
+
+/* Descriptors must be below this value (like RLIMIT_NOFILE). */
+#define FD_LIMIT 1024
 
 /* A system call handler: takes the raw 32-bit arguments and returns
    the value for the caller's eax. */
@@ -49,22 +54,20 @@ get_path (char *kbuf, const char *upath)
   return len != UMEM_TOO_LONG;
 }
 
-/* Returns the open-file entry for FD in the current process, or
-   NULL. */
-static struct fd_entry *
-find_fd (int fd)
+/* Returns the current process's descriptor table. */
+static struct fdtable *
+fds (void)
 {
-  struct thread *t = thread_current ();
-  struct list_elem *e;
+  return &thread_current ()->fds;
+}
 
-  for (e = list_begin (&t->fd_list); e != list_end (&t->fd_list);
-       e = list_next (e))
-    {
-      struct fd_entry *fe = list_entry (e, struct fd_entry, elem);
-      if (fe->fd == fd)
-        return fe;
-    }
-  return NULL;
+/* Returns the file behind descriptor FD, or NULL if FD is not an
+   open file (closed, console or pipe). */
+static struct file *
+fd_file (int fd)
+{
+  struct ofile *of = fd_lookup (fds (), fd);
+  return of != NULL && of->type == OF_FILE ? of->file : NULL;
 }
 
 static uint32_t
@@ -138,40 +141,42 @@ static uint32_t
 sys_open (const uint32_t *args)
 {
   char name[PATH_MAX_LEN + 1];
-  struct thread *t = thread_current ();
-  struct fd_entry *fe;
+  struct ofile *of;
   struct file *file;
+  int fd;
 
   if (!get_path (name, (const char *) args[0]))
     return (uint32_t) -1;
-  fe = malloc (sizeof *fe);
-  if (fe == NULL)
-    return (uint32_t) -1;
-
   lock_acquire (&filesys_lock);
   file = filesys_open (name);
   lock_release (&filesys_lock);
   if (file == NULL)
+    return (uint32_t) -1;
+
+  of = ofile_from_file (file);
+  if (of == NULL)
     {
-      free (fe);
+      lock_acquire (&filesys_lock);
+      file_close (file);
+      lock_release (&filesys_lock);
       return (uint32_t) -1;
     }
-  fe->fd = t->next_fd++;
-  fe->file = file;
-  list_push_back (&t->fd_list, &fe->elem);
-  return fe->fd;
+  fd = fd_install (fds (), of, FD_LIMIT);
+  if (fd < 0)
+    ofile_unref (of);
+  return (uint32_t) fd;
 }
 
 static uint32_t
 sys_filesize (const uint32_t *args)
 {
-  struct fd_entry *fe = find_fd ((int) args[0]);
+  struct file *file = fd_file ((int) args[0]);
   off_t size;
 
-  if (fe == NULL)
+  if (file == NULL)
     return (uint32_t) -1;
   lock_acquire (&filesys_lock);
-  size = file_length (fe->file);
+  size = file_length (file);
   lock_release (&filesys_lock);
   return size;
 }
@@ -179,67 +184,37 @@ sys_filesize (const uint32_t *args)
 static uint32_t
 sys_read (const uint32_t *args)
 {
-  int fd = (int) args[0];
-  uint8_t *buffer = (uint8_t *) args[1];
+  struct ofile *of = fd_lookup (fds (), (int) args[0]);
+  void *buffer = (void *) args[1];
   unsigned size = args[2];
-  struct fd_entry *fe;
-  off_t n;
 
   /* The kernel writes into BUFFER: every page must be writable. */
   if (!validate_range (buffer, size, true))
     kill_process ();
-
-  if (fd == STDIN_FILENO)
-    {
-      unsigned i;
-      for (i = 0; i < size; i++)
-        buffer[i] = input_getc ();
-      return size;
-    }
-  fe = find_fd (fd);
-  if (fe == NULL)
-    return (uint32_t) -1;
-  lock_acquire (&filesys_lock);
-  n = file_read (fe->file, buffer, size);
-  lock_release (&filesys_lock);
-  return n;
+  return of != NULL ? (uint32_t) ofile_read (of, buffer, size) : (uint32_t) -1;
 }
 
 static uint32_t
 sys_write (const uint32_t *args)
 {
-  int fd = (int) args[0];
+  struct ofile *of = fd_lookup (fds (), (int) args[0]);
   const void *buffer = (const void *) args[1];
   unsigned size = args[2];
-  struct fd_entry *fe;
-  off_t n;
 
   if (!validate_range (buffer, size, false))
     kill_process ();
-
-  if (fd == STDOUT_FILENO)
-    {
-      putbuf (buffer, size);
-      return size;
-    }
-  fe = find_fd (fd);
-  if (fe == NULL)
-    return (uint32_t) -1;
-  lock_acquire (&filesys_lock);
-  n = file_write (fe->file, buffer, size);
-  lock_release (&filesys_lock);
-  return n;
+  return of != NULL ? (uint32_t) ofile_write (of, buffer, size) : (uint32_t) -1;
 }
 
 static uint32_t
 sys_seek (const uint32_t *args)
 {
-  struct fd_entry *fe = find_fd ((int) args[0]);
+  struct file *file = fd_file ((int) args[0]);
 
-  if (fe != NULL)
+  if (file != NULL)
     {
       lock_acquire (&filesys_lock);
-      file_seek (fe->file, (off_t) args[1]);
+      file_seek (file, (off_t) args[1]);
       lock_release (&filesys_lock);
     }
   return 0;
@@ -248,31 +223,128 @@ sys_seek (const uint32_t *args)
 static uint32_t
 sys_tell (const uint32_t *args)
 {
-  struct fd_entry *fe = find_fd ((int) args[0]);
+  struct file *file = fd_file ((int) args[0]);
   off_t pos;
 
-  if (fe == NULL)
+  if (file == NULL)
     return (uint32_t) -1;
   lock_acquire (&filesys_lock);
-  pos = file_tell (fe->file);
+  pos = file_tell (file);
   lock_release (&filesys_lock);
   return pos;
 }
 
+/* Closing a descriptor that refers to the console is a no-op, so
+   the console stays usable (the stock Pintos contract that
+   close-stdin/close-stdout test).  A redirected fd 0 or 1 (a pipe or
+   file) closes normally.  Documented in docs/SYSCALLS.md. */
 static uint32_t
 sys_close (const uint32_t *args)
 {
-  struct fd_entry *fe = find_fd ((int) args[0]);
+  int fd = (int) args[0];
+  struct ofile *of = fd_lookup (fds (), fd);
 
-  if (fe != NULL)
-    {
-      list_remove (&fe->elem);
-      lock_acquire (&filesys_lock);
-      file_close (fe->file);
-      lock_release (&filesys_lock);
-      free (fe);
-    }
+  if (of != NULL && !ofile_is_console (of))
+    fd_close (fds (), fd);
   return 0;
+}
+
+/* bool pipe (int fds[2]) */
+static uint32_t
+sys_pipe (const uint32_t *args)
+{
+  int *ufds = (int *) args[0];
+  struct ofile *rd, *wr;
+  struct pipe *p;
+  int kfds[2];
+
+  /* Validate the output array first, so nothing is created and then
+     leaked when the process is killed. */
+  if (!validate_range (ufds, sizeof kfds, true))
+    kill_process ();
+
+  p = pipe_create ();
+  if (p == NULL)
+    return false;
+  rd = ofile_from_pipe (p, false);
+  wr = ofile_from_pipe (p, true);
+  if (rd == NULL || wr == NULL)
+    {
+      /* Close whichever ends have no object yet, then the objects. */
+      if (rd == NULL)
+        pipe_close (p, false);
+      if (wr == NULL)
+        pipe_close (p, true);
+      ofile_unref (rd);
+      ofile_unref (wr);
+      return false;
+    }
+
+  kfds[0] = fd_install (fds (), rd, FD_LIMIT);
+  kfds[1] = kfds[0] < 0 ? -1 : fd_install (fds (), wr, FD_LIMIT);
+  if (kfds[1] < 0)
+    {
+      if (kfds[0] >= 0)
+        fd_close (fds (), kfds[0]);
+      else
+        ofile_unref (rd);
+      ofile_unref (wr);
+      return false;
+    }
+  if (!copy_out (ufds, kfds, sizeof kfds))
+    kill_process ();            /* Validated above; can't happen. */
+  return true;
+}
+
+/* Returns a new reference to the object behind FD for a child's
+   standard stream, the console object DEFAULT if FD is -1, or NULL
+   if FD is not open. */
+static struct ofile *
+stream_for_child (int fd, struct ofile *default_of)
+{
+  struct ofile *of = fd == -1 ? default_of : fd_lookup (fds (), fd);
+  return of != NULL ? ofile_ref (of) : NULL;
+}
+
+/* pid_t exec_redirect (const char *cmd_line, int stdin_fd, int stdout_fd) */
+static uint32_t
+sys_exec_redirect (const uint32_t *args)
+{
+  struct ofile *in, *out;
+  char *cmd_line;
+  int len;
+
+  cmd_line = palloc_get_page (0);
+  if (cmd_line == NULL)
+    return (uint32_t) -1;
+  len = copy_in_string (cmd_line, (const char *) args[0], PGSIZE);
+  if (len == UMEM_FAULT)
+    {
+      palloc_free_page (cmd_line);
+      kill_process ();
+    }
+
+  in = stream_for_child ((int) args[1], ofile_console_in ());
+  out = stream_for_child ((int) args[2], ofile_console_out ());
+  if (len == UMEM_TOO_LONG || in == NULL || out == NULL)
+    {
+      ofile_unref (in);
+      ofile_unref (out);
+      palloc_free_page (cmd_line);
+      return (uint32_t) -1;
+    }
+
+  /* process_execute_redirect() takes over both references. */
+  len = process_execute_redirect (cmd_line, in, out);
+  palloc_free_page (cmd_line);
+  return (uint32_t) len;
+}
+
+/* int dup2 (int oldfd, int newfd) */
+static uint32_t
+sys_dup2 (const uint32_t *args)
+{
+  return (uint32_t) fd_dup2 (fds (), (int) args[0], (int) args[1], FD_LIMIT);
 }
 
 /* System call table: handler and number of 32-bit arguments. */
@@ -296,6 +368,9 @@ syscalls[] =
     [SYS_SEEK]     = { sys_seek,     2 },
     [SYS_TELL]     = { sys_tell,     1 },
     [SYS_CLOSE]    = { sys_close,    1 },
+    [SYS_PIPE]          = { sys_pipe,          1 },
+    [SYS_EXEC_REDIRECT] = { sys_exec_redirect, 3 },
+    [SYS_DUP2]          = { sys_dup2,          2 },
   };
 #define SYSCALL_CNT (sizeof syscalls / sizeof *syscalls)
 

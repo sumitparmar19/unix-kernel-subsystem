@@ -8,7 +8,7 @@ and `analysis/IMPLEMENTATION_PLAN.md`. One branch (`kernel-v2`), one draft PR, u
 | M0 baseline + tooling | done | 26/27 | 64/80 | 70/113 | – | – | see below |
 | M1 correctness | done | 27/27 | 76/80 | | | | 4 left are M2's pointer tests |
 | M2 user-pointer validation | done | 27/27 | 80/80 | 89/113 | | | 3 known panics gone |
-| M3 IPC (pipes, redirection) | – | | | | | | |
+| M3 IPC (pipes, redirection) | done | 27/27 | 80/80 | 89/113 | 11/11 | – | pipes, exec_redirect, dup2, minish |
 | M4 fuzzer, stress, stats, tracing, CI | – | | | | | | |
 | M5 resource limits | – | | | | | | |
 | M6 virtual memory | – | | | | | | |
@@ -60,3 +60,16 @@ and `analysis/IMPLEMENTATION_PLAN.md`. One branch (`kernel-v2`), one draft PR, u
 - **Results** (`analysis/test-results/m2/`): userprog **80/80** (`sc-bad-arg`, `sc-boundary-3`,
   `exec-bound-2`, `exec-bound-3` fixed; the 3 known kernel panics are gone); threads 27/27; vm 89/113
   (VM itself is M6).
+
+## M3 notes
+- **ADR-005:** descriptors point to reference-counted open-file objects (`userprog/ofile.c`: file, pipe
+  end, console); an array-based table hands out the lowest free descriptor (limit 1024). Pipes
+  (`userprog/pipe.c`) are a 4 KB ring buffer with a lock and two condition variables.
+- **New calls** (appended to `lib/syscall-nr.h`): `pipe`, `exec_redirect`, `dup2`. Every call is
+  documented against POSIX in `docs/SYSCALLS.md` (claim C2).
+- **Deviations, documented:** no `SIGPIPE` (write returns −1); closing a console descriptor is a no-op
+  (the stock `close-stdout` test accepts only that or a kill). The test named `redirect-pipeline` in the
+  instructions is `redir-pipeline`, because Pintos file names are limited to 14 characters.
+- **`tests/ipc`** (new `src/ipc` project): 11/11. **`examples/minish`** runs pipelines, e.g.
+  `minish echo one two three | upper | wc`, using two new filters, `upper` and `wc`.
+- Results: `analysis/test-results/m3/`: ipc 11/11, userprog 80/80, threads 27/27, vm 89/113 (unchanged).

@@ -89,6 +89,8 @@ struct exec_args
   {
     char *cmd_line;               /* Page holding the command line. */
     struct child_record *record;  /* Shared parent/child record. */
+    struct ofile *stdin_of;       /* Becomes the child's fd 0. */
+    struct ofile *stdout_of;      /* Becomes the child's fd 1. */
   };
 
 /* Drops one reference to REC and frees it when none are left.
@@ -104,12 +106,24 @@ child_record_release (struct child_record *rec)
 }
 
 /* Starts a new process running the program in CMD_LINE (program
-   name followed by arguments).  Waits until the child has loaded
-   its executable, and returns the child's tid, or TID_ERROR if the
+   name followed by arguments), with the console as its standard
+   input and output.  Waits until the child has loaded its
+   executable, and returns the child's tid, or TID_ERROR if the
    process could not be created or the program could not be
    loaded. */
 tid_t
 process_execute (const char *cmd_line)
+{
+  return process_execute_redirect (cmd_line, ofile_console_in (),
+                                   ofile_console_out ());
+}
+
+/* Like process_execute(), but the child's fd 0 and fd 1 are STDIN_OF
+   and STDOUT_OF (ADR-005).  Takes over one reference to each: they
+   pass to the child, or are dropped here if no child is created. */
+tid_t
+process_execute_redirect (const char *cmd_line, struct ofile *stdin_of,
+                          struct ofile *stdout_of)
 {
   char thread_name[16];
   struct exec_args *args;
@@ -144,6 +158,8 @@ process_execute (const char *cmd_line)
   sema_init (&rec->wait_sema, 0);
   args->cmd_line = cmd_copy;
   args->record = rec;
+  args->stdin_of = stdin_of;
+  args->stdout_of = stdout_of;
 
   tid = thread_create (thread_name, PRI_DEFAULT, start_process, args);
   if (tid == TID_ERROR)
@@ -165,6 +181,8 @@ process_execute (const char *cmd_line)
   palloc_free_page (cmd_copy);
   free (args);
   free (rec);
+  ofile_unref (stdin_of);
+  ofile_unref (stdout_of);
   return TID_ERROR;
 }
 
@@ -181,12 +199,16 @@ start_process (void *args_)
   cur->is_user = true;
   cur->record = args->record;
 
+  /* Install fd 0 and fd 1 before loading, so a failed load releases
+     them through the normal exit path. */
+  success = fdtable_init (&cur->fds, args->stdin_of, args->stdout_of);
+
   /* Initialize interrupt frame and load executable. */
   memset (&if_, 0, sizeof if_);
   if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
-  success = load (args->cmd_line, &if_.eip, &if_.esp);
+  success = success && load (args->cmd_line, &if_.eip, &if_.esp);
   palloc_free_page (args->cmd_line);
   free (args);
 
@@ -241,16 +263,8 @@ process_exit (void)
   if (cur->is_user)
     printf ("%s: exit(%d)\n", cur->name, cur->exit_status);
 
-  /* Close open files and the (write-denied) executable. */
-  while (!list_empty (&cur->fd_list))
-    {
-      struct fd_entry *fd_e = list_entry (list_pop_front (&cur->fd_list),
-                                          struct fd_entry, elem);
-      lock_acquire (&filesys_lock);
-      file_close (fd_e->file);
-      lock_release (&filesys_lock);
-      free (fd_e);
-    }
+  /* Close every descriptor and the (write-denied) executable. */
+  fdtable_destroy (&cur->fds);
   if (cur->exec_file != NULL)
     {
       lock_acquire (&filesys_lock);

@@ -61,6 +61,8 @@ userprog_SRC += userprog/syscall.c	# System call handler.
 userprog_SRC += userprog/gdt.c		# GDT initialization.
 userprog_SRC += userprog/tss.c		# TSS management.
 userprog_SRC += userprog/umem.c		# Validated user-memory access.
+userprog_SRC += userprog/ofile.c	# Open-file objects, fd tables.
+userprog_SRC += userprog/pipe.c		# Pipes.
 
 # No virtual memory code yet.
 #vm_SRC = vm/file.c			# Some file.
@@ -78,7 +80,7 @@ OBJECTS = $(patsubst %.c,%.o,$(patsubst %.S,%.o,$(SOURCES)))
 DEPENDS = $(patsubst %.o,%.d,$(OBJECTS))
 
 # Post-course modules build warning-free.
-userprog/umem.o: WARNINGS += -Werror
+userprog/umem.o userprog/ofile.o userprog/pipe.o: WARNINGS += -Werror
 
 threads/kernel.lds.s: CPPFLAGS += -P
 threads/kernel.lds.s: threads/kernel.lds.S threads/loader.h
