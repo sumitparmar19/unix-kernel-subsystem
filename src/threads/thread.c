@@ -12,6 +12,8 @@
 #include "threads/synch.h"
 #include "threads/vaddr.h"
 #include "threads/fixed-point.h"
+#include "threads/kstat.h"
+#include "threads/trace.h"
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
@@ -126,6 +128,7 @@ donate_chain (struct thread *donor)
       if (donor->priority <= h->priority)
         break;
       h->priority = donor->priority;
+      trace_event (TR_DONATE, h->priority);
       ready_list_reposition (h);
     }
 }
@@ -308,6 +311,7 @@ thread_create (const char *name, int priority,
   /* Initialize thread. */
   init_thread (t, name, priority);
   tid = t->tid = allocate_tid ();
+  trace_thread_name (tid, t->name);
 
   /* Stack frame for kernel_thread(). */
   kf = alloc_frame (t, sizeof *kf);
@@ -791,7 +795,11 @@ schedule (void)
   ASSERT (is_thread (next));
 
   if (cur != next)
-    prev = switch_threads (cur, next);
+    {
+      kstat_inc (KS_CTX_SWITCHES);
+      trace_event (TR_SWITCH, next->tid);
+      prev = switch_threads (cur, next);
+    }
   thread_schedule_tail (prev);
 }
 
@@ -814,3 +822,11 @@ allocate_tid (void)
 
 
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);
+
+/* Returns the running thread's tid.  Unlike thread_tid(), safe to call
+   from any context, including inside the scheduler (for tracing). */
+int
+running_thread_tid (void)
+{
+  return running_thread ()->tid;
+}

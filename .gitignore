@@ -28,3 +28,4 @@ __pycache__/
 !/src/examples/Makefile
 !/src/examples/.gitignore
 !/src/examples/lib/
+traces/*.log

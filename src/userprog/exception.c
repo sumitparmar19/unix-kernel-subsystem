@@ -6,6 +6,8 @@
 #include "threads/vaddr.h"
 #include "threads/interrupt.h"
 #include "threads/thread.h"
+#include "threads/kstat.h"
+#include "threads/trace.h"
 
 /* Number of page faults processed. */
 static long long page_fault_cnt;
@@ -137,6 +139,8 @@ page_fault (struct intr_frame *f)
 
   /* Count page faults. */
   page_fault_cnt++;
+  kstat_inc (KS_PAGE_FAULTS);
+  trace_event (TR_PAGE_FAULT, (uint32_t) fault_addr);
 
   /* Determine cause. */
   not_present = (f->error_code & PF_P) == 0;

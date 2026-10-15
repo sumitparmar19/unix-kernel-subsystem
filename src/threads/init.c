@@ -22,6 +22,7 @@
 #include "threads/palloc.h"
 #include "threads/pte.h"
 #include "threads/thread.h"
+#include "threads/trace.h"
 #ifdef USERPROG
 #include "userprog/process.h"
 #include "userprog/exception.h"
@@ -97,6 +98,7 @@ main (void)
   /* Initialize memory system. */
   palloc_init (user_page_limit);
   malloc_init ();
+  trace_init ();
   paging_init ();
 
   /* Segmentation. */
@@ -256,6 +258,8 @@ parse_options (char **argv)
         random_init (atoi (value));
       else if (!strcmp (name, "-mlfqs"))
         thread_mlfqs = true;
+      else if (!strcmp (name, "-trace"))
+        trace_enabled = true;
 #ifdef USERPROG
       else if (!strcmp (name, "-ul"))
         user_page_limit = atoi (value);
@@ -381,6 +385,7 @@ usage (void)
           "  -mlfqs             Use multi-level feedback queue scheduler.\n"
 #ifdef USERPROG
           "  -ul=COUNT          Limit user memory to COUNT pages.\n"
+          "  -trace             Record kernel events; dump them at power-off.\n"
 #endif
           );
   shutdown_power_off ();

@@ -7,6 +7,8 @@
 #include "filesys/file.h"
 #include "filesys/filesys.h"
 #include "threads/interrupt.h"
+#include "threads/kstat.h"
+#include "threads/trace.h"
 #include "threads/malloc.h"
 #include "threads/palloc.h"
 #include "threads/thread.h"
@@ -374,6 +376,9 @@ syscalls[] =
   };
 #define SYSCALL_CNT (sizeof syscalls / sizeof *syscalls)
 
+/* Calls made, per system call number. */
+static uint32_t syscall_counts[SYSCALL_CNT];
+
 /* Entry point for `int $0x30'.  The user stack holds the system call
    number followed by its arguments; every one of those words is
    copied in through umem (ADR-001) before use. */
@@ -393,7 +398,25 @@ syscall_handler (struct intr_frame *f)
                   sizeof args[i]))
       kill_process ();
 
+  kstat_inc (KS_SYSCALLS);
+  syscall_counts[number]++;
+  trace_event (TR_SYSCALL_ENTER, number);
   f->eax = syscalls[number].func (args);
+  trace_event (TR_SYSCALL_EXIT, number);
+}
+
+/* Prints how often each system call was made, as one
+   `KSTAT-SYSCALLS number=count ...' line (calls made at least once). */
+void
+syscall_print_stats (void)
+{
+  size_t i;
+
+  printf ("KSTAT-SYSCALLS");
+  for (i = 0; i < SYSCALL_CNT; i++)
+    if (syscall_counts[i] != 0)
+      printf (" %u=%u", (unsigned) i, (unsigned) syscall_counts[i]);
+  printf ("\n");
 }
 
 /* Registers the system call interrupt handler. */

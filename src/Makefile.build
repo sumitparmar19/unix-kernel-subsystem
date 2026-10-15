@@ -21,6 +21,8 @@ threads_SRC += threads/intr-stubs.S	# Interrupt stubs.
 threads_SRC += threads/synch.c		# Synchronization.
 threads_SRC += threads/palloc.c		# Page allocator.
 threads_SRC += threads/malloc.c		# Subpage allocator.
+threads_SRC += threads/kstat.c		# Statistics counters.
+threads_SRC += threads/trace.c		# Event tracing.
 
 # Device driver code.
 devices_SRC  = devices/pit.c		# Programmable interrupt timer chip.
@@ -80,7 +82,8 @@ OBJECTS = $(patsubst %.c,%.o,$(patsubst %.S,%.o,$(SOURCES)))
 DEPENDS = $(patsubst %.o,%.d,$(OBJECTS))
 
 # Post-course modules build warning-free.
-userprog/umem.o userprog/ofile.o userprog/pipe.o: WARNINGS += -Werror
+threads/kstat.o threads/trace.o userprog/umem.o userprog/ofile.o \
+userprog/pipe.o: WARNINGS += -Werror
 
 threads/kernel.lds.s: CPPFLAGS += -P
 threads/kernel.lds.s: threads/kernel.lds.S threads/loader.h

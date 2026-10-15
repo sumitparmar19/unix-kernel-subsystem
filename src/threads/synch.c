@@ -31,6 +31,8 @@
 #include <string.h>
 #include "threads/interrupt.h"
 #include "threads/thread.h"
+#include "threads/kstat.h"
+#include "threads/trace.h"
 
 /* Initializes semaphore SEMA to VALUE.  A semaphore is a
    nonnegative integer along with two atomic operators for
@@ -211,12 +213,17 @@ lock_acquire (struct lock *lock)
 
   /* Interrupts stay off from the donation until sema_down() puts us
      on the waiter list, where thread_recompute_priority() sees us. */
-  if (lock->holder != NULL)
+  bool waited = lock->holder != NULL;
+  if (waited)
     {
+      kstat_inc (KS_LOCK_WAITS);
+      trace_event (TR_LOCK_WAIT, lock->holder->tid);
       cur->waiting_on = lock;
       donate_chain (cur);
     }
   sema_down (&lock->semaphore);
+  if (waited)
+    trace_event (TR_LOCK_ACQUIRE, 0);
   cur->waiting_on = NULL;
   lock->holder = cur;
 
