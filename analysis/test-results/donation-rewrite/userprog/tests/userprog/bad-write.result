@@ -1,0 +1,12 @@
+FAIL
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (bad-write) begin
+  bad-write: exit(-1)
+Differences in `diff -u' format:
+  (bad-write) begin
++ bad-write: dying due to interrupt 0x0e
+  bad-write: exit(-1)
+
+(User fault messages are excluded for matching purposes.)

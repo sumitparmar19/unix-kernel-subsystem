@@ -6,7 +6,7 @@ and `analysis/IMPLEMENTATION_PLAN.md`. One branch (`kernel-v2`), one draft PR, u
 | Milestone | Status | threads | userprog | vm | ipc | limits | Notes |
 |---|---|---|---|---|---|---|---|
 | M0 baseline + tooling | done | 26/27 | 64/80 | 70/113 | – | – | see below |
-| M1 correctness | – | | | | | | |
+| M1 correctness | in progress | 27/27 | 63/80 | | | | donation rewrite done; see below |
 | M2 user-pointer validation | – | | | | | | |
 | M3 IPC (pipes, redirection) | – | | | | | | |
 | M4 fuzzer, stress, stats, tracing, CI | – | | | | | | |
@@ -31,3 +31,10 @@ and `analysis/IMPLEMENTATION_PLAN.md`. One branch (`kernel-v2`), one draft PR, u
   `syn-read` result **depends on timing**: a real race (unlocked file-system access in `load`), not a
   deterministic bug. Counted as flaky; M1 fixes the cause.
 - Bochs 2.6.11 for `--jitter` runs: attempted in M4 (stress testing), where it's used.
+
+## M1 notes
+- **Priority donation rewrite (plan §2.1):** `thread_recompute_priority` derives effective priority from
+  live lock waiter lists; the cached `max_priority` fields and semaphore-level donation are gone.
+  threads **27/27** (`priority-donate-multiple2` fixed). userprog 63/80 with the same failures as the
+  M0 baseline, except `syn-read`, which failed in all three runs here (Phase 1 measured the same; it's
+  the unlocked `load` race, fixed by §2.5). Results: `analysis/test-results/donation-rewrite/`.

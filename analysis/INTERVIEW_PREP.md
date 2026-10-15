@@ -218,3 +218,36 @@ Sumit should replace or extend them with what he actually remembers debugging.
   always **before** taking `filesys_lock`; `kill` sets exit status −1 on user faults.
 - **Result:** All `*-bad-ptr`, `*-null`, `*-bad-fd` and `sc-bad-sp` tests pass. The remaining cases
   (strings or arguments crossing a page boundary) are the known gap in Q3.
+
+## 4. Post-course changes (kernel-v2, written with AI pair-programming assistance)
+
+### M1 · Priority donation rewrite (`priority-donate-multiple2` now passes; threads 27/27)
+**What changed.** The course code cached donations in `lock->max_priority` (and `sema->max_priority`).
+That cache only ever grew, and `lock_release` read it through a thread comparator on a list of locks
+(Q5). The rewrite removes the cache. One function, `thread_recompute_priority (t)` (`thread.c`),
+derives `t->priority` from live state:
+
+    priority = max (base_Priority, priority of every thread in the waiter list of every lock t holds)
+
+It runs whenever a donation can end or a base priority changes: in `lock_release` (after the lock
+leaves `locks_held`), in `lock_acquire` once the lock is obtained (waiters still queued on it now
+donate to the new holder), and in `thread_set_priority`. It re-sorts the thread in the ready list if
+its priority changed.
+
+**Donation itself** is still `donate_chain`: walk `waiting_on → holder → holder's waiting_on`, up to
+8 levels, raising each holder to the donor's priority, stopping early once a holder is already at
+least that high. A raise can't disagree with the recompute, because `lock_acquire` keeps interrupts
+off from the donation until `sema_down` has put the donor on the lock's waiter list.
+
+**Other fixes in the same change.**
+- Semaphore-level donation removed from `sema_down`. A semaphore has no owner; `sema->holder` was just
+  the last thread to call down, so donating to it was wrong (it affected `wait`'s semaphore).
+- `lock_try_acquire` now adds the lock to `locks_held`; before, releasing a lock taken that way
+  removed an element that was never in the list.
+- `lock_release` keeps interrupts off through `sema_up`, so no thread can see `holder == NULL` while
+  the semaphore is still taken (and skip donating).
+
+**Trade-off to be ready for.** Recomputing walks every waiter of every held lock: O(locks × waiters)
+per release instead of O(locks). In Pintos those lists are a handful of threads, and a cache that has
+to be kept correct on every waiter change is exactly what caused the bug. Correct by construction
+was worth more than the constant factor.

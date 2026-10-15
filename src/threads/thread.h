@@ -134,6 +134,7 @@ extern bool higher_prio(const struct list_elem *a,
                         void *aux);
 
 void donate_chain(struct thread *donor);
+void thread_recompute_priority (struct thread *t);
 
 void thread_init (void);
 void thread_start (void);

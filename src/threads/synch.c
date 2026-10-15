@@ -48,8 +48,6 @@ sema_init (struct semaphore *sema, unsigned value)
 
   sema->value = value;
   list_init (&sema->waiters);
-  sema->holder = NULL;
-  sema->max_priority = 0;
 }
 
 /* Down or "P" operation on a semaphore.  Waits for SEMA's value
@@ -69,32 +67,11 @@ sema_down (struct semaphore *sema)
 
   while (sema->value == 0)
     {
-      struct thread *cur = thread_current ();
-
-      /* Remember strongest waiter */
-      if (cur->priority > sema->max_priority)
-        sema->max_priority = cur->priority;
-
-      /* Donate to holder so it can run and release resources. */
-      if (!thread_mlfqs && sema->holder != NULL
-          && cur->priority > sema->holder->priority)
-        {
-          sema->holder->priority = cur->priority;
-          if (sema->holder->status == THREAD_READY) {
-            list_remove (&sema->holder->elem);
-            list_insert_ordered (&ready_list, &sema->holder->elem,
-                                 higher_prio, NULL);
-          }
-        }
-
-      list_insert_ordered (&sema->waiters, &cur->elem, higher_prio, NULL);
+      list_insert_ordered (&sema->waiters, &thread_current ()->elem,
+                           higher_prio, NULL);
       thread_block ();
     }
-
   sema->value--;
-  /* Current thread becomes the new holder of this unit. */
-  sema->holder = thread_current ();
-
   intr_set_level (old_level);
 }
 
@@ -211,7 +188,6 @@ lock_init (struct lock *lock)
   ASSERT (lock != NULL);
 
   lock->holder = NULL;
-  lock->max_priority = 0;
   sema_init (&lock->semaphore, 1);
 }
 
@@ -230,55 +206,27 @@ lock_acquire (struct lock *lock)
   ASSERT (!intr_context ());
   ASSERT (!lock_held_by_current_thread (lock));
 
-  enum intr_level old = intr_disable();
-  struct thread *cur = thread_current();
-  struct thread *h;
-  cur->waiting_on = lock;
+  enum intr_level old = intr_disable ();
+  struct thread *cur = thread_current ();
 
-  if (!thread_mlfqs && lock->holder != NULL)
+  /* Interrupts stay off from the donation until sema_down() puts us
+     on the waiter list, where thread_recompute_priority() sees us. */
+  if (lock->holder != NULL)
     {
-      /* Record max waiting priority on this lock */
-      if (cur->priority > lock->max_priority)
-        lock->max_priority = cur->priority;
-
-      /* Propagate donation up the chain */
+      cur->waiting_on = lock;
       donate_chain (cur);
-
-      /* Update holder’s effective priority immediately */
-      h = lock->holder;
-      int eff = h->base_Priority;
-      for (struct list_elem *e = list_begin(&h->locks_held);
-           e != list_end(&h->locks_held);
-           e = list_next(e))
-        {
-          struct lock *lk = list_entry(e, struct lock, holder_elem);
-          if (lk->max_priority > eff)
-            eff = lk->max_priority;
-        }
-      h->priority = eff;
-
-      /* Reinsert holder if ready so scheduler sees new priority */
-      if (h->status == THREAD_READY)
-        {
-          list_remove (&h->elem);
-          list_insert_ordered (&ready_list, &h->elem,
-                               higher_prio, NULL);
-        }
     }
-
-  intr_set_level(old);
-
   sema_down (&lock->semaphore);
-  
-  old = intr_disable();
   cur->waiting_on = NULL;
   lock->holder = cur;
 
-  // only track locks_held if not in mlfqs
   if (!thread_mlfqs)
-    list_push_back(&cur->locks_held, &lock->holder_elem);
-
-  intr_set_level(old);
+    {
+      /* Threads still waiting on this lock now donate to us. */
+      list_push_back (&cur->locks_held, &lock->holder_elem);
+      thread_recompute_priority (cur);
+    }
+  intr_set_level (old);
 }
 
 /* Tries to acquires LOCK and returns true if successful or false
@@ -295,9 +243,15 @@ lock_try_acquire (struct lock *lock)
   ASSERT (lock != NULL);
   ASSERT (!lock_held_by_current_thread (lock));
 
+  enum intr_level old = intr_disable ();
   success = sema_try_down (&lock->semaphore);
   if (success)
-    lock->holder = thread_current ();
+    {
+      lock->holder = thread_current ();
+      if (!thread_mlfqs)
+        list_push_back (&thread_current ()->locks_held, &lock->holder_elem);
+    }
+  intr_set_level (old);
   return success;
 }
 
@@ -312,29 +266,18 @@ lock_release (struct lock *lock)
   ASSERT (lock != NULL);
   ASSERT (lock_held_by_current_thread (lock));
 
-  enum intr_level old = intr_disable();
-
+  /* Interrupts stay off through sema_up() so no thread can see the
+     lock unowned while its semaphore is still taken. */
+  enum intr_level old = intr_disable ();
   lock->holder = NULL;
-
   if (!thread_mlfqs)
     {
-      /* Only manage donation-related lists in non-MLFQS mode. */
+      /* Donations through this lock end here. */
       list_remove (&lock->holder_elem);
-
-      /* Recalculate priority from base + remaining donations. */
-      struct thread *cur = thread_current ();
-      cur->priority = cur->base_Priority;
-      if (!list_empty (&cur->locks_held))
-        {
-          struct list_elem *e = list_max (&cur->locks_held, higher_prio, NULL);
-          struct lock *l = list_entry (e, struct lock, holder_elem);
-          if (l->max_priority > cur->priority)
-            cur->priority = l->max_priority;
-        }
+      thread_recompute_priority (thread_current ());
     }
-
-  intr_set_level (old);
   sema_up (&lock->semaphore);
+  intr_set_level (old);
 }
 
 /* Returns true if the current thread holds LOCK, false
