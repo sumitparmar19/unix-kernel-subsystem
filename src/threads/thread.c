@@ -88,27 +88,84 @@ bool higher_prio(const struct list_elem *a,
   return t1->priority > t2->priority;
 }
 
-void
-donate_chain(struct thread *donor) {
-  if (thread_mlfqs) return;
-  int depth = 0;
-  struct lock *lk = donor->waiting_on;
-  while (lk && lk->holder && depth < 8) {
-    struct thread *h = lk->holder;
-    if (donor->priority > h->priority) {
-      h->priority = donor->priority;
-      if (h->status == THREAD_READY) {
-        /* reinsert to maintain ready_list order */
-        list_remove(&h->elem);
-        list_insert_ordered(&ready_list, &h->elem, higher_prio, NULL);
-      }
+/* Moves READY thread T to its place in ready_list after its
+   priority changed.  Interrupts must be off. */
+static void
+ready_list_reposition (struct thread *t)
+{
+  if (t->status == THREAD_READY)
+    {
+      list_remove (&t->elem);
+      list_insert_ordered (&ready_list, &t->elem, higher_prio, NULL);
     }
-    /* keep max of donations seen on this lock */
-    if (donor->priority > lk->max_priority)
-      lk->max_priority = donor->priority;
-    lk = h->waiting_on;
-    depth++;
-  }
+}
+
+/* Donates DONOR's priority along its chain of lock waits: to the
+   holder of the lock DONOR waits on, then to the holder of the
+   lock that thread waits on, and so on (at most 8 levels).
+
+   Donation only ever raises a holder to DONOR's priority, which is
+   exactly what thread_recompute_priority() would derive once DONOR
+   is on the lock's waiter list.  Callers keep interrupts off from
+   here until DONOR is on that list, so the two never disagree.
+   Interrupts must be off. */
+void
+donate_chain (struct thread *donor)
+{
+  struct lock *lk;
+  int depth;
+
+  ASSERT (intr_get_level () == INTR_OFF);
+  if (thread_mlfqs)
+    return;
+
+  for (lk = donor->waiting_on, depth = 0;
+       lk != NULL && lk->holder != NULL && depth < 8;
+       lk = lk->holder->waiting_on, depth++)
+    {
+      struct thread *h = lk->holder;
+      if (donor->priority <= h->priority)
+        break;
+      h->priority = donor->priority;
+      ready_list_reposition (h);
+    }
+}
+
+/* Sets T's effective priority from its base priority and the
+   donations it currently receives: the highest priority of any
+   thread waiting on a lock T holds.  Donations are read live from
+   each lock's waiter list, so a donor that got the lock or stopped
+   waiting no longer counts.  Interrupts must be off. */
+void
+thread_recompute_priority (struct thread *t)
+{
+  struct list_elem *le, *we;
+  int eff;
+
+  ASSERT (intr_get_level () == INTR_OFF);
+  if (thread_mlfqs)
+    return;
+
+  eff = t->base_Priority;
+  for (le = list_begin (&t->locks_held); le != list_end (&t->locks_held);
+       le = list_next (le))
+    {
+      struct list *waiters =
+        &list_entry (le, struct lock, holder_elem)->semaphore.waiters;
+      for (we = list_begin (waiters); we != list_end (waiters);
+           we = list_next (we))
+        {
+          int p = list_entry (we, struct thread, elem)->priority;
+          if (p > eff)
+            eff = p;
+        }
+    }
+
+  if (eff != t->priority)
+    {
+      t->priority = eff;
+      ready_list_reposition (t);
+    }
 }
 
 /* Initializes the threading system by transforming the code
@@ -430,29 +487,14 @@ thread_set_priority (int new_priority)
   enum intr_level old = intr_disable ();
   struct thread *cur = thread_current ();
   cur->base_Priority = new_priority;
+  thread_recompute_priority (cur);
 
-  /* Compute effective priority = base + any donations */
-  int eff = new_priority;
-  struct list_elem *e;
-  for (e = list_begin (&cur->locks_held);
-       e != list_end (&cur->locks_held);
-       e = list_next (e))
-    {
-      struct lock *l = list_entry (e, struct lock, holder_elem);
-      if (l->max_priority > eff)
-        eff = l->max_priority;
-    }
-  cur->priority = eff;
+  /* Yield if a ready thread now outranks us. */
+  if (!list_empty (&ready_list)
+      && list_entry (list_front (&ready_list), struct thread, elem)->priority
+         > cur->priority)
+    thread_yield ();
   intr_set_level (old);
-
-  /* Preempt if any thread now higher priority */
-  if (!thread_mlfqs && !list_empty (&ready_list))
-    {
-      struct thread *front =
-        list_entry (list_front (&ready_list), struct thread, elem);
-      if (front->priority > cur->priority)
-        thread_yield ();
-    }
 }
 
 /* Returns the current thread's priority. */
