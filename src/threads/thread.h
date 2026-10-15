@@ -4,6 +4,9 @@
 #include <debug.h>
 #include <list.h>
 #include <stdint.h>
+#ifdef USERPROG
+#include "userprog/ofile.h"
+#endif
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -109,9 +112,8 @@ struct thread
     struct child_record *record;        /* Shared with our parent, or NULL. */
     struct file *exec_file;             /* Running executable (write-denied). */
 
-    /* Owned by userprog/syscall.c: per-process file descriptors. */
-    struct list fd_list;                /* List of struct fd_entry. */
-    int next_fd;                        /* Next FD number to hand out. */
+    /* Per-process file descriptors (userprog/ofile.c, ADR-005). */
+    struct fdtable fds;
 #endif
 
     int64_t wake_up_tick;

@@ -3,6 +3,7 @@
 
 #include "threads/synch.h"
 #include "threads/thread.h"
+#include "userprog/ofile.h"
 
 /* Shared record between a parent and one child process
    (docs/adr/ADR-002).  The parent allocates it before the child
@@ -20,7 +21,9 @@ struct child_record
     struct list_elem elem;      /* In the parent's `children' list. */
   };
 
-tid_t process_execute (const char *file_name);
+tid_t process_execute (const char *cmd_line);
+tid_t process_execute_redirect (const char *cmd_line, struct ofile *stdin_of,
+                                struct ofile *stdout_of);
 int process_wait (tid_t);
 void process_exit (void);
 void process_activate (void);

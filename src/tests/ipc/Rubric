@@ -1,0 +1,12 @@
+Pipes, redirection and dup2 (kernel-v2):
+1	pipe-basic
+1	pipe-eof
+1	pipe-full
+1	pipe-no-reader
+1	pipe-large
+1	pipe-multi
+1	pipe-bad-ptr
+1	redirect-basic
+1	redir-pipeline
+1	dup2-basic
+1	pipe-leak

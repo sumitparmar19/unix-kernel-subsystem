@@ -45,4 +45,9 @@ bool readdir (int fd, char name[READDIR_MAX_LEN + 1]);
 bool isdir (int fd);
 int inumber (int fd);
 
+/* kernel-v2 additions (docs/SYSCALLS.md). */
+bool pipe (int fds[2]);
+pid_t exec_redirect (const char *cmd_line, int stdin_fd, int stdout_fd);
+int dup2 (int oldfd, int newfd);
+
 #endif /* lib/user/syscall.h */
