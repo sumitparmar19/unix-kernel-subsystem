@@ -1,0 +1,46 @@
+Copying tests/userprog/exec-bound-3 to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/Yz3B_sZ2jX.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.....................
+Kernel command line: -q -f extract run exec-bound-3
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  838,860,800 loops/s.
+ide0: unexpected interrupt
+hda: 5,040 sectors (2 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 182 sectors (91 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 114 sectors (57 kB), Pintos scratch (22)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'exec-bound-3' into the file system...
+Erasing ustar archive...
+Executing 'exec-bound-3':
+(exec-bound-3) begin
+Page fault at 0x804f000: not present error reading page in kernel context.
+Interrupt 0x0e (#PF Page-Fault Exception) at eip=0xc002867c
+ cr2=0804f000 error=00000000
+ eax=0804f000 ebx=c0109000 ecx=c010b030 edx=0804efff
+ esi=0804efff edi=00001000 esp=c0028745 ebp=c010bfe8
+ cs=0008 ds=0010 es=0010 ss=efff
+Kernel PANIC at ../../userprog/exception.c:91 in kill(): Kernel bug - unexpected interrupt in kernel
+Call stack: 0xc002930b 0xc002867c 0x804a2b4.
+The `backtrace' program can make call stacks useful.
+Read "Backtraces" in the "Debugging Tools" chapter
+of the Pintos documentation for more information.
+Timer: 76 ticks
+Thread: 38 idle ticks, 37 kernel ticks, 1 user ticks
+hda2 (filesys): 59 reads, 232 writes
+hda3 (scratch): 113 reads, 2 writes
+Console: 1485 characters output
+Keyboard: 0 keys pressed
+Exception: 1 page faults
+Powering off...
