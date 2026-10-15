@@ -1,0 +1,4 @@
+project:  threads
+passed:   27 / 27
+runtime:  226 s (make check, -j4, --qemu)
+failing:

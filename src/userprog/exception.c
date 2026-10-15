@@ -79,8 +79,8 @@ kill (struct intr_frame *f)
         struct thread *cur = thread_current ();
         cur->exit_status = -1;
 #endif
-        printf ("%s: dying due to interrupt %#04x\n",
-                thread_name (), f->vec_no);
+        printf ("%s: dying due to interrupt %#04x (%s).\n",
+                thread_name (), f->vec_no, intr_name (f->vec_no));
         intr_dump_frame (f);
         thread_exit ();
       }
@@ -94,8 +94,8 @@ kill (struct intr_frame *f)
     default:
       /* Some weird segment. */
       intr_dump_frame (f);
-      printf ("Interrupt %#04x in unknown segment %04x\n",
-              f->vec_no, f->cs);
+      printf ("Interrupt %#04x (%s) in unknown segment %04x\n",
+              f->vec_no, intr_name (f->vec_no), f->cs);
       thread_exit ();
     }
 }

@@ -6,7 +6,7 @@ and `analysis/IMPLEMENTATION_PLAN.md`. One branch (`kernel-v2`), one draft PR, u
 | Milestone | Status | threads | userprog | vm | ipc | limits | Notes |
 |---|---|---|---|---|---|---|---|
 | M0 baseline + tooling | done | 26/27 | 64/80 | 70/113 | – | – | see below |
-| M1 correctness | in progress | 27/27 | 63/80 | | | | donation rewrite done; see below |
+| M1 correctness | done | 27/27 | 76/80 | | | | 4 left are M2's pointer tests |
 | M2 user-pointer validation | – | | | | | | |
 | M3 IPC (pipes, redirection) | – | | | | | | |
 | M4 fuzzer, stress, stats, tracing, CI | – | | | | | | |
@@ -38,3 +38,11 @@ and `analysis/IMPLEMENTATION_PLAN.md`. One branch (`kernel-v2`), one draft PR, u
   threads **27/27** (`priority-donate-multiple2` fixed). userprog 63/80 with the same failures as the
   M0 baseline, except `syn-read`, which failed in all three runs here (Phase 1 measured the same; it's
   the unlocked `load` race, fixed by §2.5). Results: `analysis/test-results/donation-rewrite/`.
+- **Lifecycle redesign (ADR-002), §2.2, §2.4, §2.5** (this thread): shared reference-counted
+  `child_record`, load handshake, exit status −1 by default, exit order, `filesys_lock` in `load`,
+  write-protected executables, the restored `validate_segment` check and the stock fault message, plus a
+  `cond_signal` fix (it no longer peeks at a possibly empty waiter list).
+  **threads 27/27, userprog 76/80** (`analysis/test-results/m1/`). Now passing: `exec-missing`,
+  `multi-oom`, `syn-read`, `syn-write`, `rox-*`, `bad-*`. The 4 failures left (`sc-bad-arg`,
+  `sc-boundary-3`, `exec-bound-2/3`) are exactly the pointer-validation tests that M2 covers.
+- PR #3 (donation rewrite, from a parallel thread) was reviewed and fast-forwarded into `kernel-v2`.

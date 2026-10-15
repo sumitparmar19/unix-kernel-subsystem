@@ -77,7 +77,6 @@ static void schedule (void);
 void thread_schedule_tail (struct thread *prev);
 static tid_t allocate_tid (void);
 void mlfqs_update_priority(struct thread *t);
-struct thread *thread_get_by_tid (tid_t);
 
 
 bool higher_prio(const struct list_elem *a,
@@ -673,23 +672,20 @@ init_thread (struct thread *t, const char *name, int priority)
   t->priority = priority;
   t->base_Priority = priority;
   t->magic = THREAD_MAGIC;
-  t->exit_status = 0;
 
-  list_init(&t->locks_held);
+  list_init (&t->locks_held);
   t->waiting_on = NULL;
 
-  // mlfqs fields
+  /* MLFQS fields. */
   t->nice = 0;
-  t->recent_cpu = CONVERT_TO_FP(0);
+  t->recent_cpu = CONVERT_TO_FP (0);
 
 #ifdef USERPROG
+  t->exit_status = -1;
   list_init (&t->children);
-  t->parent_info = NULL;
-
   list_init (&t->fd_list);
   t->next_fd = 2;        /* 0 = stdin, 1 = stdout, others start at 2. */
 #endif
-
 
   if (thread_mlfqs && t != initial_thread) {
     struct thread *cur = running_thread();
@@ -820,18 +816,3 @@ allocate_tid (void)
 
 
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);
-struct thread *
-thread_get_by_tid (tid_t tid)
-{
-  struct list_elem *e;
-
-  for (e = list_begin (&all_list); e != list_end (&all_list);
-       e = list_next (e))
-    {
-      struct thread *t = list_entry (e, struct thread, allelem);
-      if (t->tid == tid)
-        return t;
-    }
-  return NULL;
-}
-

@@ -84,162 +84,205 @@ static bool load_segment (struct file *file, off_t ofs, uint8_t *upage,
 static bool push_args (const char *cmd_line, void **esp);
 static bool install_page (void *upage, void *kpage, bool writable);
 
-/* Starts a new thread running a user program loaded from FILE_NAME. */
-tid_t
-process_execute (const char *file_name)
+/* Arguments handed from process_execute() to the new child. */
+struct exec_args
+  {
+    char *cmd_line;               /* Page holding the command line. */
+    struct child_record *record;  /* Shared parent/child record. */
+  };
+
+/* Drops one reference to REC and frees it when none are left.
+   Parent and child each call this exactly once (ADR-002). */
+static void
+child_record_release (struct child_record *rec)
 {
-  char *fn_copy;
+  enum intr_level old_level = intr_disable ();
+  bool last = --rec->refs == 0;
+  intr_set_level (old_level);
+  if (last)
+    free (rec);
+}
+
+/* Starts a new process running the program in CMD_LINE (program
+   name followed by arguments).  Waits until the child has loaded
+   its executable, and returns the child's tid, or TID_ERROR if the
+   process could not be created or the program could not be
+   loaded. */
+tid_t
+process_execute (const char *cmd_line)
+{
+  char thread_name[16];
+  struct exec_args *args;
+  struct child_record *rec;
+  char *cmd_copy;
+  size_t i;
   tid_t tid;
 
-  /* Make a copy of FILE_NAME. */
-  fn_copy = palloc_get_page (0);
-  if (fn_copy == NULL)
-    return TID_ERROR;
-  strlcpy (fn_copy, file_name, PGSIZE);
+  /* Copy CMD_LINE: the caller's buffer may go away before the child
+     reads it. */
+  cmd_copy = palloc_get_page (0);
+  args = malloc (sizeof *args);
+  rec = malloc (sizeof *rec);
+  if (cmd_copy == NULL || args == NULL || rec == NULL)
+    goto fail;
+  strlcpy (cmd_copy, cmd_line, PGSIZE);
 
-  /* Extract program name for thread name. */
-  char *cmd_copy = palloc_get_page (0);
-  if (cmd_copy == NULL)
+  /* The thread is named after the program (first word). */
+  while (*cmd_line == ' ')
+    cmd_line++;
+  for (i = 0; i + 1 < sizeof thread_name && cmd_line[i] != '\0'
+              && cmd_line[i] != ' '; i++)
+    thread_name[i] = cmd_line[i];
+  thread_name[i] = '\0';
+
+  /* The record exists before the child does, so the child can never
+     run unlinked from its parent. */
+  rec->exit_status = -1;
+  rec->load_ok = false;
+  rec->refs = 2;
+  sema_init (&rec->load_sema, 0);
+  sema_init (&rec->wait_sema, 0);
+  args->cmd_line = cmd_copy;
+  args->record = rec;
+
+  tid = thread_create (thread_name, PRI_DEFAULT, start_process, args);
+  if (tid == TID_ERROR)
+    goto fail;
+  rec->tid = tid;
+
+  /* Wait for the child to report whether its program loaded.  From
+     here on, the child owns ARGS and CMD_COPY. */
+  sema_down (&rec->load_sema);
+  if (!rec->load_ok)
     {
-      palloc_free_page (fn_copy);
+      child_record_release (rec);
       return TID_ERROR;
     }
-  strlcpy (cmd_copy, file_name, PGSIZE);
+  list_push_back (&thread_current ()->children, &rec->elem);
+  return tid;
 
-  char *save_ptr;
-  char *prog_name = strtok_r (cmd_copy, " ", &save_ptr);
-
-  /* Create a new thread to execute FILE_NAME. */
-  tid = thread_create (prog_name, PRI_DEFAULT, start_process, fn_copy);
-
+ fail:
   palloc_free_page (cmd_copy);
-
-if (tid == TID_ERROR)
-  {
-    palloc_free_page (fn_copy);
-    return TID_ERROR;
-  }
-
-/* Create child_info and link into parent's children list. */
-struct thread *cur = thread_current ();
-struct child_info *ci = malloc (sizeof *ci);
-if (ci != NULL)
-  {
-    ci->tid = tid;
-    ci->exit_status = -1;
-    ci->finished = false;
-    ci->waited = false;
-    sema_init (&ci->wait_sema, 0);
-    list_push_back (&cur->children, &ci->elem);
-
-    struct thread *child = thread_get_by_tid (tid);
-    if (child != NULL)
-      child->parent_info = ci;
-  }
-
-return tid;
-
-
+  free (args);
+  free (rec);
+  return TID_ERROR;
 }
+
+/* Thread function of a new process: loads the user program and
+   starts running it. */
 static void
-start_process (void *file_name_)
+start_process (void *args_)
 {
-  char *file_name = file_name_;
+  struct exec_args *args = args_;
+  struct thread *cur = thread_current ();
   struct intr_frame if_;
   bool success;
+
+  cur->is_user = true;
+  cur->record = args->record;
 
   /* Initialize interrupt frame and load executable. */
   memset (&if_, 0, sizeof if_);
   if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
-  success = load (file_name, &if_.eip, &if_.esp);
+  success = load (args->cmd_line, &if_.eip, &if_.esp);
+  palloc_free_page (args->cmd_line);
+  free (args);
 
-
-  /* If load failed, quit. */
-  palloc_free_page (file_name);
+  /* Tell the parent, which is blocked in process_execute(). */
+  cur->record->load_ok = success;
+  sema_up (&cur->record->load_sema);
   if (!success)
-    thread_exit ();
+    thread_exit ();             /* exit_status stays -1. */
 
-  /* Start the user process by simulating a return from an interrupt. */
+  /* Start the user process by simulating a return from an
+     interrupt, implemented by intr_exit (in threads/intr-stubs.S). */
   asm volatile ("movl %0, %%esp; jmp intr_exit" : : "g" (&if_) : "memory");
   NOT_REACHED ();
 }
 
-/* Wait for child_tid to finish and return its exit status. */
+/* Waits for child process CHILD_TID to die and returns its exit
+   status.  Returns -1 if CHILD_TID is not a child of the calling
+   process, or if it was already waited for. */
 int
 process_wait (tid_t child_tid)
 {
   struct thread *cur = thread_current ();
   struct list_elem *e;
 
-  for (e = list_begin (&cur->children);
-       e != list_end (&cur->children);
+  for (e = list_begin (&cur->children); e != list_end (&cur->children);
        e = list_next (e))
     {
-      struct child_info *ci = list_entry (e, struct child_info, elem);
-
-      if (ci->tid == child_tid)
+      struct child_record *rec = list_entry (e, struct child_record, elem);
+      if (rec->tid == child_tid)
         {
-          /* Only one successful wait per child. */
-          if (ci->waited)
-            return -1;
+          int status;
 
-          ci->waited = true;
-
-          /* Sleep until the child actually exits. */
-          if (!ci->finished)
-            sema_down (&ci->wait_sema);
-
-          /* Child is done: grab status and free record. */
-          int status = ci->exit_status;
-          list_remove (&ci->elem);
-          free (ci);
+          sema_down (&rec->wait_sema);
+          status = rec->exit_status;
+          list_remove (&rec->elem);     /* A second wait returns -1. */
+          child_record_release (rec);
           return status;
         }
     }
-
-  /* child_tid is not a child of this process. */
   return -1;
 }
+
+/* Frees the current process's resources.  Order matters (ADR-002):
+   print the exit line, release files and memory, and only then wake
+   a waiting parent, so the parent sees everything already freed. */
 void
 process_exit (void)
 {
   struct thread *cur = thread_current ();
   uint32_t *pd;
 
-#ifdef USERPROG
-  /* Tell our parent (if any) that we are exiting. */
-  if (cur->parent_info != NULL)
-    {
-      struct child_info *ci = cur->parent_info;
-      ci->exit_status = cur->exit_status;   /* status set by do_exit/SYS_EXIT */
-      ci->finished = true;
-      sema_up (&ci->wait_sema);             /* wake parent in process_wait() */
-    }
+  if (cur->is_user)
+    printf ("%s: exit(%d)\n", cur->name, cur->exit_status);
 
-  /* Required Pintos exit line. */
-  printf ("%s: exit(%d)\n", cur->name, cur->exit_status);
-
-  /* Close all open files for this process. */
+  /* Close open files and the (write-denied) executable. */
   while (!list_empty (&cur->fd_list))
     {
-      struct list_elem *e = list_pop_front (&cur->fd_list);
-      struct fd_entry *fd_e = list_entry (e, struct fd_entry, elem);
+      struct fd_entry *fd_e = list_entry (list_pop_front (&cur->fd_list),
+                                          struct fd_entry, elem);
       lock_acquire (&filesys_lock);
       file_close (fd_e->file);
       lock_release (&filesys_lock);
       free (fd_e);
     }
-#endif
+  if (cur->exec_file != NULL)
+    {
+      lock_acquire (&filesys_lock);
+      file_close (cur->exec_file);      /* Re-allows writes. */
+      lock_release (&filesys_lock);
+      cur->exec_file = NULL;
+    }
 
-  /* Destroy the page directory. */
+  /* Orphan our children: drop our reference to each record.  A
+     child still running keeps its own reference. */
+  while (!list_empty (&cur->children))
+    child_record_release (list_entry (list_pop_front (&cur->children),
+                                      struct child_record, elem));
+
+  /* Destroy the page directory.  Set cur->pagedir to NULL before
+     switching back to the kernel-only page directory, so a timer
+     interrupt can't switch back to the process page directory. */
   pd = cur->pagedir;
   if (pd != NULL)
     {
       cur->pagedir = NULL;
       pagedir_activate (NULL);
       pagedir_destroy (pd);
+    }
+
+  /* Report to the parent last. */
+  if (cur->record != NULL)
+    {
+      cur->record->exit_status = cur->exit_status;
+      sema_up (&cur->record->wait_sema);
+      child_record_release (cur->record);
+      cur->record = NULL;
     }
 }
 
@@ -335,6 +378,10 @@ load (const char *file_name, void (**eip) (void), void **esp)
   off_t file_ofs;
   bool success = false;
   int i;
+
+  /* The base file system is not thread-safe: hold filesys_lock for
+     every file access while loading (ADR-002). */
+  lock_acquire (&filesys_lock);
 
   /* Allocate and activate page directory. */
   t->pagedir = pagedir_create ();
@@ -445,8 +492,16 @@ load (const char *file_name, void (**eip) (void), void **esp)
   success = true;
 
  done:
-  if (file != NULL)
+  if (success)
+    {
+      /* Keep the executable open and unwritable while it runs;
+         process_exit() closes it, which re-allows writes. */
+      file_deny_write (file);
+      t->exec_file = file;
+    }
+  else if (file != NULL)
     file_close (file);
+  lock_release (&filesys_lock);
   return success;
 }
 
@@ -470,10 +525,16 @@ validate_segment (const struct Elf32_Phdr *phdr, struct file *file)
   if (phdr->p_memsz == 0)
     return false;
 
-  /* The virtual memory region must be in user address space. */
+  /* The virtual memory region must both start and end within the
+     user address space range. */
   if (!is_user_vaddr ((void *) phdr->p_vaddr))
     return false;
   if (!is_user_vaddr ((void *) (phdr->p_vaddr + phdr->p_memsz)))
+    return false;
+
+  /* The region cannot "wrap around" across the kernel virtual
+     address space. */
+  if (phdr->p_vaddr + phdr->p_memsz < phdr->p_vaddr)
     return false;
 
   /* Disallow mapping page 0. */

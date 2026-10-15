@@ -251,3 +251,28 @@ off from the donation until `sema_down` has put the donor on the lock's waiter l
 per release instead of O(locks). In Pintos those lists are a handful of threads, and a cache that has
 to be kept correct on every waiter change is exactly what caused the bug. Correct by construction
 was worth more than the constant factor.
+
+### M1 · Process lifecycle redesign (ADR-002) and file-system locking
+**What changed** (`userprog/process.[ch]`):
+- **Shared child record.** The parent allocates `struct child_record` *before* `thread_create` and hands
+  it to the child with the command line. Parent and child each hold one reference (`refs = 2`). Each
+  drops it exactly once (`child_record_release`), and the last one frees it. That replaced
+  `thread_get_by_tid`, which looked the child up after it might already have exited.
+- **Load handshake.** `exec` blocks on `load_sema` until the child reports `load_ok`. A missing program
+  now returns −1 (`exec-missing`), and a failed load exits with −1, because `exit_status` now defaults
+  to −1.
+- **Exit order.** Print `name: exit(n)` → close files and the executable → orphan our own children (drop
+  our references) → destroy the page directory → *then* publish the status and wake the parent. A
+  parent that wakes from `wait` sees the child's memory already freed (`multi-oom` passes).
+- **File-system lock in `load`.** `load` holds `filesys_lock` for every file access. Before, ten children
+  loading at once raced inside the non-thread-safe file system, and some failed to open their own
+  executable (`syn-read`/`syn-write` passed or failed depending on timing).
+- **Write-protected executables.** `load` keeps the executable open with `file_deny_write`;
+  `process_exit` closes it, which re-allows writes (`rox-*`).
+- **`cond_signal`** orders waiters by the thread recorded in `cond_wait`, instead of peeking at a
+  semaphore waiter list that can still be empty.
+
+**Interview question:** *"Why a refcount instead of letting the parent free the record?"* Either side can
+finish first. If the parent frees it, an orphaned child would write into freed memory when it exits; if
+the child frees it, a parent that waits later reads freed memory. Two owners with a count is the
+smallest design where neither order breaks.
