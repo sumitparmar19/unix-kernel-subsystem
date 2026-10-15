@@ -87,31 +87,31 @@ struct thread
     enum thread_status status;          /* Thread state. */
     char name[16];                      /* Name (for debugging purposes). */
     uint8_t *stack;                     /* Saved stack pointer. */
-    int priority;
-    int exit_status;                       /* Priority. */
-    int base_Priority;
+    int priority;                       /* Effective priority (with donations). */
+    int base_Priority;                  /* Priority set by thread_set_priority(). */
     struct list_elem allelem;           /* List element for all threads list. */
-    struct list locks_held;
-    struct lock *waiting_on;
+    struct list locks_held;             /* Locks held (donation sources). */
+    struct lock *waiting_on;            /* Lock being waited for, or NULL. */
 
-    int nice;
-    int recent_cpu;
+    int nice;                           /* MLFQS niceness. */
+    int recent_cpu;                     /* MLFQS recent CPU (17.14 fixed point). */
 
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
     struct list_elem sleep_elem;
 
 #ifdef USERPROG
-  /* Owned by userprog/process.c. */
-  uint32_t *pagedir;
+    /* Owned by userprog/process.c (docs/adr/ADR-002). */
+    uint32_t *pagedir;                  /* Page directory, or NULL. */
+    bool is_user;                       /* True for user processes. */
+    int exit_status;                    /* Reported to the parent; -1 by default. */
+    struct list children;               /* struct child_record of each child. */
+    struct child_record *record;        /* Shared with our parent, or NULL. */
+    struct file *exec_file;             /* Running executable (write-denied). */
 
-  /* Project 2: child process tracking. */
-  struct list children;              /* List of struct child_info. */
-  struct child_info *parent_info;    /* Info in parent's children list. */
-
-  /* Project 2: per-process file descriptors. */
-  struct list fd_list;               /* List of struct fd_entry. */
-  int next_fd;                       /* Next FD number to hand out. */
+    /* Owned by userprog/syscall.c: per-process file descriptors. */
+    struct list fd_list;                /* List of struct fd_entry. */
+    int next_fd;                        /* Next FD number to hand out. */
 #endif
 
     int64_t wake_up_tick;
@@ -151,7 +151,6 @@ void thread_unblock (struct thread *);
 struct thread *thread_current (void);
 tid_t thread_tid (void);
 const char *thread_name (void);
-struct thread *thread_get_by_tid (tid_t);
 
 void thread_exit (void) NO_RETURN;
 void thread_yield (void);

@@ -1,0 +1,8 @@
+project:  userprog
+passed:   76 / 80
+runtime:  64 s (make check, -j4, --qemu)
+failing:
+  tests/userprog/exec-bound-2
+  tests/userprog/exec-bound-3
+  tests/userprog/sc-bad-arg
+  tests/userprog/sc-boundary-3
