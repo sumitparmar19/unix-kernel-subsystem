@@ -1,5 +1,8 @@
 # Phase 2 plan (recommendation, not built)
 
+> **Superseded by [`IMPLEMENTATION_PLAN.md`](IMPLEMENTATION_PLAN.md)** (2026-10-15), which turns this into
+> a phased build plan including virtual memory, fuzzing and benchmarks. Kept for the record.
+
 Based on what Phase 1 measured: projects 1 and 2 are implemented (threads 26/27, user programs
 63/80). There is **no virtual-memory or file-system project code**. The Docker harness already works.
 
