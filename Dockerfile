@@ -27,8 +27,10 @@ WORKDIR /pintos
 COPY . /pintos
 
 # Pintos source root: src/ if present, otherwise the repository root.
+# QEMU runs need only setitimer-helper. squish-pty (Bochs terminal) and
+# squish-unix (VMware Player) include <stropts.h>, which modern glibc dropped.
 RUN if [ -f src/Make.config ]; then ln -s /pintos/src /pintos-src; else ln -s /pintos /pintos-src; fi \
- && if [ -f /pintos-src/utils/Makefile ]; then make -C /pintos-src/utils; fi
+ && if [ -f /pintos-src/utils/Makefile ]; then make -C /pintos-src/utils setitimer-helper; fi
 
 ENV PATH="/pintos-src/utils:${PATH}"
 

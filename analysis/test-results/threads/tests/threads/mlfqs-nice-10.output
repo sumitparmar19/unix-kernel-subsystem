@@ -1,0 +1,34 @@
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/KNWHVbAaQl.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.....................
+Kernel command line: -q -mlfqs run mlfqs-nice-10
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  850,329,600 loops/s.
+Boot complete.
+Executing 'mlfqs-nice-10':
+(mlfqs-nice-10) begin
+(mlfqs-nice-10) Starting 10 threads...
+(mlfqs-nice-10) Starting threads took 0 ticks.
+(mlfqs-nice-10) Sleeping 40 seconds to let threads run, please wait...
+(mlfqs-nice-10) Thread 0 received 677 ticks.
+(mlfqs-nice-10) Thread 1 received 581 ticks.
+(mlfqs-nice-10) Thread 2 received 492 ticks.
+(mlfqs-nice-10) Thread 3 received 404 ticks.
+(mlfqs-nice-10) Thread 4 received 320 ticks.
+(mlfqs-nice-10) Thread 5 received 232 ticks.
+(mlfqs-nice-10) Thread 6 received 156 ticks.
+(mlfqs-nice-10) Thread 7 received 93 ticks.
+(mlfqs-nice-10) Thread 8 received 41 ticks.
+(mlfqs-nice-10) Thread 9 received 9 ticks.
+(mlfqs-nice-10) end
+Execution of 'mlfqs-nice-10' complete.
+Timer: 4034 ticks
+Thread: 1000 idle ticks, 3034 kernel ticks, 0 user ticks
+Console: 999 characters output
+Keyboard: 0 keys pressed
+Powering off...
