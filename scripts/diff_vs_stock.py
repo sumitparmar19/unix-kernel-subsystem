@@ -46,11 +46,24 @@ IDENT = re.compile(r"([A-Za-z_]\w*)\s*\(")
 
 
 def c_functions(lines):
-    """Map function name -> body text, for GNU-style C (brace in column 0)."""
+    """Map function name -> body text. Handles GNU style (brace alone in
+    column 0) and K&R style (`name (args) {` with the closing brace in column 0)."""
     funcs = {}
     i = 0
     while i < len(lines):
-        if lines[i] == "{":
+        line = lines[i]
+        if line.endswith("{") and line[:1] not in ("", " ", "\t", "#", "}") \
+                and "(" in line and "=" not in line.split("(")[0] \
+                and not line.startswith(("struct", "enum", "union", "typedef")):
+            k = i + 1
+            while k < len(lines) and lines[k] != "}":
+                k += 1
+            m = IDENT.search(line)
+            if m:
+                funcs[m.group(1)] = "\n".join(lines[i:k + 1])
+            i = k + 1
+            continue
+        if line == "{":
             # Header: lines above the brace, back to a blank line or a line
             # that ends a previous declaration/definition.
             j = i - 1

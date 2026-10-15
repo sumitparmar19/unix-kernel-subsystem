@@ -27,14 +27,14 @@ pintos -v -k -T 480 --qemu  -- -q -mlfqs run mlfqs-nice-2 < /dev/null 2> tests/t
 pintos -v -k -T 480 --qemu  -- -q -mlfqs run mlfqs-nice-10 < /dev/null 2> tests/threads/mlfqs-nice-10.errors > tests/threads/mlfqs-nice-10.output
 pintos -v -k -T 480 --qemu  -- -q -mlfqs run mlfqs-block < /dev/null 2> tests/threads/mlfqs-block.errors > tests/threads/mlfqs-block.output
 perl -I../.. ../../tests/threads/alarm-single.ck tests/threads/alarm-single tests/threads/alarm-single.result
-[32mpass tests/threads/alarm-single
-[0mperl -I../.. ../../tests/threads/alarm-multiple.ck tests/threads/alarm-multiple tests/threads/alarm-multiple.result
-[32mpass tests/threads/alarm-multiple
-[0mperl -I../.. ../../tests/threads/alarm-simultaneous.ck tests/threads/alarm-simultaneous tests/threads/alarm-simultaneous.result
-[32mpass tests/threads/alarm-simultaneous
-[0mperl -I../.. ../../tests/threads/alarm-priority.ck tests/threads/alarm-priority tests/threads/alarm-priority.result
-[31mFAIL tests/threads/alarm-priority
-[0mTest output failed to match any acceptable form.
+pass tests/threads/alarm-single
+perl -I../.. ../../tests/threads/alarm-multiple.ck tests/threads/alarm-multiple tests/threads/alarm-multiple.result
+pass tests/threads/alarm-multiple
+perl -I../.. ../../tests/threads/alarm-simultaneous.ck tests/threads/alarm-simultaneous tests/threads/alarm-simultaneous.result
+pass tests/threads/alarm-simultaneous
+perl -I../.. ../../tests/threads/alarm-priority.ck tests/threads/alarm-priority tests/threads/alarm-priority.result
+FAIL tests/threads/alarm-priority
+Test output failed to match any acceptable form.
 
 Acceptable output:
   (alarm-priority) begin
@@ -54,7 +54,7 @@ Differences in `diff -u' format:
 - (alarm-priority) Thread priority 30 woke up.
 - (alarm-priority) Thread priority 29 woke up.
 - (alarm-priority) Thread priority 28 woke up.
-  (alarm-priority) Thread priority 27 woke up.
+- (alarm-priority) Thread priority 27 woke up.
   (alarm-priority) Thread priority 26 woke up.
   (alarm-priority) Thread priority 25 woke up.
   (alarm-priority) Thread priority 24 woke up.
@@ -64,14 +64,15 @@ Differences in `diff -u' format:
 + (alarm-priority) Thread priority 30 woke up.
 + (alarm-priority) Thread priority 29 woke up.
 + (alarm-priority) Thread priority 28 woke up.
++ (alarm-priority) Thread priority 27 woke up.
   (alarm-priority) end
 perl -I../.. ../../tests/threads/alarm-zero.ck tests/threads/alarm-zero tests/threads/alarm-zero.result
-[32mpass tests/threads/alarm-zero
-[0mperl -I../.. ../../tests/threads/alarm-negative.ck tests/threads/alarm-negative tests/threads/alarm-negative.result
-[32mpass tests/threads/alarm-negative
-[0mperl -I../.. ../../tests/threads/priority-change.ck tests/threads/priority-change tests/threads/priority-change.result
-[31mFAIL tests/threads/priority-change
-[0mTest output failed to match any acceptable form.
+pass tests/threads/alarm-zero
+perl -I../.. ../../tests/threads/alarm-negative.ck tests/threads/alarm-negative tests/threads/alarm-negative.result
+pass tests/threads/alarm-negative
+perl -I../.. ../../tests/threads/priority-change.ck tests/threads/priority-change tests/threads/priority-change.result
+FAIL tests/threads/priority-change
+Test output failed to match any acceptable form.
 
 Acceptable output:
   (priority-change) begin
@@ -90,8 +91,8 @@ Differences in `diff -u' format:
   (priority-change) Thread 2 should have just exited.
   (priority-change) end
 perl -I../.. ../../tests/threads/priority-donate-one.ck tests/threads/priority-donate-one tests/threads/priority-donate-one.result
-[31mFAIL tests/threads/priority-donate-one
-[0mTest output failed to match any acceptable form.
+FAIL tests/threads/priority-donate-one
+Test output failed to match any acceptable form.
 
 Acceptable output:
   (priority-donate-one) begin
@@ -118,8 +119,8 @@ Differences in `diff -u' format:
   (priority-donate-one) This should be the last line before finishing this test.
   (priority-donate-one) end
 perl -I../.. ../../tests/threads/priority-donate-multiple.ck tests/threads/priority-donate-multiple tests/threads/priority-donate-multiple.result
-[31mFAIL tests/threads/priority-donate-multiple
-[0mTest output failed to match any acceptable form.
+FAIL tests/threads/priority-donate-multiple
+Test output failed to match any acceptable form.
 
 Acceptable output:
   (priority-donate-multiple) begin
@@ -151,8 +152,8 @@ Differences in `diff -u' format:
   (priority-donate-multiple) Main thread should have priority 31.  Actual priority: 31.
   (priority-donate-multiple) end
 perl -I../.. ../../tests/threads/priority-donate-multiple2.ck tests/threads/priority-donate-multiple2 tests/threads/priority-donate-multiple2.result
-[31mFAIL tests/threads/priority-donate-multiple2
-[0mTest output failed to match any acceptable form.
+FAIL tests/threads/priority-donate-multiple2
+Test output failed to match any acceptable form.
 
 Acceptable output:
   (priority-donate-multiple2) begin
@@ -184,8 +185,8 @@ Differences in `diff -u' format:
   (priority-donate-multiple2) Main thread should have priority 31.  Actual priority: 31.
   (priority-donate-multiple2) end
 perl -I../.. ../../tests/threads/priority-donate-nest.ck tests/threads/priority-donate-nest tests/threads/priority-donate-nest.result
-[31mFAIL tests/threads/priority-donate-nest
-[0mTest output failed to match any acceptable form.
+FAIL tests/threads/priority-donate-nest
+Test output failed to match any acceptable form.
 
 Acceptable output:
   (priority-donate-nest) begin
@@ -217,8 +218,8 @@ Differences in `diff -u' format:
   (priority-donate-nest) Low thread should have priority 31.  Actual priority: 31.
   (priority-donate-nest) end
 perl -I../.. ../../tests/threads/priority-donate-sema.ck tests/threads/priority-donate-sema tests/threads/priority-donate-sema.result
-[31mFAIL tests/threads/priority-donate-sema
-[0mTest output failed to match any acceptable form.
+FAIL tests/threads/priority-donate-sema
+Test output failed to match any acceptable form.
 
 Acceptable output:
   (priority-donate-sema) begin
@@ -241,8 +242,8 @@ Differences in `diff -u' format:
   (priority-donate-sema) Main thread finished.
   (priority-donate-sema) end
 perl -I../.. ../../tests/threads/priority-donate-lower.ck tests/threads/priority-donate-lower tests/threads/priority-donate-lower.result
-[31mFAIL tests/threads/priority-donate-lower
-[0mTest output failed to match any acceptable form.
+FAIL tests/threads/priority-donate-lower
+Test output failed to match any acceptable form.
 
 Acceptable output:
   (priority-donate-lower) begin
@@ -267,11 +268,11 @@ Differences in `diff -u' format:
   (priority-donate-lower) Main thread should have priority 21.  Actual priority: 21.
   (priority-donate-lower) end
 perl -I../.. ../../tests/threads/priority-fifo.ck tests/threads/priority-fifo tests/threads/priority-fifo.result
-[31mFAIL tests/threads/priority-fifo
-[0mNo iterations found in output.
+FAIL tests/threads/priority-fifo
+No iterations found in output.
 perl -I../.. ../../tests/threads/priority-preempt.ck tests/threads/priority-preempt tests/threads/priority-preempt.result
-[31mFAIL tests/threads/priority-preempt
-[0mTest output failed to match any acceptable form.
+FAIL tests/threads/priority-preempt
+Test output failed to match any acceptable form.
 
 Acceptable output:
   (priority-preempt) begin
@@ -294,8 +295,8 @@ Differences in `diff -u' format:
   (priority-preempt) The high-priority thread should have already completed.
   (priority-preempt) end
 perl -I../.. ../../tests/threads/priority-sema.ck tests/threads/priority-sema tests/threads/priority-sema.result
-[31mFAIL tests/threads/priority-sema
-[0mTest output failed to match any acceptable form.
+FAIL tests/threads/priority-sema
+Test output failed to match any acceptable form.
 
 Acceptable output:
   (priority-sema) begin
@@ -344,8 +345,8 @@ Differences in `diff -u' format:
   (priority-sema) Back in main thread.
   (priority-sema) end
 perl -I../.. ../../tests/threads/priority-condvar.ck tests/threads/priority-condvar tests/threads/priority-condvar.result
-[31mFAIL tests/threads/priority-condvar
-[0mTest output failed to match any acceptable form.
+FAIL tests/threads/priority-condvar
+Test output failed to match any acceptable form.
 
 Acceptable output:
   (priority-condvar) begin
@@ -414,8 +415,8 @@ Differences in `diff -u' format:
 - (priority-condvar) Thread priority 21 woke up.
   (priority-condvar) end
 perl -I../.. ../../tests/threads/priority-donate-chain.ck tests/threads/priority-donate-chain tests/threads/priority-donate-chain.result
-[31mFAIL tests/threads/priority-donate-chain
-[0mTest output failed to match any acceptable form.
+FAIL tests/threads/priority-donate-chain
+Test output failed to match any acceptable form.
 
 Acceptable output:
   (priority-donate-chain) begin
@@ -505,14 +506,14 @@ Differences in `diff -u' format:
   (priority-donate-chain) main finishing with priority 0.
   (priority-donate-chain) end
 perl -I../.. ../../tests/threads/mlfqs-load-1.ck tests/threads/mlfqs-load-1 tests/threads/mlfqs-load-1.result
-[31mFAIL tests/threads/mlfqs-load-1
-[0mKernel panic in run: PANIC at ../../tests/threads/tests.c:93 in fail(): test failed
+FAIL tests/threads/mlfqs-load-1
+Kernel panic in run: PANIC at ../../tests/threads/tests.c:93 in fail(): test failed
 Call stack: 0xc002864b
 Translation of call stack:
 0xc002864b: debug_panic (.../../lib/kernel/debug.c:38)
 perl -I../.. ../../tests/threads/mlfqs-load-60.ck tests/threads/mlfqs-load-60 tests/threads/mlfqs-load-60.result
-[31mFAIL tests/threads/mlfqs-load-60
-[0mSome load average values were missing or differed from those expected by more than 3.5.
+FAIL tests/threads/mlfqs-load-60
+Some load average values were missing or differed from those expected by more than 3.5.
   time   actual <-> expected explanation
 ------ -------- --- -------- ----------------------------------------
      2     0.00  =  2.95     
@@ -605,8 +606,8 @@ perl -I../.. ../../tests/threads/mlfqs-load-60.ck tests/threads/mlfqs-load-60 te
    176     0.00 <<< 5.33     Too small, by 1.83.
    178     0.00 <<< 5.16     Too small, by 1.66.
 perl -I../.. ../../tests/threads/mlfqs-load-avg.ck tests/threads/mlfqs-load-avg tests/threads/mlfqs-load-avg.result
-[31mFAIL tests/threads/mlfqs-load-avg
-[0mSome load average values were missing or differed from those expected by more than 2.5.
+FAIL tests/threads/mlfqs-load-avg
+Some load average values were missing or differed from those expected by more than 2.5.
   time   actual <-> expected explanation
 ------ -------- --- -------- ----------------------------------------
      2     0.00  =  0.05     
@@ -699,19 +700,19 @@ perl -I../.. ../../tests/threads/mlfqs-load-avg.ck tests/threads/mlfqs-load-avg 
    176     0.00 <<< 9.29     Too small, by 6.79.
    178     0.00 <<< 8.98     Too small, by 6.48.
 perl -I../.. ../../tests/threads/mlfqs-fair-2.ck tests/threads/mlfqs-fair-2 tests/threads/mlfqs-fair-2.result
-[32mpass tests/threads/mlfqs-fair-2
-[0mperl -I../.. ../../tests/threads/mlfqs-fair-20.ck tests/threads/mlfqs-fair-20 tests/threads/mlfqs-fair-20.result
-[32mpass tests/threads/mlfqs-fair-20
-[0mperl -I../.. ../../tests/threads/mlfqs-nice-2.ck tests/threads/mlfqs-nice-2 tests/threads/mlfqs-nice-2.result
-[31mFAIL tests/threads/mlfqs-nice-2
-[0mSome tick counts were missing or differed from those expected by more than 50.
+pass tests/threads/mlfqs-fair-2
+perl -I../.. ../../tests/threads/mlfqs-fair-20.ck tests/threads/mlfqs-fair-20 tests/threads/mlfqs-fair-20.result
+pass tests/threads/mlfqs-fair-20
+perl -I../.. ../../tests/threads/mlfqs-nice-2.ck tests/threads/mlfqs-nice-2 tests/threads/mlfqs-nice-2.result
+FAIL tests/threads/mlfqs-nice-2
+Some tick counts were missing or differed from those expected by more than 50.
 thread   actual <-> expected explanation
 ------ -------- --- -------- ----------------------------------------
      0     1501 <<< 1904     Too small, by 353.
      1     1501 >>> 1096     Too big, by 355.
 perl -I../.. ../../tests/threads/mlfqs-recent-1.ck tests/threads/mlfqs-recent-1 tests/threads/mlfqs-recent-1.result
-[31mFAIL tests/threads/mlfqs-recent-1
-[0mSome recent_cpu values were missing or differed from those expected by more than 2.5.
+FAIL tests/threads/mlfqs-recent-1
+Some recent_cpu values were missing or differed from those expected by more than 2.5.
   time   actual <-> expected explanation
 ------ -------- --- -------- ----------------------------------------
      2     0.00 <<< 6.40     Too small, by 3.90.
@@ -804,23 +805,23 @@ perl -I../.. ../../tests/threads/mlfqs-recent-1.ck tests/threads/mlfqs-recent-1 
    176     0.00 <<< 189.27   Too small, by 186.77.
    178     0.00 <<< 189.63   Too small, by 187.13.
 perl -I../.. ../../tests/threads/mlfqs-nice-10.ck tests/threads/mlfqs-nice-10 tests/threads/mlfqs-nice-10.result
-[31mFAIL tests/threads/mlfqs-nice-10
-[0mSome tick counts were missing or differed from those expected by more than 25.
+FAIL tests/threads/mlfqs-nice-10
+Some tick counts were missing or differed from those expected by more than 25.
 thread   actual <-> expected explanation
 ------ -------- --- -------- ----------------------------------------
      0      301 <<< 672      Too small, by 346.
-     1      301 <<< 588      Too small, by 262.
+     1      300 <<< 588      Too small, by 263.
      2      300 <<< 492      Too small, by 167.
-     3      300 <<< 408      Too small, by 83.
+     3      301 <<< 408      Too small, by 82.
      4      301  =  316      
-     5      301 >>> 232      Too big, by 44.
-     6      300 >>> 152      Too big, by 123.
+     5      300 >>> 232      Too big, by 43.
+     6      301 >>> 152      Too big, by 124.
      7      301 >>> 92       Too big, by 184.
      8      300 >>> 40       Too big, by 235.
-     9      300 >>> 8        Too big, by 267.
+     9      301 >>> 8        Too big, by 268.
 perl -I../.. ../../tests/threads/mlfqs-block.ck tests/threads/mlfqs-block tests/threads/mlfqs-block.result
-[31mFAIL tests/threads/mlfqs-block
-[0mTest output failed to match any acceptable form.
+FAIL tests/threads/mlfqs-block
+Test output failed to match any acceptable form.
 
 Acceptable output:
   (mlfqs-block) begin

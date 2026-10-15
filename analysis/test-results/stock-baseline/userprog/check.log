@@ -80,245 +80,245 @@ pintos -v -k -T 300 --qemu  --filesys-size=2 -p tests/filesys/base/syn-read -a s
 pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/filesys/base/syn-remove -a syn-remove -- -q  -f run syn-remove < /dev/null 2> tests/filesys/base/syn-remove.errors > tests/filesys/base/syn-remove.output
 pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/filesys/base/syn-write -a syn-write -p tests/filesys/base/child-syn-wrt -a child-syn-wrt -- -q  -f run syn-write < /dev/null 2> tests/filesys/base/syn-write.errors > tests/filesys/base/syn-write.output
 perl -I../.. ../../tests/userprog/args-none.ck tests/userprog/args-none tests/userprog/args-none.result
-[31mFAIL tests/userprog/args-none
-[0mRun didn't produce any output
 perl -I../.. ../../tests/userprog/args-single.ck tests/userprog/args-single tests/userprog/args-single.result
+FAIL tests/userprog/args-none
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/args-multiple.ck tests/userprog/args-multiple tests/userprog/args-multiple.result
-[31mFAIL tests/userprog/args-single
-[0mRun didn't produce any output
+FAIL tests/userprog/args-single
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/args-many.ck tests/userprog/args-many tests/userprog/args-many.result
-[31mFAIL tests/userprog/args-multiple
-[0mRun didn't produce any output
+FAIL tests/userprog/args-multiple
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/args-dbl-space.ck tests/userprog/args-dbl-space tests/userprog/args-dbl-space.result
+FAIL tests/userprog/args-many
+Run didn't produce any output
+FAIL tests/userprog/args-dbl-space
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/sc-bad-sp.ck tests/userprog/sc-bad-sp tests/userprog/sc-bad-sp.result
-[31mFAIL tests/userprog/args-many
-[0mRun didn't produce any output
 perl -I../.. ../../tests/userprog/sc-bad-arg.ck tests/userprog/sc-bad-arg tests/userprog/sc-bad-arg.result
-[31mFAIL tests/userprog/args-dbl-space
-[0mRun didn't produce any output
+FAIL tests/userprog/sc-bad-arg
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/sc-boundary.ck tests/userprog/sc-boundary tests/userprog/sc-boundary.result
-[31mFAIL tests/userprog/sc-bad-arg
-[0mRun didn't produce any output
+FAIL tests/userprog/sc-bad-sp
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/sc-boundary-2.ck tests/userprog/sc-boundary-2 tests/userprog/sc-boundary-2.result
-[31mFAIL tests/userprog/sc-bad-sp
-[0mRun didn't produce any output
+FAIL tests/userprog/sc-boundary
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/sc-boundary-3.ck tests/userprog/sc-boundary-3 tests/userprog/sc-boundary-3.result
-[31mFAIL tests/userprog/sc-boundary
-[0mRun didn't produce any output
+FAIL tests/userprog/sc-boundary-2
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/halt.ck tests/userprog/halt tests/userprog/halt.result
-[31mFAIL tests/userprog/sc-boundary-2
-[0mRun didn't produce any output
+FAIL tests/userprog/sc-boundary-3
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/exit.ck tests/userprog/exit tests/userprog/exit.result
-[31mFAIL tests/userprog/halt
-[0mmissing 'begin' message
+FAIL tests/userprog/halt
+missing 'begin' message
 perl -I../.. ../../tests/userprog/create-normal.ck tests/userprog/create-normal tests/userprog/create-normal.result
-[31mFAIL tests/userprog/sc-boundary-3
-[0mRun didn't produce any output
 perl -I../.. ../../tests/userprog/create-empty.ck tests/userprog/create-empty tests/userprog/create-empty.result
-[31mFAIL tests/userprog/exit
-[0mRun didn't produce any output
+FAIL tests/userprog/exit
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/create-null.ck tests/userprog/create-null tests/userprog/create-null.result
-[31mFAIL tests/userprog/create-normal
-[0mRun didn't produce any output
+FAIL tests/userprog/create-normal
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/create-bad-ptr.ck tests/userprog/create-bad-ptr tests/userprog/create-bad-ptr.result
-[31mFAIL tests/userprog/create-empty
-[0mRun didn't produce any output
+FAIL tests/userprog/create-empty
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/create-long.ck tests/userprog/create-long tests/userprog/create-long.result
-[31mFAIL tests/userprog/create-null
-[0mRun didn't produce any output
+FAIL tests/userprog/create-null
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/create-exists.ck tests/userprog/create-exists tests/userprog/create-exists.result
-[31mFAIL tests/userprog/create-bad-ptr
-[0mRun didn't produce any output
+FAIL tests/userprog/create-long
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/create-bound.ck tests/userprog/create-bound tests/userprog/create-bound.result
-[31mFAIL tests/userprog/create-bound
-[0mRun didn't produce any output
+FAIL tests/userprog/create-bad-ptr
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/open-normal.ck tests/userprog/open-normal tests/userprog/open-normal.result
-[31mFAIL tests/userprog/create-long
-[0mRun didn't produce any output
-[31mFAIL tests/userprog/create-exists
-[0mRun didn't produce any output
+FAIL tests/userprog/create-exists
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/open-missing.ck tests/userprog/open-missing tests/userprog/open-missing.result
+FAIL tests/userprog/create-bound
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/open-boundary.ck tests/userprog/open-boundary tests/userprog/open-boundary.result
-[31mFAIL tests/userprog/open-normal
-[0mRun didn't produce any output
+FAIL tests/userprog/open-missing
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/open-empty.ck tests/userprog/open-empty tests/userprog/open-empty.result
-[31mFAIL tests/userprog/open-missing
-[0mRun didn't produce any output
+FAIL tests/userprog/open-normal
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/open-null.ck tests/userprog/open-null tests/userprog/open-null.result
-[31mFAIL tests/userprog/open-boundary
-[0mRun didn't produce any output
+FAIL tests/userprog/open-boundary
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/open-bad-ptr.ck tests/userprog/open-bad-ptr tests/userprog/open-bad-ptr.result
-[31mFAIL tests/userprog/open-empty
-[0mRun didn't produce any output
 perl -I../.. ../../tests/userprog/open-twice.ck tests/userprog/open-twice tests/userprog/open-twice.result
-[31mFAIL tests/userprog/open-null
-[0mRun didn't produce any output
+FAIL tests/userprog/open-empty
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/close-normal.ck tests/userprog/close-normal tests/userprog/close-normal.result
-[31mFAIL tests/userprog/open-bad-ptr
-[0mRun didn't produce any output
+FAIL tests/userprog/open-null
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/close-twice.ck tests/userprog/close-twice tests/userprog/close-twice.result
-[31mFAIL tests/userprog/open-twice
-[0mRun didn't produce any output
+FAIL tests/userprog/open-bad-ptr
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/close-stdin.ck tests/userprog/close-stdin tests/userprog/close-stdin.result
-[31mFAIL tests/userprog/close-normal
-[0mRun didn't produce any output
+FAIL tests/userprog/open-twice
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/close-stdout.ck tests/userprog/close-stdout tests/userprog/close-stdout.result
-[31mFAIL tests/userprog/close-twice
-[0mRun didn't produce any output
+FAIL tests/userprog/close-normal
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/close-bad-fd.ck tests/userprog/close-bad-fd tests/userprog/close-bad-fd.result
-[31mFAIL tests/userprog/close-stdout
-[0mRun didn't produce any output
+FAIL tests/userprog/close-twice
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/read-normal.ck tests/userprog/read-normal tests/userprog/read-normal.result
-[31mFAIL tests/userprog/close-stdin
-[0mRun didn't produce any output
+FAIL tests/userprog/close-stdin
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/read-bad-ptr.ck tests/userprog/read-bad-ptr tests/userprog/read-bad-ptr.result
-[31mFAIL tests/userprog/close-bad-fd
-[0mRun didn't produce any output
+FAIL tests/userprog/close-stdout
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/read-boundary.ck tests/userprog/read-boundary tests/userprog/read-boundary.result
-[31mFAIL tests/userprog/read-normal
-[0mRun didn't produce any output
+FAIL tests/userprog/read-normal
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/read-zero.ck tests/userprog/read-zero tests/userprog/read-zero.result
-[31mFAIL tests/userprog/read-bad-ptr
-[0mRun didn't produce any output
+FAIL tests/userprog/close-bad-fd
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/read-stdout.ck tests/userprog/read-stdout tests/userprog/read-stdout.result
-[31mFAIL tests/userprog/read-boundary
-[0mRun didn't produce any output
+FAIL tests/userprog/read-bad-ptr
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/read-bad-fd.ck tests/userprog/read-bad-fd tests/userprog/read-bad-fd.result
+FAIL tests/userprog/read-boundary
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/write-normal.ck tests/userprog/write-normal tests/userprog/write-normal.result
-[31mFAIL tests/userprog/read-zero
-[0mRun didn't produce any output
+FAIL tests/userprog/read-zero
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/write-bad-ptr.ck tests/userprog/write-bad-ptr tests/userprog/write-bad-ptr.result
-[31mFAIL tests/userprog/read-stdout
-[0mRun didn't produce any output
+FAIL tests/userprog/read-stdout
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/write-boundary.ck tests/userprog/write-boundary tests/userprog/write-boundary.result
-[31mFAIL tests/userprog/read-bad-fd
-[0mRun didn't produce any output
+FAIL tests/userprog/read-bad-fd
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/write-zero.ck tests/userprog/write-zero tests/userprog/write-zero.result
-[31mFAIL tests/userprog/write-normal
-[0mRun didn't produce any output
+FAIL tests/userprog/write-normal
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/write-stdin.ck tests/userprog/write-stdin tests/userprog/write-stdin.result
-[31mFAIL tests/userprog/write-bad-ptr
-[0mRun didn't produce any output
+FAIL tests/userprog/write-bad-ptr
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/write-bad-fd.ck tests/userprog/write-bad-fd tests/userprog/write-bad-fd.result
-[31mFAIL tests/userprog/write-boundary
-[0mRun didn't produce any output
+FAIL tests/userprog/write-boundary
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/exec-once.ck tests/userprog/exec-once tests/userprog/exec-once.result
-[31mFAIL tests/userprog/write-zero
-[0mRun didn't produce any output
+FAIL tests/userprog/write-zero
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/exec-arg.ck tests/userprog/exec-arg tests/userprog/exec-arg.result
-[31mFAIL tests/userprog/write-stdin
-[0mRun didn't produce any output
+FAIL tests/userprog/write-stdin
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/exec-bound.ck tests/userprog/exec-bound tests/userprog/exec-bound.result
-[31mFAIL tests/userprog/write-bad-fd
-[0mRun didn't produce any output
+FAIL tests/userprog/write-bad-fd
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/exec-bound-2.ck tests/userprog/exec-bound-2 tests/userprog/exec-bound-2.result
-[31mFAIL tests/userprog/exec-once
-[0mRun didn't produce any output
+FAIL tests/userprog/exec-arg
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/exec-bound-3.ck tests/userprog/exec-bound-3 tests/userprog/exec-bound-3.result
-[31mFAIL tests/userprog/exec-arg
-[0mRun didn't produce any output
+FAIL tests/userprog/exec-once
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/exec-multiple.ck tests/userprog/exec-multiple tests/userprog/exec-multiple.result
-[31mFAIL tests/userprog/exec-bound
-[0mRun didn't produce any output
+FAIL tests/userprog/exec-bound
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/exec-missing.ck tests/userprog/exec-missing tests/userprog/exec-missing.result
-[31mFAIL tests/userprog/exec-bound-2
-[0mRun didn't produce any output
+FAIL tests/userprog/exec-bound-2
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/exec-bad-ptr.ck tests/userprog/exec-bad-ptr tests/userprog/exec-bad-ptr.result
-[31mFAIL tests/userprog/exec-bound-3
-[0mRun didn't produce any output
+FAIL tests/userprog/exec-bound-3
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/wait-simple.ck tests/userprog/wait-simple tests/userprog/wait-simple.result
-[31mFAIL tests/userprog/exec-multiple
-[0mRun didn't produce any output
+FAIL tests/userprog/exec-multiple
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/wait-twice.ck tests/userprog/wait-twice tests/userprog/wait-twice.result
-[31mFAIL tests/userprog/exec-missing
-[0mRun didn't produce any output
-[31mFAIL tests/userprog/exec-bad-ptr
-[0mRun didn't produce any output
+FAIL tests/userprog/exec-missing
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/wait-killed.ck tests/userprog/wait-killed tests/userprog/wait-killed.result
+FAIL tests/userprog/exec-bad-ptr
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/wait-bad-pid.ck tests/userprog/wait-bad-pid tests/userprog/wait-bad-pid.result
-[31mFAIL tests/userprog/wait-simple
-[0mRun didn't produce any output
+FAIL tests/userprog/wait-simple
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/multi-recurse.ck tests/userprog/multi-recurse tests/userprog/multi-recurse.result
-[31mFAIL tests/userprog/wait-twice
-[0mRun didn't produce any output
+FAIL tests/userprog/wait-killed
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/multi-child-fd.ck tests/userprog/multi-child-fd tests/userprog/multi-child-fd.result
-[31mFAIL tests/userprog/wait-bad-pid
-[0mRun didn't produce any output
+FAIL tests/userprog/wait-twice
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/rox-simple.ck tests/userprog/rox-simple tests/userprog/rox-simple.result
-[31mFAIL tests/userprog/wait-killed
-[0mRun didn't produce any output
+FAIL tests/userprog/wait-bad-pid
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/rox-child.ck tests/userprog/rox-child tests/userprog/rox-child.result
-[31mFAIL tests/userprog/multi-recurse
-[0mRun didn't produce any output
+FAIL tests/userprog/multi-recurse
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/rox-multichild.ck tests/userprog/rox-multichild tests/userprog/rox-multichild.result
-[31mFAIL tests/userprog/multi-child-fd
-[0mRun didn't produce any output
+FAIL tests/userprog/multi-child-fd
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/bad-read.ck tests/userprog/bad-read tests/userprog/bad-read.result
-[31mFAIL tests/userprog/rox-simple
-[0mRun didn't produce any output
+FAIL tests/userprog/rox-simple
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/bad-write.ck tests/userprog/bad-write tests/userprog/bad-write.result
-[31mFAIL tests/userprog/rox-child
-[0mRun didn't produce any output
+FAIL tests/userprog/rox-child
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/bad-read2.ck tests/userprog/bad-read2 tests/userprog/bad-read2.result
-[31mFAIL tests/userprog/rox-multichild
-[0mRun didn't produce any output
+FAIL tests/userprog/rox-multichild
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/bad-write2.ck tests/userprog/bad-write2 tests/userprog/bad-write2.result
-[31mFAIL tests/userprog/bad-read
-[0mRun didn't produce any output
+FAIL tests/userprog/bad-read
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/bad-jump.ck tests/userprog/bad-jump tests/userprog/bad-jump.result
-[31mFAIL tests/userprog/bad-write
-[0mRun didn't produce any output
+FAIL tests/userprog/bad-read2
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/bad-jump2.ck tests/userprog/bad-jump2 tests/userprog/bad-jump2.result
-[31mFAIL tests/userprog/bad-read2
-[0mRun didn't produce any output
+FAIL tests/userprog/bad-write2
+Run didn't produce any output
 perl -I../.. ../../tests/userprog/no-vm/multi-oom.ck tests/userprog/no-vm/multi-oom tests/userprog/no-vm/multi-oom.result
-[31mFAIL tests/userprog/bad-write2
-[0mRun didn't produce any output
+FAIL tests/userprog/bad-write
+Run didn't produce any output
 perl -I../.. ../../tests/filesys/base/lg-create.ck tests/filesys/base/lg-create tests/filesys/base/lg-create.result
-[31mFAIL tests/userprog/bad-jump
-[0mRun didn't produce any output
+FAIL tests/userprog/bad-jump
+Run didn't produce any output
 perl -I../.. ../../tests/filesys/base/lg-full.ck tests/filesys/base/lg-full tests/filesys/base/lg-full.result
-[31mFAIL tests/userprog/bad-jump2
-[0mRun didn't produce any output
+FAIL tests/userprog/bad-jump2
+Run didn't produce any output
 perl -I../.. ../../tests/filesys/base/lg-random.ck tests/filesys/base/lg-random tests/filesys/base/lg-random.result
-[31mFAIL tests/userprog/no-vm/multi-oom
-[0mRun didn't produce any output
+FAIL tests/userprog/no-vm/multi-oom
+Run didn't produce any output
 perl -I../.. ../../tests/filesys/base/lg-seq-block.ck tests/filesys/base/lg-seq-block tests/filesys/base/lg-seq-block.result
-[31mFAIL tests/filesys/base/lg-create
-[0mRun didn't produce any output
+FAIL tests/filesys/base/lg-full
+Run didn't produce any output
 perl -I../.. ../../tests/filesys/base/lg-seq-random.ck tests/filesys/base/lg-seq-random tests/filesys/base/lg-seq-random.result
-[31mFAIL tests/filesys/base/lg-random
-[0mRun didn't produce any output
+FAIL tests/filesys/base/lg-create
+Run didn't produce any output
 perl -I../.. ../../tests/filesys/base/sm-create.ck tests/filesys/base/sm-create tests/filesys/base/sm-create.result
-[31mFAIL tests/filesys/base/lg-seq-block
-[0mRun didn't produce any output
+FAIL tests/filesys/base/lg-random
+Run didn't produce any output
 perl -I../.. ../../tests/filesys/base/sm-full.ck tests/filesys/base/sm-full tests/filesys/base/sm-full.result
-[31mFAIL tests/filesys/base/lg-full
-[0mRun didn't produce any output
+FAIL tests/filesys/base/lg-seq-block
+Run didn't produce any output
 perl -I../.. ../../tests/filesys/base/sm-random.ck tests/filesys/base/sm-random tests/filesys/base/sm-random.result
-[31mFAIL tests/filesys/base/lg-seq-random
-[0mRun didn't produce any output
-[31mFAIL tests/filesys/base/sm-create
-[0mRun didn't produce any output
+FAIL tests/filesys/base/lg-seq-random
+Run didn't produce any output
 perl -I../.. ../../tests/filesys/base/sm-seq-block.ck tests/filesys/base/sm-seq-block tests/filesys/base/sm-seq-block.result
+FAIL tests/filesys/base/sm-create
+Run didn't produce any output
 perl -I../.. ../../tests/filesys/base/sm-seq-random.ck tests/filesys/base/sm-seq-random tests/filesys/base/sm-seq-random.result
-[31mFAIL tests/filesys/base/sm-full
-[0mRun didn't produce any output
+FAIL tests/filesys/base/sm-full
+Run didn't produce any output
 perl -I../.. ../../tests/filesys/base/syn-read.ck tests/filesys/base/syn-read tests/filesys/base/syn-read.result
-[31mFAIL tests/filesys/base/sm-random
-[0mRun didn't produce any output
+FAIL tests/filesys/base/sm-random
+Run didn't produce any output
 perl -I../.. ../../tests/filesys/base/syn-remove.ck tests/filesys/base/syn-remove tests/filesys/base/syn-remove.result
-[31mFAIL tests/filesys/base/sm-seq-random
-[0mRun didn't produce any output
+FAIL tests/filesys/base/sm-seq-block
+Run didn't produce any output
 perl -I../.. ../../tests/filesys/base/syn-write.ck tests/filesys/base/syn-write tests/filesys/base/syn-write.result
-[31mFAIL tests/filesys/base/syn-read
-[0mRun didn't produce any output
-[31mFAIL tests/filesys/base/sm-seq-block
-[0mRun didn't produce any output
-[31mFAIL tests/filesys/base/syn-remove
-[0mRun didn't produce any output
-[31mFAIL tests/filesys/base/syn-write
-[0mRun didn't produce any output
+FAIL tests/filesys/base/sm-seq-random
+Run didn't produce any output
+FAIL tests/filesys/base/syn-read
+Run didn't produce any output
+FAIL tests/filesys/base/syn-remove
+Run didn't produce any output
+FAIL tests/filesys/base/syn-write
+Run didn't produce any output
 FAIL tests/userprog/args-none
 FAIL tests/userprog/args-single
 FAIL tests/userprog/args-multiple

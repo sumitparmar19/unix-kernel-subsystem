@@ -1,24 +1,14 @@
 # Stock-Pintos baseline (not Sumit's code)
 
-These results come from an **unmodified** Pintos tree, run through this repo's
-`Dockerfile` and `scripts/run-tests.sh` on 2026-10-14. They serve two purposes:
+The course handout **without Sumit's changes**: Stanford `pintos-anon` commit `9f013d0` plus the
+course's `utils/pintos` (QEMU default). Run on 2026-10-15 with this repo's `Dockerfile` and
+`scripts/run-tests.sh` (QEMU, `make -k check -j4`). Use it to see which passes come free with the
+handout and which come from Sumit's work.
 
-1. They prove the Docker toolchain builds Pintos and runs every suite end to end.
-2. They show how many tests pass **with zero student work**, so Sumit's own
-   results can be credited correctly. For example, 7 threads tests pass on stock code.
-
-Tree used: `jhu-cs318/pintos` at `ab69995` (a widely used Stanford-Pintos
-derivative), with this repo's root `Make.config`, `Makefile.build`,
-`Makefile.kernel` and `Makefile.userprog` copied over it. This is **not** the
-exact handout Sumit's course used, so test totals may differ slightly from
-his tree. All suites ran under QEMU 6.2 (`SIMULATOR=--qemu`), `make -k check -j4`.
-
-| Project | Passed (stock) | Notes |
+| Suite | Stock passes | Sumit's tree |
 |---|---|---|
-| threads  | 7 / 27   | `alarm-single`, `alarm-multiple`, `alarm-simultaneous`, `alarm-zero`, `alarm-negative` pass with the stock busy-wait `timer_sleep`; `mlfqs-fair-2` and `mlfqs-fair-20` pass because all threads have equal priority |
-| userprog | 0 / 80   | Kernel boots and loads the program, but stock `process_wait` returns at once and no system calls exist, so the tests report "Run didn't produce any output" |
-| vm       | 0 / 113  | Same reason as userprog |
-| filesys  | 0 / 102  | 81 fail; the other 21 (`tests/filesys/extended/*`) get no verdict because their persistence step can't run without working system calls |
+| threads  | **7 / 27**: `alarm-single`, `alarm-multiple`, `alarm-simultaneous`, `alarm-zero`, `alarm-negative` (the stock busy-wait `timer_sleep` still produces correct output), `mlfqs-fair-2`, `mlfqs-fair-20` (equal-priority threads get equal CPU under round robin) | 26 / 27 |
+| userprog | **0 / 80**: the kernel boots and loads the program, but there are no system calls and `process_wait` returns at once, so no test produces output | 63 / 80 |
 
-Each project folder holds `summary.txt`, `verdicts.txt` (one PASS/FAIL line
-per test) and the raw `check.log`.
+Each folder keeps `summary.txt`, `verdicts.txt`, `check.log`, `grade` and `build.log`. Per-test
+outputs were dropped to keep the repo small; re-run to regenerate them.
