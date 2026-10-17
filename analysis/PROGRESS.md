@@ -11,7 +11,7 @@ and `analysis/IMPLEMENTATION_PLAN.md`. One branch (`kernel-v2`), one draft PR, u
 | M3 IPC (pipes, redirection) | done | 27/27 | 80/80 | 89/113 | 11/11 | – | pipes, exec_redirect, dup2, minish |
 | M4 fuzzer, stress, stats, tracing, CI | done | 27/27 | 80/80 | 89/113 | 11/11 | – | 125k fuzzed calls, 0 panics; CI+CodeQL/cppcheck |
 | M5 resource limits | done | 27/27 | 80/80 | 89/113 | 11/11 | 5/5 | fork-bomb, cpu-spin, fd-exhaust, neighbor contained |
-| M6 virtual memory | – | | | | | | |
+| M6 virtual memory | done | 27/27 | 80/80 | 113/113 | 11/11 | 6/6 | SPT, clock evict, swap, mmap, stack growth |
 | M7 benchmarks | – | | | | | | |
 | M8 browser demo | – | | | | | | |
 | M9 presentation | – | | | | | | |
@@ -109,3 +109,20 @@ and `analysis/IMPLEMENTATION_PLAN.md`. One branch (`kernel-v2`), one draft PR, u
   (killed at its budget), getlimit (lower-only), neighbor (a good process finishes within an `uptime`
   deadline beside a fork bomb and a CPU spinner). 5/5. No regression: threads 27/27, userprog 80/80,
   ipc 11/11, vm 89/113, fuzzer still clean. Results: `analysis/test-results/m5/`.
+
+## M6 notes
+- **ADR-003, `src/vm/{page,frame,swap,mmap}.[ch]`:** demand-paged virtual memory. Supplemental page
+  table per process (lazy load, stack growth, teardown); global frame table with **clock** eviction;
+  swap over `BLOCK_SWAP`; memory-mapped files with write-back. **vm 113/113.**
+- **Key fix:** a sticky `dirtied` flag — once a page has held written data it is always preserved in
+  swap, never reconstructed from file/zero. Without it, a swapped-in anonymous page dropped while
+  "clean" loses data (caught as `page-linear: byte 0 != 0x5a`).
+- **Deadlock avoidance:** `read`/`write` and `umem` pin user buffer pages (fault them in, mark the
+  frames unevictable) before taking `filesys_lock`; lock order `frame_lock` -> `filesys_lock`/`swap_lock`.
+- **Cleanup:** `process_exit` runs mmap write-back and `spt_destroy` before `pagedir_destroy`, so no
+  physical page is freed twice.
+- **Ties to earlier milestones:** umem's validation now pins resident pages for the whole syscall (M2
+  claim under VM); `LIMIT_PAGES` is charged per SPT entry, so the limits suite now runs under VM and
+  gains `mem-hog` (a process grows its stack past the cap and is killed). **limits 6/6.**
+- No regression: threads 27/27, userprog 80/80, ipc 11/11; fuzzer still 0 panics. Results:
+  `analysis/test-results/m6/`.

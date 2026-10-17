@@ -26,6 +26,12 @@
 #ifdef USERPROG
 #include "userprog/process.h"
 #include "userprog/rlimit.h"
+#endif
+#ifdef VM
+#include "vm/frame.h"
+#include "vm/swap.h"
+#endif
+#ifdef USERPROG
 #include "userprog/exception.h"
 #include "userprog/gdt.h"
 #include "userprog/syscall.h"
@@ -103,6 +109,9 @@ main (void)
 #ifdef USERPROG
   rlimit_init_root (thread_current ());
 #endif
+#ifdef VM
+  frame_init ();
+#endif
   paging_init ();
 
   /* Segmentation. */
@@ -130,6 +139,9 @@ main (void)
   /* Initialize file system. */
   ide_init ();
   locate_block_devices ();
+#ifdef VM
+  swap_init ();
+#endif
   filesys_init (format_filesys);
 #endif
 

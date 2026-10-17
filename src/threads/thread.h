@@ -8,6 +8,9 @@
 #include "userprog/ofile.h"
 #include "userprog/rlimit.h"
 #endif
+#ifdef VM
+#include <hash.h>
+#endif
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -119,6 +122,12 @@ struct thread
     int cpu_budget;                     /* Ticks left, or RLIMIT_NONE. */
     int charged_pages;                  /* User pages this process charged. */
     bool over_cpu;                      /* Set by the timer when budget hits 0. */
+#ifdef VM
+    struct hash spt;                    /* Supplemental page table (vm/page.c). */
+    struct list mmaps;                  /* struct mmap_region (vm/mmap.c). */
+    int next_mapid;                     /* Next mmap id to hand out. */
+    void *user_esp;                     /* User stack pointer, saved at syscall. */
+#endif
 
     /* Per-process file descriptors (userprog/ofile.c, ADR-005). */
     struct fdtable fds;

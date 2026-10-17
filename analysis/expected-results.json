@@ -12,11 +12,11 @@
     "total": 11
   },
   "vm": {
-    "passed": 89,
+    "passed": 113,
     "total": 113
   },
   "limits": {
-    "passed": 5,
-    "total": 5
+    "passed": 6,
+    "total": 6
   }
 }

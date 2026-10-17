@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: [threads, userprog, ipc]
+        suite: [threads, userprog, ipc, vm, limits]
     steps:
       - uses: actions/checkout@v4
       - name: Build image

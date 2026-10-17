@@ -382,3 +382,33 @@ deadline. No regression across threads/userprog/ipc/vm, fuzzer still clean.
 refuses any value above the current cap, like lowering a hard `rlimit`. And a child can never exceed what
 its parent allowed, because limits are inherited (per-process by value, subtree by shared group) and only
 ever tightened.
+
+### M6 · Demand-paged virtual memory (ADR-003)
+**What changed.** Four modules: a per-process **supplemental page table** (what each user page holds and
+how to fetch it), a global **frame table** with **clock** eviction, **swap** over the swap disk, and
+**mmap**. Programs now load pages lazily on fault, the stack grows on demand, and cold pages are evicted
+to swap or written back to their file, so a working set larger than RAM runs fine. vm 113/113.
+
+**The bug worth telling.** `page-linear` failed with `byte 0 != 0x5a` after heavy swapping. An
+anonymous page written by the program, swapped out, then swapped back in, is clean again (fresh mapping)
+but its only copy of the data is now in RAM. My first eviction logic treated a clean anonymous page as
+"re-zero on next fault" and dropped it — losing the data. The fix is a sticky `dirtied` flag: once a
+page has ever held written data, it is always preserved in swap. Knowing exactly why that corrupted is
+a good systems story.
+
+**The classic deadlock.** `read` holds the file-system lock while filling the user's buffer; if a buffer
+page isn't resident, the fault handler needs the file system too → deadlock. The fix is pinning:
+`read`/`write` fault in and pin every buffer page before taking the lock, then unpin after. Lock order
+is `frame_lock` → `filesys_lock`/`swap_lock`, never the reverse.
+
+**Interview questions.**
+- *"How do you pick a victim?"* Clock / second chance: a hand sweeps frames; a frame whose accessed bit
+  is set gets the bit cleared and a second chance; the first with a clear bit is evicted. It approximates
+  LRU without per-access bookkeeping.
+- *"What happens on a stack access below the stack?"* If the faulting address is within 32 bytes of the
+  user `esp` (the `PUSHA` case) and inside the 8 MB limit, a fresh zero page is mapped; otherwise the
+  process is killed. During a system call the kernel uses the `esp` it saved on entry, since the fault's
+  `esp` is then a kernel address.
+- *"Why is this relevant beyond a class project?"* It's the same mechanism as OS paging generally, and
+  vLLM's PagedAttention applies exactly this idea — a page table, on-demand allocation, eviction — to a
+  GPU's KV cache. Sandboxing untrusted code (the project's theme) needs both this and the limits from M5.

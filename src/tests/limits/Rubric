@@ -4,3 +4,4 @@ Resource limits (kernel-v2):
 1	cpu-spin
 1	getlimit
 1	neighbor
+1	mem-hog

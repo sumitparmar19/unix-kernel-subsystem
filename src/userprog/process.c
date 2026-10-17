@@ -2,6 +2,10 @@
 #include "userprog/process.h"
 #include "threads/kstat.h"
 #include "userprog/rlimit.h"
+#ifdef VM
+#include "vm/page.h"
+#include "vm/mmap.h"
+#endif
 #include "userprog/syscall.h"
 #include <debug.h>
 #include <inttypes.h>
@@ -84,7 +88,9 @@ static bool load_segment (struct file *file, off_t ofs, uint8_t *upage,
                           uint32_t read_bytes, uint32_t zero_bytes,
                           bool writable);
 static bool push_args (const char *cmd_line, void **esp);
+#ifndef VM
 static bool install_page (void *upage, void *kpage, bool writable);
+#endif
 
 /* Arguments handed from process_execute() to the new child. */
 struct exec_args
@@ -216,6 +222,12 @@ start_process (void *args_)
   cur->is_user = true;
   cur->record = args->record;
   rlimit_join (cur, args->rgroup, args->max_fds, args->cpu_budget);
+#ifdef VM
+  spt_init (&cur->spt);
+  list_init (&cur->mmaps);
+  cur->next_mapid = 1;
+  cur->user_esp = NULL;
+#endif
 
   /* Install fd 0 and fd 1 before loading, so a failed load releases
      them through the normal exit path. */
@@ -296,6 +308,16 @@ process_exit (void)
   while (!list_empty (&cur->children))
     child_record_release (list_entry (list_pop_front (&cur->children),
                                       struct child_record, elem));
+
+#ifdef VM
+  /* Write back mmapped files and free the supplemental page table
+     while the page directory is still active. */
+  if (cur->is_user)
+    {
+      mmap_cleanup ();
+      spt_destroy (&cur->spt);
+    }
+#endif
 
   /* Destroy the page directory.  Set cur->pagedir to NULL before
      switching back to the kernel-only page directory, so a timer
@@ -589,6 +611,24 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
   ASSERT (pg_ofs (upage) == 0);
   ASSERT (ofs % PGSIZE == 0);
 
+#ifdef VM
+  /* Record each page in the supplemental page table; the page fault
+     handler loads it from the executable on first access. */
+  while (read_bytes > 0 || zero_bytes > 0)
+    {
+      size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE;
+      size_t page_zero_bytes = PGSIZE - page_read_bytes;
+      if (page_read_bytes == 0
+          ? !spt_add_zero (upage, writable)
+          : !spt_add_file (upage, file, ofs, page_read_bytes, writable, false))
+        return false;
+      ofs += PGSIZE;
+      read_bytes -= page_read_bytes;
+      zero_bytes -= page_zero_bytes;
+      upage += PGSIZE;
+    }
+  return true;
+#else
   file_seek (file, ofs);
   while (read_bytes > 0 || zero_bytes > 0)
     {
@@ -626,6 +666,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       upage += PGSIZE;
     }
   return true;
+#endif
 }
 
 /* Create a minimal stack by mapping a zeroed page at the top of user
@@ -633,6 +674,17 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 static bool
 setup_stack (void **esp)
 {
+#ifdef VM
+  /* Map one zero page at the top of the user stack and load it now,
+     since push_args() writes to it immediately. */
+  uint8_t *upage = (uint8_t *) PHYS_BASE - PGSIZE;
+  if (!spt_add_zero (upage, true))
+    return false;
+  if (!page_fault_handler (upage, upage, true))
+    return false;
+  *esp = PHYS_BASE;
+  return true;
+#else
   uint8_t *kpage;
   bool success = false;
 
@@ -650,10 +702,12 @@ setup_stack (void **esp)
         palloc_free_page (kpage);
     }
   return success;
+#endif
 }
 
 /* Adds a mapping from user virtual address UPAGE to kernel virtual address
    KPAGE to the page table. */
+#ifndef VM
 static bool
 install_page (void *upage, void *kpage, bool writable)
 {
@@ -666,4 +720,5 @@ install_page (void *upage, void *kpage, bool writable)
   /* Map it. */
   return pagedir_set_page (t->pagedir, upage, kpage, writable);
 }
+#endif /* !VM */
 
