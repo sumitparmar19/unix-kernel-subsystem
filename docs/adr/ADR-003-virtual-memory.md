@@ -58,6 +58,18 @@ pinned frame. After the I/O the pages are unpinned. `umem`'s `copy_in`/`copy_out
 the same way for arguments, paths and command lines. **Lock order:** a thread holding `frame_lock` never
 takes `filesys_lock` or `swap_lock`.
 
+### Two paging races (found by the M7 benchmark)
+Dropping `frame_lock` across eviction I/O is necessary for lock order but opens two windows that the
+M7 benchmark's parallel-fault stress (`tests/vm/page-parallel`, five faulting processes) exposed as
+nondeterministic corruption — a parent returning into `eip=0`. Both are fixed (`analysis/benchmarks/BUGS-FOUND.md`):
+- **`swap_in` freed the slot before reading it.** A concurrent `swap_out` could reclaim the slot and
+  overwrite it mid-read, mixing two pages. Fixed by reading the page out *before* clearing the bitmap bit.
+- **Load during eviction.** Between `page_evict` clearing the victim's PTE and recording `has_swap`, the
+  owner could fault and `load_frame` would zero-fill the page, dropping data still headed to swap. Fixed
+  with an **eviction barrier**: the evictor marks the victim `evicting` under `frame_lock`; a faulting
+  owner calls `frame_await_eviction` and waits on a condition variable until the evictor has recorded
+  where the data went.
+
 ### Cleanup order
 `process_exit` runs `mmap_cleanup` (write back dirty mappings) and `spt_destroy` (free frames, clear
 PTEs, release swap slots) **before** `pagedir_destroy`, so the two never double-free a physical page.
@@ -74,8 +86,10 @@ PTEs, release swap slots) **before** `pagedir_destroy`, so the two never double-
 - **Eager loading (status quo):** simplest, but cannot exceed RAM or grow the stack — the whole point.
 - **Fault-based user access (`get_user`/`put_user`) instead of pinning:** would reintroduce the
   filesys-lock deadlock for buffered I/O; pinning is the standard fix.
-- **FIFO or random eviction:** kept as compile-time options for the M7 benchmark; clock is the default
-  because it approximates LRU cheaply.
+- **FIFO or random eviction:** kept as boot-time options (`-evict=fifo|random`, `src/vm/frame.c`) for the
+  M7 benchmark; clock is the default because it approximates LRU cheaply. The M7 measurements
+  (`analysis/benchmarks/`) confirm the choice: clock does ~3.5x fewer evictions and almost no swap-ins
+  than FIFO on a sequential scan, and FIFO thrashes the write-heavy mergesort past its time budget.
 
 ## Consequences
 - Every user frame now flows through the frame table; `frame_alloc` is the single choke point for the

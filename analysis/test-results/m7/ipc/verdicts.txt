@@ -1,0 +1,11 @@
+PASS tests/ipc/dup2-basic
+PASS tests/ipc/pipe-bad-ptr
+PASS tests/ipc/pipe-basic
+PASS tests/ipc/pipe-eof
+PASS tests/ipc/pipe-full
+PASS tests/ipc/pipe-large
+PASS tests/ipc/pipe-leak
+PASS tests/ipc/pipe-multi
+PASS tests/ipc/pipe-no-reader
+PASS tests/ipc/redir-pipeline
+PASS tests/ipc/redirect-basic
