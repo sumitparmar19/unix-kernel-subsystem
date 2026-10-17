@@ -8,10 +8,10 @@ pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/limits/mem-hog -a mem-hog -
 perl -I../.. ../../tests/limits/fork-bomb.ck tests/limits/fork-bomb tests/limits/fork-bomb.result
 pass tests/limits/fork-bomb
 perl -I../.. ../../tests/limits/fd-exhaust.ck tests/limits/fd-exhaust tests/limits/fd-exhaust.result
-perl -I../.. ../../tests/limits/getlimit.ck tests/limits/getlimit tests/limits/getlimit.result
 pass tests/limits/fd-exhaust
-perl -I../.. ../../tests/limits/cpu-spin.ck tests/limits/cpu-spin tests/limits/cpu-spin.result
+perl -I../.. ../../tests/limits/getlimit.ck tests/limits/getlimit tests/limits/getlimit.result
 pass tests/limits/getlimit
+perl -I../.. ../../tests/limits/cpu-spin.ck tests/limits/cpu-spin tests/limits/cpu-spin.result
 pass tests/limits/cpu-spin
 perl -I../.. ../../tests/limits/mem-hog.ck tests/limits/mem-hog tests/limits/mem-hog.result
 pass tests/limits/mem-hog

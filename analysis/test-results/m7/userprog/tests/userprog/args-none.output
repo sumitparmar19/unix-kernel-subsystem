@@ -1,5 +1,5 @@
 Copying tests/userprog/args-none to scratch partition...
-qemu-system-i386 -device isa-debug-exit -drive file=/tmp/0zQ5TTip3R.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/3oy3HOHhln.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
 c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
 Booting from Hard Disk...
 PPiiLLoo  hhddaa1
@@ -9,7 +9,7 @@ Kernel command line: -q -f extract run args-none
 Pintos booting with 3,968 kB RAM...
 367 pages available in kernel pool.
 367 pages available in user pool.
-Calibrating timer...  575,897,600 loops/s.
+Calibrating timer...  425,164,800 loops/s.
 ide0: unexpected interrupt
 hda: 5,040 sectors (2 MB), model "QM00001", serial "QEMU HARDDISK"
 hda1: 203 sectors (101 kB), Pintos OS kernel (20)
@@ -31,8 +31,8 @@ Executing 'args-none':
 (args) end
 args-none: exit(0)
 Execution of 'args-none' complete.
-Timer: 60 ticks
-Thread: 32 idle ticks, 29 kernel ticks, 0 user ticks
+Timer: 70 ticks
+Thread: 35 idle ticks, 33 kernel ticks, 2 user ticks
 hda2 (filesys): 59 reads, 228 writes
 hda3 (scratch): 111 reads, 2 writes
 Console: 998 characters output

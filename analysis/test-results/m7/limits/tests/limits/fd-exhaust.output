@@ -1,5 +1,5 @@
 Copying tests/limits/fd-exhaust to scratch partition...
-qemu-system-i386 -device isa-debug-exit -drive file=/tmp/c3tJcJaolL.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/u8SmvEbezo.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
 c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
 Booting from Hard Disk...
 PPiiLLoo  hhddaa1
@@ -9,7 +9,7 @@ Kernel command line: -q -f extract run fd-exhaust
 Pintos booting with 3,968 kB RAM...
 367 pages available in kernel pool.
 367 pages available in user pool.
-Calibrating timer...  433,356,800 loops/s.
+Calibrating timer...  830,668,800 loops/s.
 ide0: unexpected interrupt
 hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
 hda1: 221 sectors (110 kB), Pintos OS kernel (20)
@@ -34,8 +34,8 @@ Executing 'fd-exhaust':
 (fd-exhaust) end
 fd-exhaust: exit(0)
 Execution of 'fd-exhaust' complete.
-Timer: 76 ticks
-Thread: 39 idle ticks, 34 kernel ticks, 3 user ticks
+Timer: 65 ticks
+Thread: 35 idle ticks, 27 kernel ticks, 3 user ticks
 hda2 (filesys): 127 reads, 239 writes
 hda3 (scratch): 114 reads, 2 writes
 hda4 (swap): 0 reads, 0 writes
@@ -43,5 +43,5 @@ Console: 1234 characters output
 Keyboard: 0 keys pressed
 Exception: 5 page faults
 KSTAT-SYSCALLS 1=1 4=1 6=15 9=6 23=1
-KSTAT syscalls=24 ctx_switches=590 lock_waits=0 page_faults=5 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=0 pipe_blocks=0 limit_denials=0 limit_kills=0
+KSTAT syscalls=24 ctx_switches=974 lock_waits=0 page_faults=5 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=0 pipe_blocks=0 limit_denials=0 limit_kills=0
 Powering off...

@@ -1,6 +1,6 @@
 Copying tests/userprog/exec-bound to scratch partition...
 Copying tests/userprog/child-args to scratch partition...
-qemu-system-i386 -device isa-debug-exit -drive file=/tmp/Smqggu0SYC.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/ocJnVWew2l.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
 c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
 Booting from Hard Disk...
 PPiiLLoo  hhddaa1
@@ -10,7 +10,7 @@ Kernel command line: -q -f extract run exec-bound
 Pintos booting with 3,968 kB RAM...
 367 pages available in kernel pool.
 367 pages available in user pool.
-Calibrating timer...  720,076,800 loops/s.
+Calibrating timer...  842,137,600 loops/s.
 ide0: unexpected interrupt
 hda: 5,040 sectors (2 MB), model "QM00001", serial "QEMU HARDDISK"
 hda1: 203 sectors (101 kB), Pintos OS kernel (20)
@@ -38,13 +38,13 @@ child-args: exit(0)
 (exec-bound) end
 exec-bound: exit(0)
 Execution of 'exec-bound' complete.
-Timer: 74 ticks
-Thread: 37 idle ticks, 34 kernel ticks, 3 user ticks
+Timer: 75 ticks
+Thread: 38 idle ticks, 36 kernel ticks, 1 user ticks
 hda2 (filesys): 119 reads, 458 writes
 hda3 (scratch): 225 reads, 2 writes
 Console: 1155 characters output
 Keyboard: 0 keys pressed
 Exception: 0 page faults
 KSTAT-SYSCALLS 1=2 2=1 3=1 9=9
-KSTAT syscalls=13 ctx_switches=729 lock_waits=0 page_faults=0 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=0 pipe_blocks=0 limit_denials=0 limit_kills=0
+KSTAT syscalls=13 ctx_switches=1619 lock_waits=0 page_faults=0 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=0 pipe_blocks=0 limit_denials=0 limit_kills=0
 Powering off...
