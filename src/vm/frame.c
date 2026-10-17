@@ -1,6 +1,7 @@
 #include "vm/frame.h"
 #include <debug.h>
 #include <list.h>
+#include <random.h>
 #include <string.h>
 #include "threads/malloc.h"
 #include "threads/palloc.h"
@@ -22,6 +23,9 @@ struct frame
 static struct list frame_list;         /* All allocated frames (clock order). */
 static struct list_elem *clock_hand;   /* Next frame the clock will examine. */
 static struct lock frame_lock;         /* Protects the table and eviction. */
+
+/* Selected eviction policy (default clock); set by -evict= in init.c. */
+enum evict_policy frame_policy = EVICT_CLOCK;
 
 void
 frame_init (void)
@@ -57,34 +61,82 @@ clock_next (void)
   return f;
 }
 
-/* Chooses a victim by the clock (second-chance) algorithm, evicts its
-   page, and returns the now-free frame record, still in the list.
+/* Returns the first unpinned frame at or after the clock hand, by
+   list order (FIFO: oldest allocated).  frame_lock held. */
+static struct frame *
+first_unpinned (void)
+{
+  struct list_elem *e;
+  for (e = list_begin (&frame_list); e != list_end (&frame_list);
+       e = list_next (e))
+    {
+      struct frame *f = list_entry (e, struct frame, elem);
+      if (!f->pinned)
+        return f;
+    }
+  return NULL;
+}
+
+/* Returns a pseudo-random unpinned frame.  frame_lock held. */
+static struct frame *
+random_unpinned (void)
+{
+  size_t n = list_size (&frame_list), i, start = random_ulong () % (n ? n : 1);
+  struct list_elem *e = list_begin (&frame_list);
+  for (i = 0; i < start; i++)
+    e = list_next (e);
+  for (i = 0; i < n; i++)
+    {
+      struct frame *f = list_entry (e, struct frame, elem);
+      if (!f->pinned)
+        return f;
+      e = list_next (e);
+      if (e == list_end (&frame_list))
+        e = list_begin (&frame_list);
+    }
+  return NULL;
+}
+
+/* Picks a victim per the selected policy (clock gives accessed pages a
+   second chance), evicts its page, and returns the freed frame.
    frame_lock held. */
 static struct frame *
 evict (void)
 {
-  size_t steps, n = list_size (&frame_list) * 2 + 1;
+  struct frame *f = NULL;
 
-  for (steps = 0; steps < n; steps++)
+  if (frame_policy == EVICT_CLOCK)
     {
-      struct frame *f = clock_next ();
-      if (f->pinned)
-        continue;
-      uint32_t *pd = f->page->owner->pagedir;
-      if (pagedir_is_accessed (pd, f->page->upage))
+      size_t steps, n = list_size (&frame_list) * 2 + 1;
+      for (steps = 0; steps < n; steps++)
         {
-          pagedir_set_accessed (pd, f->page->upage, false);
-          continue;             /* Second chance. */
+          struct frame *c = clock_next ();
+          if (c->pinned)
+            continue;
+          uint32_t *pd = c->page->owner->pagedir;
+          if (pagedir_is_accessed (pd, c->page->upage))
+            {
+              pagedir_set_accessed (pd, c->page->upage, false);
+              continue;         /* Second chance. */
+            }
+          f = c;
+          break;
         }
-      /* Evict f->page: pin it so nobody else touches it mid-eviction. */
-      f->pinned = true;
-      lock_release (&frame_lock);
-      page_evict (f->page, f->kpage);   /* Swaps out / writes back / drops. */
-      lock_acquire (&frame_lock);
-      f->page = NULL;
-      return f;
     }
-  PANIC ("frame: no evictable frame found");
+  else if (frame_policy == EVICT_FIFO)
+    f = first_unpinned ();
+  else
+    f = random_unpinned ();
+
+  if (f == NULL)
+    PANIC ("frame: no evictable frame found");
+
+  f->pinned = true;             /* Hold it across the eviction write. */
+  lock_release (&frame_lock);
+  page_evict (f->page, f->kpage);
+  lock_acquire (&frame_lock);
+  f->page = NULL;
+  return f;
 }
 
 void *

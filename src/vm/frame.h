@@ -8,6 +8,10 @@
 
 struct spt_entry;
 
+/* Eviction policies, selectable at boot with -evict=NAME (M7). */
+enum evict_policy { EVICT_CLOCK, EVICT_FIFO, EVICT_RANDOM };
+extern enum evict_policy frame_policy;
+
 void frame_init (void);
 
 /* Allocates a frame for page P (its spt_entry).  Evicts another frame
