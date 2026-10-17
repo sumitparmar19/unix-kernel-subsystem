@@ -126,3 +126,20 @@ and `analysis/IMPLEMENTATION_PLAN.md`. One branch (`kernel-v2`), one draft PR, u
   gains `mem-hog` (a process grows its stack past the cap and is killed). **limits 6/6.**
 - No regression: threads 27/27, userprog 80/80, ipc 11/11; fuzzer still 0 panics. Results:
   `analysis/test-results/m6/`.
+
+## M7 notes
+- **Eviction policy selectable at boot** (`-evict=clock|fifo|random`, `src/vm/frame.c`/`init.c`): clock
+  (second-chance, default), fifo (oldest unpinned), random (`random_ulong`). Enables measurement.
+- **Benchmark pipeline:** `scripts/bench.sh`/`bench-run.sh` run policy × workload × RAM × seed, logging
+  the kernel's `KSTAT` counters to `analysis/benchmarks/bench.jsonl`; `analysis/analyze.py` →
+  `BENCHMARKS.md` + charts; `analysis/simulate.py` → FIFO/LRU/CLOCK/OPT trace simulation (`SIMULATION.md`,
+  Belady's anomaly); `analysis/build_site.py` → `docs/benchmarks/` GitHub Pages site.
+- **Result:** at 4 MB, clock swaps in 3 pages vs FIFO ~320 on `page-parallel`; FIFO thrashes
+  `page-merge-par` past the time budget (0/5) while clock finishes in ~3 s. Random high-variance between.
+- **Two paging races found and fixed** (`analysis/benchmarks/BUGS-FOUND.md`): (1) `swap_in` freed the
+  slot before reading it → concurrent `swap_out` overwrote it (fix: read then free); (2) a page could be
+  loaded mid-eviction and zero-filled before `has_swap` was recorded (fix: `frame_await_eviction`
+  barrier on a condition variable). Symptom was a parent crash at `eip=0` under parallel paging.
+- No regression: vm 113/113, userprog 80/80, ipc 11/11, limits 6/6. Results: `analysis/test-results/m7/`.
+- **Pages:** site prebuilt under `docs/`; enabling is a one-click repo setting (Settings → Pages →
+  Deploy from branch, `/docs`).

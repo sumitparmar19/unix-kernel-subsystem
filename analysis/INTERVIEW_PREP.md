@@ -412,3 +412,42 @@ is `frame_lock` → `filesys_lock`/`swap_lock`, never the reverse.
 - *"Why is this relevant beyond a class project?"* It's the same mechanism as OS paging generally, and
   vLLM's PagedAttention applies exactly this idea — a page table, on-demand allocation, eviction — to a
   GPU's KV cache. Sandboxing untrusted code (the project's theme) needs both this and the limits from M5.
+
+### M7 · Measuring the eviction policies (benchmarks + simulation)
+**What changed.** Made the eviction policy selectable at boot (`-evict=clock|fifo|random`) and built a
+measurement pipeline around it: `scripts/bench.sh` runs a matrix of policy × workload × RAM × seed and
+records the kernel's own `KSTAT` counters; `analysis/analyze.py` aggregates mean±std over 5 seeds into
+tables and charts; `analysis/simulate.py` is a trace-driven FIFO/LRU/CLOCK/OPT simulator; and
+`docs/benchmarks/` is a GitHub Pages site built from the live data.
+
+**The headline result.** At 4 MB RAM on `page-parallel` (four processes scanning large arrays), clock
+evicts ~3× fewer pages than FIFO and — the number that matters — swaps just **3** pages back in vs
+FIFO's **~320**. A swap-in means the policy evicted a page the program immediately needed again, so
+FIFO is doing hundreds of avoidable disk round-trips. On the write-heavy `page-merge-par`, FIFO thrashes
+so hard it never finishes in the time budget (0/5) while clock finishes in ~3 simulated seconds. Random
+sits between the two, with large run-to-run variance (that's the point of random).
+
+**The bug worth telling (this milestone).** Running the benchmark under memory sizes the suite never
+uses, with four parallel faulting processes, exposed a nondeterministic crash: the *parent* died
+returning into `eip=0` — a corrupted return address. Two races, both in the swap/eviction path:
+1. `swap_in` cleared the slot's bitmap bit *before* reading the slot, so a concurrent `swap_out` could
+   grab that slot and overwrite it mid-read, mixing two pages — including a stack page. Fix: read first,
+   free second.
+2. The evictor drops `frame_lock` across swap I/O (lock order). In the window after it cleared the
+   victim's page-table entry but before it recorded `has_swap`, the owner could fault and the loader
+   would zero-fill the page, dropping data headed to swap. Fix: an "evicting" barrier — the owner waits
+   on a condition variable until the evictor records where the data went.
+The lesson: a single green test run hides timing bugs; deliberate parallel stress at varied pressure is
+what surfaces them. Write-up in `analysis/benchmarks/BUGS-FOUND.md`.
+
+**Interview questions.**
+- *"Why is clock better than FIFO here?"* FIFO evicts by age alone, so it throws out hot pages that are
+  old; the accessed bit lets clock skip a page that was touched recently. The measured swap-in gap
+  (3 vs ~320) is exactly that difference in avoidable faults.
+- *"What is Belady's anomaly and does your kernel's policy have it?"* FIFO can fault *more* with more
+  frames; LRU and OPT (stack algorithms) never do. Clock is not a true stack algorithm, so it can too —
+  my simulator shows it on an adversarial string — but on real workloads it tracks LRU closely for one
+  reference bit per frame, which is why it's the default.
+- *"How did you make the numbers trustworthy?"* Five seeds per configuration with mean±std, the kernel's
+  own counters rather than wall-clock guesses, failed/timed-out runs recorded honestly rather than
+  dropped, and a one-command reproduction (`scripts/bench-run.sh`).
