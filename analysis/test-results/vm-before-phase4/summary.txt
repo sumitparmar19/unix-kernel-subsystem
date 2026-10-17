@@ -1,0 +1,47 @@
+project:  vm
+passed:   70 / 113
+runtime:  26 s (make check, -j4, --qemu)
+failing:
+  tests/filesys/base/syn-read
+  tests/filesys/base/syn-write
+  tests/userprog/bad-jump
+  tests/userprog/bad-jump2
+  tests/userprog/bad-read
+  tests/userprog/bad-read2
+  tests/userprog/bad-write
+  tests/userprog/bad-write2
+  tests/userprog/exec-bound-2
+  tests/userprog/exec-bound-3
+  tests/userprog/exec-missing
+  tests/userprog/rox-child
+  tests/userprog/rox-multichild
+  tests/userprog/rox-simple
+  tests/userprog/sc-bad-arg
+  tests/userprog/sc-boundary-3
+  tests/vm/mmap-clean
+  tests/vm/mmap-close
+  tests/vm/mmap-exit
+  tests/vm/mmap-inherit
+  tests/vm/mmap-misalign
+  tests/vm/mmap-null
+  tests/vm/mmap-over-code
+  tests/vm/mmap-over-data
+  tests/vm/mmap-over-stk
+  tests/vm/mmap-overlap
+  tests/vm/mmap-read
+  tests/vm/mmap-remove
+  tests/vm/mmap-shuffle
+  tests/vm/mmap-twice
+  tests/vm/mmap-write
+  tests/vm/page-linear
+  tests/vm/page-merge-mm
+  tests/vm/page-merge-par
+  tests/vm/page-merge-seq
+  tests/vm/page-merge-stk
+  tests/vm/page-parallel
+  tests/vm/pt-big-stk-obj
+  tests/vm/pt-grow-bad
+  tests/vm/pt-grow-pusha
+  tests/vm/pt-grow-stack
+  tests/vm/pt-grow-stk-sc
+  tests/vm/pt-write-code2
