@@ -31,6 +31,9 @@ and `analysis/IMPLEMENTATION_PLAN.md`. One branch (`kernel-v2`), one draft PR, u
   `syn-read` result **depends on timing**: a real race (unlocked file-system access in `load`), not a
   deterministic bug. Counted as flaky; M1 fixes the cause.
 - Bochs 2.6.11 for `--jitter` runs: attempted in M4 (stress testing), where it's used.
+- **Stress artifact pending:** `scripts/stress.sh` is validated (ipc 20/20, threads non-flaky in sanity
+  runs). The full 20-run-per-suite record is being accumulated in chunks (the threads suite is ~4 min/run,
+  so a 20-run pass exceeds one background window); results land in `analysis/test-results/m4/stress.txt`.
 
 ## M1 notes
 - **Priority donation rewrite (plan §2.1):** `thread_recompute_priority` derives effective priority from
