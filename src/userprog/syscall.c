@@ -17,6 +17,8 @@
 #include "userprog/pipe.h"
 #include "userprog/process.h"
 #include "userprog/umem.h"
+#include "userprog/rlimit.h"
+#include "devices/timer.h"
 
 /* Serialises every call into the (non-thread-safe) file system.
    Lock-order rule (ADR-002): never block on another process or
@@ -28,8 +30,17 @@ struct lock filesys_lock;
    file system itself allows 14. */
 #define PATH_MAX_LEN 127
 
-/* Descriptors must be below this value (like RLIMIT_NOFILE). */
+/* Default descriptor ceiling when no tighter limit is set (like
+   RLIMIT_NOFILE).  The per-process cap from setlimit() overrides it. */
 #define FD_LIMIT 1024
+
+/* The current process's descriptor ceiling. */
+static int
+fd_cap (void)
+{
+  int lim = rlimit_get (thread_current (), LIMIT_FDS);
+  return lim == RLIMIT_NONE || lim > FD_LIMIT ? FD_LIMIT : lim;
+}
 
 /* A system call handler: takes the raw 32-bit arguments and returns
    the value for the caller's eax. */
@@ -163,7 +174,7 @@ sys_open (const uint32_t *args)
       lock_release (&filesys_lock);
       return (uint32_t) -1;
     }
-  fd = fd_install (fds (), of, FD_LIMIT);
+  fd = fd_install (fds (), of, fd_cap ());
   if (fd < 0)
     ofile_unref (of);
   return (uint32_t) fd;
@@ -282,8 +293,8 @@ sys_pipe (const uint32_t *args)
       return false;
     }
 
-  kfds[0] = fd_install (fds (), rd, FD_LIMIT);
-  kfds[1] = kfds[0] < 0 ? -1 : fd_install (fds (), wr, FD_LIMIT);
+  kfds[0] = fd_install (fds (), rd, fd_cap ());
+  kfds[1] = kfds[0] < 0 ? -1 : fd_install (fds (), wr, fd_cap ());
   if (kfds[1] < 0)
     {
       if (kfds[0] >= 0)
@@ -346,7 +357,34 @@ sys_exec_redirect (const uint32_t *args)
 static uint32_t
 sys_dup2 (const uint32_t *args)
 {
-  return (uint32_t) fd_dup2 (fds (), (int) args[0], (int) args[1], FD_LIMIT);
+  return (uint32_t) fd_dup2 (fds (), (int) args[0], (int) args[1], fd_cap ());
+}
+
+/* bool setlimit (int resource, int value) */
+static uint32_t
+sys_setlimit (const uint32_t *args)
+{
+  int res = (int) args[0];
+  if (res < 0 || res >= LIMIT_CNT)
+    return false;
+  return rlimit_set (thread_current (), res, (int) args[1]);
+}
+
+/* int getlimit (int resource) */
+static uint32_t
+sys_getlimit (const uint32_t *args)
+{
+  int res = (int) args[0];
+  if (res < 0 || res >= LIMIT_CNT)
+    return (uint32_t) RLIMIT_NONE;
+  return (uint32_t) rlimit_get (thread_current (), res);
+}
+
+/* int uptime (void) -- timer ticks since boot. */
+static uint32_t
+sys_uptime (const uint32_t *args UNUSED)
+{
+  return (uint32_t) timer_ticks ();
 }
 
 /* System call table: handler and number of 32-bit arguments. */
@@ -373,6 +411,9 @@ syscalls[] =
     [SYS_PIPE]          = { sys_pipe,          1 },
     [SYS_EXEC_REDIRECT] = { sys_exec_redirect, 3 },
     [SYS_DUP2]          = { sys_dup2,          2 },
+    [SYS_SETLIMIT]      = { sys_setlimit,      2 },
+    [SYS_GETLIMIT]      = { sys_getlimit,      1 },
+    [SYS_UPTIME]        = { sys_uptime,        0 },
   };
 #define SYSCALL_CNT (sizeof syscalls / sizeof *syscalls)
 

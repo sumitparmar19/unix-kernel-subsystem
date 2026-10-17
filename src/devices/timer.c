@@ -7,6 +7,9 @@
 #include "threads/interrupt.h"
 #include "threads/synch.h"
 #include "threads/thread.h"
+#ifdef USERPROG
+#include "userprog/rlimit.h"
+#endif
 #include "threads/fixed-point.h"
   
 /* See [8254] for hardware details of the 8254 timer chip. */
@@ -199,6 +202,22 @@ timer_interrupt (struct intr_frame *args UNUSED)
   ticks++;
 
   bool need_yield = false;
+
+#ifdef USERPROG
+  /* Charge this tick to a running user process's CPU budget.  When it
+     runs out, flag the process and force it into process context,
+     where thread_tick()'s caller (the syscall path) or the kill check
+     below ends it. */
+  {
+    struct thread *cur = thread_current ();
+    if (cur->pagedir != NULL && cur->cpu_budget != RLIMIT_NONE
+        && !cur->over_cpu && --cur->cpu_budget <= 0)
+      {
+        cur->over_cpu = true;
+        need_yield = true;
+      }
+  }
+#endif
 
   if (thread_mlfqs)
   {

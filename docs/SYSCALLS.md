@@ -34,6 +34,18 @@ at most 14 characters.
 | `bool pipe (int fds[2])` | Creates a pipe with a 4096-byte buffer; `fds[0]` reads, `fds[1]` writes (lowest free descriptors). False if out of memory or descriptors. | `pipe` | **same** |
 | `int dup2 (int oldfd, int newfd)` | Makes `newfd` share `oldfd`'s open-file object (and offset), closing `newfd` first. Returns `newfd`; `oldfd == newfd` returns `newfd` without change. −1 if `oldfd` isn't open or `newfd` is out of range (0–1023). | `dup2` | **same** |
 
+## Resource limits (kernel-v2, docs/adr/ADR-004)
+
+| Call | Behaviour | POSIX counterpart | Comparison |
+|---|---|---|---|
+| `bool setlimit (int resource, int value)` | Lowers a limit on the caller (`LIMIT_PROCS`, `LIMIT_PAGES` are shared with future descendants; `LIMIT_FDS`, `LIMIT_CPU` are per-process). Refuses to raise a limit (returns false). | `setrlimit` | **differs:** unprivileged processes can only lower, as with a hard limit; subtree scope for procs/pages is cgroup-like |
+| `int getlimit (int resource)` | The caller's current cap (−1 = unlimited). | `getrlimit` | — |
+| `int uptime (void)` | Timer ticks since boot (100/second). | `times` / `clock_gettime(CLOCK_MONOTONIC)` | coarse, tick-granular |
+
+`resource` is 0 `LIMIT_PROCS`, 1 `LIMIT_PAGES`, 2 `LIMIT_FDS`, 3 `LIMIT_CPU`. Over a subtree process or
+page cap, `exec` / allocation fails; over the CPU budget, the process is killed (exit −1); over the fd
+cap, `open`/`pipe`/`dup2` return −1.
+
 ## Limits
 
 - Descriptors: 0–1023 per process (like `RLIMIT_NOFILE` = 1024). M5 makes this configurable per process.

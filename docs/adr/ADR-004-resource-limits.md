@@ -1,0 +1,76 @@
+# ADR-004: Per-process resource limits ("cgroups-lite")
+
+**Status:** accepted (M5) · **Code:** `src/userprog/rlimit.[ch]`, `syscall.c`, `process.c`,
+`threads/thread.[ch]`, `devices/timer.c` · **Proof:** `src/tests/limits`
+
+## Context
+A sandbox must stop one program from starving the others: a fork bomb, a memory hog, a descriptor
+leak, a CPU spinner. The course kernel had no limits — any user program could exhaust kernel memory or
+spin forever. This is the kernel-side of what Linux `cgroups` and `setrlimit` do.
+
+## Decision
+
+### Four resources, two scopes
+| Resource | Scope | Enforced in | Over-limit action |
+|---|---|---|---|
+| `LIMIT_PROCS` — live processes | **subtree** (a process and its descendants) | `process_execute` | `exec` returns −1 |
+| `LIMIT_PAGES` — user pages | **subtree** | user-page allocation (`frame_alloc` in M6; `load`/`setup_stack` now) | allocation fails → process killed (−1) |
+| `LIMIT_FDS` — open descriptors | **per process** | `open`, `pipe`, `dup2` | the call returns −1 |
+| `LIMIT_CPU` — CPU time in timer ticks | **per process** | timer interrupt | process killed (−1) |
+
+**Why two scopes?** A *per-process* child limit cannot stop a fork bomb: each child would get its own
+fresh allowance and could spawn N more, so the tree still explodes. Process and memory limits must
+therefore be **shared across the whole subtree**, exactly as cgroup v2 accounts a subtree. Descriptors
+and CPU are naturally per-process, like POSIX `RLIMIT_NOFILE` and `RLIMIT_CPU`.
+
+### Resource groups
+Subtree limits live in a reference-counted `struct rgroup` that a process shares with its descendants:
+```
+struct rgroup { int max_procs, procs;  int32_t max_pages, pages;  int refs; };
+```
+- At boot the initial process gets a root group with unlimited caps.
+- A new process **joins its parent's group** at creation (`procs++`), and leaves it at exit
+  (`procs--`); the group is freed when the last member exits. Pages a process charged are returned to
+  the group when it exits.
+- `setlimit(LIMIT_PROCS|LIMIT_PAGES, n)` makes the caller **split off a new, tighter group** (seeded
+  with its current usage) that it and its *future* descendants share. Already-running descendants stay
+  in the old group. This matches how the sandbox tests work: a process lowers its own limit and *then*
+  spawns the workload it wants to contain, so the workload is created into the tightened group.
+
+### Per-process limits
+`max_fds` and a `cpu_budget` (ticks remaining, −1 = unlimited) live in `struct thread`. They are copied
+**by value** to a child at creation, so a child can't exceed what its parent allowed, and
+`setlimit` can only ever **lower** them (like `setrlimit` for an unprivileged process).
+
+### New system calls
+| Call | Semantics |
+|---|---|
+| `bool setlimit (int resource, int value)` | Lower a limit on the caller (and, for subtree resources, its future descendants). Raising is refused (returns false). Documented in `docs/SYSCALLS.md`. |
+| `int getlimit (int resource)` | The caller's current cap for `resource` (−1 = unlimited). |
+| `int uptime (void)` | Timer ticks since boot. Lets a test assert a neighbour finished *within a time bound* while an abuser ran. |
+
+### Enforcement details
+- **Fork bomb:** `process_execute` checks `procs < max_procs` in the caller's group before creating a
+  child; on success the child joins and `procs++`. The group's count falls as children exit.
+- **CPU spinner:** the timer interrupt decrements the running user process's `cpu_budget`; at zero it
+  flags the process, which `thread_tick` turns into a kill (exit −1). Checked in the interrupt so a
+  pure busy loop that makes no system calls is still caught.
+- **Descriptor leak:** `open`/`pipe`/`dup2` install at the lowest free descriptor below `max_fds`.
+- **Memory hog:** the user-page allocator charges the group and refuses over the cap. Pre-M6 there is
+  no user-visible way to grow user memory at run time, so the mechanism is in place but the `mem-hog`
+  test arrives with VM in M6.
+
+Counters are updated with interrupts disabled (the critical sections are a few instructions and some
+run from the timer interrupt), consistent with the rest of this uniprocessor kernel.
+
+## Alternatives considered
+- **A single global limit:** would make one tenant's fork bomb cap everyone, the opposite of isolation.
+- **Pure per-process limits inherited by value:** simplest, but can't bound a fork bomb (above).
+- **A full cgroup hierarchy with live re-parenting of running descendants:** more faithful to Linux,
+  but the extra bookkeeping buys nothing the sandbox tests need; splitting a new group for future
+  descendants is enough and much simpler to reason about.
+
+## Consequences
+- The `neighbor-survives` test proves the key property: a well-behaved process started next to each
+  abuser still finishes, and within a recorded `uptime` bound.
+- M6 connects `LIMIT_PAGES` to `frame_alloc`; nothing else about limits changes.

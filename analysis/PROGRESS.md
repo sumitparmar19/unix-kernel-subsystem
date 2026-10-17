@@ -10,7 +10,7 @@ and `analysis/IMPLEMENTATION_PLAN.md`. One branch (`kernel-v2`), one draft PR, u
 | M2 user-pointer validation | done | 27/27 | 80/80 | 89/113 | | | 3 known panics gone |
 | M3 IPC (pipes, redirection) | done | 27/27 | 80/80 | 89/113 | 11/11 | – | pipes, exec_redirect, dup2, minish |
 | M4 fuzzer, stress, stats, tracing, CI | done | 27/27 | 80/80 | 89/113 | 11/11 | – | 125k fuzzed calls, 0 panics; CI+CodeQL/cppcheck |
-| M5 resource limits | – | | | | | | |
+| M5 resource limits | done | 27/27 | 80/80 | 89/113 | 11/11 | 5/5 | fork-bomb, cpu-spin, fd-exhaust, neighbor contained |
 | M6 virtual memory | – | | | | | | |
 | M7 benchmarks | – | | | | | | |
 | M8 browser demo | – | | | | | | |
@@ -92,3 +92,17 @@ and `analysis/IMPLEMENTATION_PLAN.md`. One branch (`kernel-v2`), one draft PR, u
   regression gate against `analysis/expected-results.json` (`scripts/check_results.py`); a short fuzz;
   cppcheck and CodeQL (scoped to kernel code). cppcheck/CodeQL run on GitHub runners (not installable
   in this sandbox); the new modules already build under `-Werror`.
+
+## M5 notes
+- **ADR-004, `userprog/rlimit.[ch]`:** four limits. `LIMIT_PROCS` and `LIMIT_PAGES` are accounted across
+  a process subtree via a shared reference-counted `struct rgroup` (so a fork bomb can't escape by
+  spawning more); `LIMIT_FDS` and `LIMIT_CPU` are per-process, inherited by value. `setlimit` can only
+  lower a limit; `getlimit` reads it; `uptime` returns timer ticks.
+- **Enforcement:** `process_execute_redirect` admits a child to the group (fork-bomb cap); the timer
+  interrupt charges the running user process's CPU budget and `intr_handler` kills it when spent (a pure
+  spinner that makes no syscalls is still caught); `open`/`pipe`/`dup2` honour the fd cap; the user-page
+  allocator charges the group (full mem-hog test arrives with VM in M6).
+- **`tests/limits`** (new `src/limits` project): fork-bomb (capped at 7 of 8), fd-exhaust, cpu-spin
+  (killed at its budget), getlimit (lower-only), neighbor (a good process finishes within an `uptime`
+  deadline beside a fork bomb and a CPU spinner). 5/5. No regression: threads 27/27, userprog 80/80,
+  ipc 11/11, vm 89/113, fuzzer still clean. Results: `analysis/test-results/m5/`.

@@ -1,5 +1,7 @@
 #include "threads/malloc.h"
 #include "userprog/process.h"
+#include "threads/kstat.h"
+#include "userprog/rlimit.h"
 #include "userprog/syscall.h"
 #include <debug.h>
 #include <inttypes.h>
@@ -91,6 +93,9 @@ struct exec_args
     struct child_record *record;  /* Shared parent/child record. */
     struct ofile *stdin_of;       /* Becomes the child's fd 0. */
     struct ofile *stdout_of;      /* Becomes the child's fd 1. */
+    struct rgroup *rgroup;        /* Parent's resource group to join. */
+    int max_fds;                  /* Inherited per-process caps. */
+    int cpu_budget;
   };
 
 /* Drops one reference to REC and frees it when none are left.
@@ -160,10 +165,22 @@ process_execute_redirect (const char *cmd_line, struct ofile *stdin_of,
   args->record = rec;
   args->stdin_of = stdin_of;
   args->stdout_of = stdout_of;
+  args->rgroup = thread_current ()->rgroup;
+  args->max_fds = thread_current ()->max_fds;
+  args->cpu_budget = thread_current ()->cpu_budget;
 
+  /* Resource limit: refuse if the subtree is at its process cap. */
+  if (!rlimit_admit_proc (thread_current ()))
+    {
+      kstat_inc (KS_LIMIT_DENIALS);
+      goto fail;
+    }
   tid = thread_create (thread_name, PRI_DEFAULT, start_process, args);
   if (tid == TID_ERROR)
-    goto fail;
+    {
+      rlimit_drop_proc (thread_current ());
+      goto fail;
+    }
   rec->tid = tid;
 
   /* Wait for the child to report whether its program loaded.  From
@@ -198,6 +215,7 @@ start_process (void *args_)
 
   cur->is_user = true;
   cur->record = args->record;
+  rlimit_join (cur, args->rgroup, args->max_fds, args->cpu_budget);
 
   /* Install fd 0 and fd 1 before loading, so a failed load releases
      them through the normal exit path. */
@@ -289,6 +307,10 @@ process_exit (void)
       pagedir_activate (NULL);
       pagedir_destroy (pd);
     }
+
+  /* Release resource-limit accounting (procs--, return charged pages). */
+  if (cur->is_user)
+    rlimit_exit (cur);
 
   /* Report to the parent last. */
   if (cur->record != NULL)
@@ -573,9 +595,18 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE;
       size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
-      uint8_t *kpage = palloc_get_page (PAL_USER);
+      uint8_t *kpage;
+      if (!rlimit_charge_pages (thread_current (), 1))
+        {
+          kstat_inc (KS_LIMIT_DENIALS);
+          return false;         /* Over the subtree page cap. */
+        }
+      kpage = palloc_get_page (PAL_USER);
       if (kpage == NULL)
-        return false;
+        {
+          rlimit_uncharge_pages (thread_current (), 1);
+          return false;
+        }
 
       if (file_read (file, kpage, page_read_bytes) != (int) page_read_bytes)
         {
@@ -605,8 +636,12 @@ setup_stack (void **esp)
   uint8_t *kpage;
   bool success = false;
 
+  if (!rlimit_charge_pages (thread_current (), 1))
+    return false;
   kpage = palloc_get_page (PAL_USER | PAL_ZERO);
-  if (kpage != NULL)
+  if (kpage == NULL)
+    rlimit_uncharge_pages (thread_current (), 1);
+  else
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
       if (success)

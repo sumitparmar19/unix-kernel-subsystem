@@ -200,3 +200,21 @@ dup2 (int oldfd, int newfd)
 {
   return syscall2 (SYS_DUP2, oldfd, newfd);
 }
+
+bool
+setlimit (int resource, int value)
+{
+  return syscall2 (SYS_SETLIMIT, resource, value);
+}
+
+int
+getlimit (int resource)
+{
+  return syscall1 (SYS_GETLIMIT, resource);
+}
+
+int
+uptime (void)
+{
+  return syscall0 (SYS_UPTIME);
+}

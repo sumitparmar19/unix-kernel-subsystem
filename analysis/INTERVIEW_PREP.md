@@ -354,3 +354,31 @@ immediately?"* The survivor children are the answer: each completes a fixed numb
 with a recognisable code, so the parent counts only calls that genuinely ran. 125,000 of them, zero
 panics. And the same harness panics the old kernel on `sc-boundary-3`, which shows the checks are what's
 holding the line.
+
+### M5 · Resource limits, "cgroups-lite" (ADR-004)
+**What changed.** Four limits (`userprog/rlimit.c`): live processes and user pages are capped across a
+process **subtree** (a shared, reference-counted `struct rgroup`), while open descriptors and CPU time
+are **per process** and inherited by value. `setlimit` can only lower a limit; `getlimit` reads it; a
+new `uptime` returns timer ticks. Enforcement sits at the natural choke points: `process_execute`
+(fork bomb), the timer interrupt + `intr_handler` kill (CPU spinner), `open`/`pipe`/`dup2` (descriptor
+leak), and the user-page allocator (memory hog).
+
+**Why subtree scope for processes?** *This is the key design question.* A per-process child limit cannot
+stop a fork bomb: each new child would get its own fresh allowance and spawn N more, so the tree still
+explodes. Process and memory caps must be accounted over the whole subtree, exactly as Linux cgroup v2
+does. Descriptors and CPU are naturally per-process, like `RLIMIT_NOFILE` and `RLIMIT_CPU`.
+
+**How is a pure CPU spinner killed if it makes no system calls?** The only kernel entry left is the
+timer interrupt. It decrements the running user process's budget; when the budget hits zero it flags the
+process, and `intr_handler` — which runs just after the external interrupt with `in_external_intr`
+already cleared, so it is back in process context — calls `thread_exit()`. That's the one safe place to
+terminate from the timer path.
+
+**Proof.** `tests/limits` 5/5, including `neighbor`: a well-behaved process started next to a
+self-limited fork bomb and a self-limited CPU spinner still finishes, and within a recorded `uptime`
+deadline. No regression across threads/userprog/ipc/vm, fuzzer still clean.
+
+**Interview question:** *"A tenant sets its own limit — can it then raise it to escape?"* No: `setlimit`
+refuses any value above the current cap, like lowering a hard `rlimit`. And a child can never exceed what
+its parent allowed, because limits are inherited (per-process by value, subtree by shared group) and only
+ever tightened.
