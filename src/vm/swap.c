@@ -59,14 +59,19 @@ swap_in (size_t slot, void *page)
 
   ASSERT (pg_ofs (page) == 0);
   ASSERT (swap_device != NULL);
+
+  /* Read the data out *before* freeing the slot.  Freeing first would let
+     a concurrent swap_out grab this slot and overwrite it between the
+     reset and the read, handing us another page's bytes (observed as
+     stack/return-address corruption -- eip=0 -- under parallel paging). */
+  for (i = 0; i < SECTORS_PER_PAGE; i++)
+    block_read (swap_device, slot * SECTORS_PER_PAGE + i,
+                (uint8_t *) page + i * BLOCK_SECTOR_SIZE);
+
   lock_acquire (&swap_lock);
   ASSERT (bitmap_test (used_slots, slot));
   bitmap_reset (used_slots, slot);
   lock_release (&swap_lock);
-
-  for (i = 0; i < SECTORS_PER_PAGE; i++)
-    block_read (swap_device, slot * SECTORS_PER_PAGE + i,
-                (uint8_t *) page + i * BLOCK_SECTOR_SIZE);
 }
 
 /* Releases SLOT without reading it (the owning page is gone). */

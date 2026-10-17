@@ -23,6 +23,7 @@ struct frame
 static struct list frame_list;         /* All allocated frames (clock order). */
 static struct list_elem *clock_hand;   /* Next frame the clock will examine. */
 static struct lock frame_lock;         /* Protects the table and eviction. */
+static struct condition frame_cond;    /* Signalled when an eviction finishes. */
 
 /* Selected eviction policy (default clock); set by -evict= in init.c. */
 enum evict_policy frame_policy = EVICT_CLOCK;
@@ -33,6 +34,7 @@ frame_init (void)
   list_init (&frame_list);
   clock_hand = NULL;
   lock_init (&frame_lock);
+  cond_init (&frame_cond);
 }
 
 /* Returns the frame record holding KPAGE, or NULL.  frame_lock held. */
@@ -131,10 +133,18 @@ evict (void)
   if (f == NULL)
     PANIC ("frame: no evictable frame found");
 
-  f->pinned = true;             /* Hold it across the eviction write. */
+  /* Write the victim out with the table unlocked (swap/file I/O must not
+     be held under frame_lock).  Mark the page evicting first so that if
+     its owner faults on it meanwhile, frame_await_eviction makes it wait
+     until the data's new home (swap slot / file) is recorded below. */
+  struct spt_entry *victim = f->page;
+  f->pinned = true;
+  victim->evicting = true;
   lock_release (&frame_lock);
-  page_evict (f->page, f->kpage);
+  page_evict (victim, f->kpage);
   lock_acquire (&frame_lock);
+  victim->evicting = false;
+  cond_broadcast (&frame_cond, &frame_lock);
   f->page = NULL;
   return f;
 }
@@ -201,3 +211,12 @@ set_pin (void *kpage, bool pinned)
 
 void frame_pin (void *kpage) { set_pin (kpage, true); }
 void frame_unpin (void *kpage) { set_pin (kpage, false); }
+
+void
+frame_await_eviction (struct spt_entry *p)
+{
+  lock_acquire (&frame_lock);
+  while (p->evicting)
+    cond_wait (&frame_cond, &frame_lock);
+  lock_release (&frame_lock);
+}

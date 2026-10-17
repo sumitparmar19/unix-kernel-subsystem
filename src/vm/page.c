@@ -73,6 +73,7 @@ spt_new (void *upage, bool writable)
   p->has_swap = false;
   p->swap_slot = 0;
   p->kpage = NULL;
+  p->evicting = false;
   p->owner = thread_current ();
   if (hash_insert (&p->owner->spt, &p->elem) != NULL)
     {
@@ -147,6 +148,11 @@ static bool
 spt_load (struct spt_entry *p, bool keep_pinned)
 {
   void *kpage;
+
+  /* If this page is being evicted right now, wait for the evictor to
+     finish recording where its data went; otherwise we could load a
+     stale or zero-filled copy over data still on its way to swap. */
+  frame_await_eviction (p);
 
   if (p->kpage != NULL)
     {

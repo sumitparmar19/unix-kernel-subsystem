@@ -24,4 +24,8 @@ void frame_free (void *kpage);        /* Frees a frame (page is going away). */
 void frame_pin (void *kpage);         /* Protects a frame from eviction. */
 void frame_unpin (void *kpage);
 
+/* Blocks while P's frame is mid-eviction, so the owner never loads a
+   page whose contents are still being written out (ADR-003). */
+void frame_await_eviction (struct spt_entry *p);
+
 #endif /* vm/frame.h */
