@@ -276,6 +276,11 @@ parse_options (char **argv)
         thread_mlfqs = true;
       else if (!strcmp (name, "-trace"))
         trace_enabled = true;
+#ifdef VM
+      else if (!strcmp (name, "-evict"))
+        frame_policy = !strcmp (value, "fifo") ? EVICT_FIFO
+                     : !strcmp (value, "random") ? EVICT_RANDOM : EVICT_CLOCK;
+#endif
 #ifdef USERPROG
       else if (!strcmp (name, "-ul"))
         user_page_limit = atoi (value);
@@ -402,6 +407,7 @@ usage (void)
 #ifdef USERPROG
           "  -ul=COUNT          Limit user memory to COUNT pages.\n"
           "  -trace             Record kernel events; dump them at power-off.\n"
+          "  -evict=POLICY      Eviction policy: clock (default), fifo, random.\n"
 #endif
           );
   shutdown_power_off ();
