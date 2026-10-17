@@ -19,6 +19,10 @@
 #include "userprog/umem.h"
 #include "userprog/rlimit.h"
 #include "devices/timer.h"
+#ifdef VM
+#include "vm/page.h"
+#include "vm/mmap.h"
+#endif
 
 /* Serialises every call into the (non-thread-safe) file system.
    Lock-order rule (ADR-002): never block on another process or
@@ -201,10 +205,22 @@ sys_read (const uint32_t *args)
   void *buffer = (void *) args[1];
   unsigned size = args[2];
 
-  /* The kernel writes into BUFFER: every page must be writable. */
+  /* The kernel writes into BUFFER: every page must be writable.  Under
+     VM, pin the pages for the whole read so file I/O can't fault while
+     holding the file-system lock (ADR-003 deadlock rule). */
+  uint32_t n;
+#ifdef VM
+  if (!page_pin_range (buffer, size, thread_current ()->user_esp, true))
+    kill_process ();
+  n = of != NULL ? (uint32_t) ofile_read (of, buffer, size) : (uint32_t) -1;
+  page_unpin_range (buffer, size);
+  return n;
+#else
   if (!validate_range (buffer, size, true))
     kill_process ();
-  return of != NULL ? (uint32_t) ofile_read (of, buffer, size) : (uint32_t) -1;
+  n = of != NULL ? (uint32_t) ofile_read (of, buffer, size) : (uint32_t) -1;
+  return n;
+#endif
 }
 
 static uint32_t
@@ -214,9 +230,19 @@ sys_write (const uint32_t *args)
   const void *buffer = (const void *) args[1];
   unsigned size = args[2];
 
+  uint32_t n;
+#ifdef VM
+  if (!page_pin_range (buffer, size, thread_current ()->user_esp, false))
+    kill_process ();
+  n = of != NULL ? (uint32_t) ofile_write (of, buffer, size) : (uint32_t) -1;
+  page_unpin_range (buffer, size);
+  return n;
+#else
   if (!validate_range (buffer, size, false))
     kill_process ();
-  return of != NULL ? (uint32_t) ofile_write (of, buffer, size) : (uint32_t) -1;
+  n = of != NULL ? (uint32_t) ofile_write (of, buffer, size) : (uint32_t) -1;
+  return n;
+#endif
 }
 
 static uint32_t
@@ -387,6 +413,45 @@ sys_uptime (const uint32_t *args UNUSED)
   return (uint32_t) timer_ticks ();
 }
 
+#ifdef VM
+/* mapid_t mmap (int fd, void *addr) */
+static uint32_t
+sys_mmap (const uint32_t *args)
+{
+  int fd = (int) args[0];
+  void *addr = (void *) args[1];
+  struct file *file, *mfile;
+  mapid_t id;
+
+  if (addr == NULL || pg_ofs (addr) != 0 || !is_user_vaddr (addr))
+    return (uint32_t) MAP_FAILED;
+  file = fd_file (fd);                  /* NULL for console, pipe or closed. */
+  if (file == NULL)
+    return (uint32_t) MAP_FAILED;
+  lock_acquire (&filesys_lock);
+  mfile = file_reopen (file);           /* Own handle, immune to close(fd). */
+  lock_release (&filesys_lock);
+  if (mfile == NULL)
+    return (uint32_t) MAP_FAILED;
+  id = mmap_create (mfile, addr);
+  if (id == MAP_FAILED)
+    {
+      lock_acquire (&filesys_lock);
+      file_close (mfile);
+      lock_release (&filesys_lock);
+    }
+  return (uint32_t) id;
+}
+
+/* void munmap (mapid_t) */
+static uint32_t
+sys_munmap (const uint32_t *args)
+{
+  mmap_remove ((mapid_t) args[0]);
+  return 0;
+}
+#endif
+
 /* System call table: handler and number of 32-bit arguments. */
 static const struct
   {
@@ -414,6 +479,10 @@ syscalls[] =
     [SYS_SETLIMIT]      = { sys_setlimit,      2 },
     [SYS_GETLIMIT]      = { sys_getlimit,      1 },
     [SYS_UPTIME]        = { sys_uptime,        0 },
+#ifdef VM
+    [SYS_MMAP]          = { sys_mmap,          2 },
+    [SYS_MUNMAP]        = { sys_munmap,        1 },
+#endif
   };
 #define SYSCALL_CNT (sizeof syscalls / sizeof *syscalls)
 
@@ -428,6 +497,9 @@ syscall_handler (struct intr_frame *f)
 {
   uintptr_t usp = (uintptr_t) f->esp;
   uint32_t number;
+#ifdef VM
+  thread_current ()->user_esp = f->esp;
+#endif
   uint32_t args[3];
   int i;
 

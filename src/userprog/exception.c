@@ -4,6 +4,9 @@
 #include "userprog/gdt.h"
 #include "userprog/syscall.h"
 #include "threads/vaddr.h"
+#ifdef VM
+#include "vm/page.h"
+#endif
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 #include "threads/kstat.h"
@@ -146,6 +149,17 @@ page_fault (struct intr_frame *f)
   not_present = (f->error_code & PF_P) == 0;
   write = (f->error_code & PF_W) != 0;
   user = (f->error_code & PF_U) != 0;
+
+#ifdef VM
+  /* A not-present fault may be a page that is loaded lazily, has been
+     evicted to swap, or is a valid stack growth.  Try to satisfy it. */
+  if (not_present && thread_current ()->is_user)
+    {
+      void *esp = user ? f->esp : thread_current ()->user_esp;
+      if (esp != NULL && page_fault_handler (fault_addr, esp, write))
+        return;
+    }
+#endif
 
 #ifdef USERPROG
   /* Defence in depth (ADR-001): system calls validate every user
