@@ -1,0 +1,5 @@
+project:  threads
+passed:   26 / 27
+runtime:  225 s (make check, -j4, --qemu)
+failing:
+  tests/threads/priority-donate-multiple2
