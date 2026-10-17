@@ -1,0 +1,52 @@
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/fEHJ6d_JA9.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.....................
+Kernel command line: -q run priority-condvar
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  416,972,800 loops/s.
+Boot complete.
+Executing 'priority-condvar':
+(priority-condvar) begin
+(priority-condvar) Thread priority 23 starting.
+(priority-condvar) Thread priority 22 starting.
+(priority-condvar) Thread priority 21 starting.
+(priority-condvar) Thread priority 30 starting.
+(priority-condvar) Thread priority 29 starting.
+(priority-condvar) Thread priority 28 starting.
+(priority-condvar) Thread priority 27 starting.
+(priority-condvar) Thread priority 26 starting.
+(priority-condvar) Thread priority 25 starting.
+(priority-condvar) Thread priority 24 starting.
+(priority-condvar) Signaling...
+(priority-condvar) Thread priority 30 woke up.
+(priority-condvar) Signaling...
+(priority-condvar) Thread priority 29 woke up.
+(priority-condvar) Signaling...
+(priority-condvar) Thread priority 28 woke up.
+(priority-condvar) Signaling...
+(priority-condvar) Thread priority 27 woke up.
+(priority-condvar) Signaling...
+(priority-condvar) Thread priority 26 woke up.
+(priority-condvar) Signaling...
+(priority-condvar) Thread priority 25 woke up.
+(priority-condvar) Signaling...
+(priority-condvar) Thread priority 24 woke up.
+(priority-condvar) Signaling...
+(priority-condvar) Thread priority 23 woke up.
+(priority-condvar) Signaling...
+(priority-condvar) Thread priority 22 woke up.
+(priority-condvar) Signaling...
+(priority-condvar) Thread priority 21 woke up.
+(priority-condvar) end
+Execution of 'priority-condvar' complete.
+Timer: 28 ticks
+Thread: 0 idle ticks, 28 kernel ticks, 0 user ticks
+Console: 1667 characters output
+Keyboard: 0 keys pressed
+KSTAT syscalls=0 ctx_switches=62 lock_waits=10 page_faults=0 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=0 pipe_blocks=0 limit_denials=0 limit_kills=0
+Powering off...
