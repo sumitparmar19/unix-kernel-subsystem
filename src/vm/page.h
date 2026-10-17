@@ -27,6 +27,9 @@ struct spt_entry
     size_t swap_slot;
 
     void *kpage;                /* Resident frame, or NULL. */
+    bool evicting;              /* Being written out right now: the owner must
+                                   wait before loading it (avoids racing the
+                                   half-updated entry mid-eviction). */
     struct thread *owner;       /* Process that owns this page. */
     struct hash_elem elem;      /* In the owner's spt. */
   };
