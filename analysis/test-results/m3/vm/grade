@@ -1,0 +1,2034 @@
+warning: test tests/userprog/sc-boundary-3 doesn't count for grading
+warning: test tests/userprog/exec-bound-3 doesn't count for grading
+warning: test tests/userprog/exec-bound doesn't count for grading
+warning: test tests/userprog/exec-bound-2 doesn't count for grading
+TOTAL TESTING SCORE: 50.8%
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+SUMMARY BY TEST SET
+
+Test Set                                      Pts Max  % Ttl  % Max
+--------------------------------------------- --- --- ------ ------
+tests/vm/Rubric.functionality                   8/ 55   7.3%/ 50.0%
+tests/vm/Rubric.robustness                     16/ 28   8.6%/ 15.0%
+tests/userprog/Rubric.functionality           108/108  10.0%/ 10.0%
+tests/userprog/Rubric.robustness               88/ 88   5.0%/  5.0%
+tests/filesys/base/Rubric                      30/ 30  20.0%/ 20.0%
+--------------------------------------------- --- --- ------ ------
+Total                                                  50.8%/100.0%
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+SUMMARY OF INDIVIDUAL TESTS
+
+Functionality of virtual memory subsystem (tests/vm/Rubric.functionality):
+	- Test stack growth.
+	  ** 0/ 3 tests/vm/pt-grow-stack
+	  ** 0/ 3 tests/vm/pt-grow-stk-sc
+	  ** 0/ 3 tests/vm/pt-big-stk-obj
+	  ** 0/ 3 tests/vm/pt-grow-pusha
+
+	- Test paging behavior.
+	  ** 0/ 3 tests/vm/page-linear
+	     3/ 3 tests/vm/page-parallel
+	     3/ 3 tests/vm/page-shuffle
+	  ** 0/ 4 tests/vm/page-merge-seq
+	  ** 0/ 4 tests/vm/page-merge-par
+	  ** 0/ 4 tests/vm/page-merge-mm
+	  ** 0/ 4 tests/vm/page-merge-stk
+
+	- Test "mmap" system call.
+	  ** 0/ 2 tests/vm/mmap-read
+	  ** 0/ 2 tests/vm/mmap-write
+	  ** 0/ 2 tests/vm/mmap-shuffle
+
+	  ** 0/ 2 tests/vm/mmap-twice
+
+	     2/ 2 tests/vm/mmap-unmap
+	  ** 0/ 1 tests/vm/mmap-exit
+
+	  ** 0/ 3 tests/vm/mmap-clean
+
+	  ** 0/ 2 tests/vm/mmap-close
+	  ** 0/ 2 tests/vm/mmap-remove
+
+	- Section summary.
+	      3/ 20 tests passed
+	      8/ 55 points subtotal
+
+Robustness of virtual memory subsystem (tests/vm/Rubric.robustness):
+	- Test robustness of page table support.
+	     2/ 2 tests/vm/pt-bad-addr
+	     3/ 3 tests/vm/pt-bad-read
+	     2/ 2 tests/vm/pt-write-code
+	     3/ 3 tests/vm/pt-write-code2
+	     4/ 4 tests/vm/pt-grow-bad
+
+	- Test robustness of "mmap" system call.
+	     1/ 1 tests/vm/mmap-bad-fd
+	  ** 0/ 1 tests/vm/mmap-inherit
+	  ** 0/ 1 tests/vm/mmap-null
+	     1/ 1 tests/vm/mmap-zero
+
+	  ** 0/ 2 tests/vm/mmap-misalign
+
+	  ** 0/ 2 tests/vm/mmap-over-code
+	  ** 0/ 2 tests/vm/mmap-over-data
+	  ** 0/ 2 tests/vm/mmap-over-stk
+	  ** 0/ 2 tests/vm/mmap-overlap
+
+
+	- Section summary.
+	      7/ 14 tests passed
+	     16/ 28 points subtotal
+
+Functionality of system calls (tests/userprog/Rubric.functionality):
+	- Test argument passing on Pintos command line.
+	     3/ 3 tests/userprog/args-none
+	     3/ 3 tests/userprog/args-single
+	     3/ 3 tests/userprog/args-multiple
+	     3/ 3 tests/userprog/args-many
+	     3/ 3 tests/userprog/args-dbl-space
+
+	- Test "create" system call.
+	     3/ 3 tests/userprog/create-empty
+	     3/ 3 tests/userprog/create-long
+	     3/ 3 tests/userprog/create-normal
+	     3/ 3 tests/userprog/create-exists
+
+	- Test "open" system call.
+	     3/ 3 tests/userprog/open-missing
+	     3/ 3 tests/userprog/open-normal
+	     3/ 3 tests/userprog/open-twice
+
+	- Test "read" system call.
+	     3/ 3 tests/userprog/read-normal
+	     3/ 3 tests/userprog/read-zero
+
+	- Test "write" system call.
+	     3/ 3 tests/userprog/write-normal
+	     3/ 3 tests/userprog/write-zero
+
+	- Test "close" system call.
+	     3/ 3 tests/userprog/close-normal
+
+	- Test "exec" system call.
+	     5/ 5 tests/userprog/exec-once
+	     5/ 5 tests/userprog/exec-multiple
+	     5/ 5 tests/userprog/exec-arg
+
+	- Test "wait" system call.
+	     5/ 5 tests/userprog/wait-simple
+	     5/ 5 tests/userprog/wait-twice
+
+	- Test "exit" system call.
+	     5/ 5 tests/userprog/exit
+
+	- Test "halt" system call.
+	     3/ 3 tests/userprog/halt
+
+	- Test recursive execution of user programs.
+	    15/15 tests/userprog/multi-recurse
+
+	- Test read-only executable feature.
+	     3/ 3 tests/userprog/rox-simple
+	     3/ 3 tests/userprog/rox-child
+	     3/ 3 tests/userprog/rox-multichild
+
+	- Section summary.
+	     28/ 28 tests passed
+	    108/108 points subtotal
+
+Robustness of system calls (tests/userprog/Rubric.robustness):
+	- Test robustness of file descriptor handling.
+	     2/ 2 tests/userprog/close-stdin
+	     2/ 2 tests/userprog/close-stdout
+	     2/ 2 tests/userprog/close-bad-fd
+	     2/ 2 tests/userprog/close-twice
+	     2/ 2 tests/userprog/read-bad-fd
+	     2/ 2 tests/userprog/read-stdout
+	     2/ 2 tests/userprog/write-bad-fd
+	     2/ 2 tests/userprog/write-stdin
+	     2/ 2 tests/userprog/multi-child-fd
+
+	- Test robustness of pointer handling.
+	     3/ 3 tests/userprog/create-bad-ptr
+	     3/ 3 tests/userprog/exec-bad-ptr
+	     3/ 3 tests/userprog/open-bad-ptr
+	     3/ 3 tests/userprog/read-bad-ptr
+	     3/ 3 tests/userprog/write-bad-ptr
+
+	- Test robustness of buffer copying across page boundaries.
+	     3/ 3 tests/userprog/create-bound
+	     3/ 3 tests/userprog/open-boundary
+	     3/ 3 tests/userprog/read-boundary
+	     3/ 3 tests/userprog/write-boundary
+
+	- Test handling of null pointer and empty strings.
+	     2/ 2 tests/userprog/create-null
+	     2/ 2 tests/userprog/open-null
+	     2/ 2 tests/userprog/open-empty
+
+	- Test robustness of system call implementation.
+	     3/ 3 tests/userprog/sc-bad-arg
+	     3/ 3 tests/userprog/sc-bad-sp
+	     5/ 5 tests/userprog/sc-boundary
+	     5/ 5 tests/userprog/sc-boundary-2
+
+	- Test robustness of "exec" and "wait" system calls.
+	     5/ 5 tests/userprog/exec-missing
+	     5/ 5 tests/userprog/wait-bad-pid
+	     5/ 5 tests/userprog/wait-killed
+
+	- Test robustness of exception handling.
+	     1/ 1 tests/userprog/bad-read
+	     1/ 1 tests/userprog/bad-write
+	     1/ 1 tests/userprog/bad-jump
+	     1/ 1 tests/userprog/bad-read2
+	     1/ 1 tests/userprog/bad-write2
+	     1/ 1 tests/userprog/bad-jump2
+
+	- Section summary.
+	     34/ 34 tests passed
+	     88/ 88 points subtotal
+
+Functionality of base file system (tests/filesys/base/Rubric):
+	- Test basic support for small files.
+	     1/ 1 tests/filesys/base/sm-create
+	     2/ 2 tests/filesys/base/sm-full
+	     2/ 2 tests/filesys/base/sm-random
+	     2/ 2 tests/filesys/base/sm-seq-block
+	     3/ 3 tests/filesys/base/sm-seq-random
+
+	- Test basic support for large files.
+	     1/ 1 tests/filesys/base/lg-create
+	     2/ 2 tests/filesys/base/lg-full
+	     2/ 2 tests/filesys/base/lg-random
+	     2/ 2 tests/filesys/base/lg-seq-block
+	     3/ 3 tests/filesys/base/lg-seq-random
+
+	- Test synchronized multiprogram access to files.
+	     4/ 4 tests/filesys/base/syn-read
+	     4/ 4 tests/filesys/base/syn-write
+	     2/ 2 tests/filesys/base/syn-remove
+
+	- Section summary.
+	     13/ 13 tests passed
+	     30/ 30 points subtotal
+
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+DETAILS OF tests/vm/pt-grow-stack FAILURE:
+
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (pt-grow-stack) begin
+  (pt-grow-stack) cksum: 3424492700
+  (pt-grow-stack) end
+Differences in `diff -u' format:
+  (pt-grow-stack) begin
+- (pt-grow-stack) cksum: 3424492700
+- (pt-grow-stack) end
++ Page fault at 0xbfffef98: not present error reading page in user context.
++ pt-grow-stack: dying due to interrupt 0x0e (#PF Page-Fault Exception).
++ Interrupt 0x0e (#PF Page-Fault Exception) at eip=0x80480a7
++  cr2=bfffef98 error=00000004
++  eax=00000100 ebx=00000000 ecx=0000000e edx=00000027
++  esi=00000000 edi=00000000 esp=bfffef98 ebp=bfffffb8
++  cs=001b ds=0023 es=0023 ss=0023
+
+(Process exit codes are excluded for matching purposes.)
+
+OUTPUT FROM tests/vm/pt-grow-stack:
+
+Copying tests/vm/pt-grow-stack to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/fj8WT0_wG9.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run pt-grow-stack
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  419,020,800 loops/s.
+ide0: unexpected interrupt
+hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 193 sectors (96 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 122 sectors (61 kB), Pintos scratch (22)
+hda4: 8,192 sectors (4 MB), Pintos swap (23)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+swap: using hda4
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'pt-grow-stack' into the file system...
+Erasing ustar archive...
+Executing 'pt-grow-stack':
+(pt-grow-stack) begin
+Page fault at 0xbfffef98: not present error reading page in user context.
+pt-grow-stack: dying due to interrupt 0x0e (#PF Page-Fault Exception).
+Interrupt 0x0e (#PF Page-Fault Exception) at eip=0x80480a7
+ cr2=bfffef98 error=00000004
+ eax=00000100 ebx=00000000 ecx=0000000e edx=00000027
+ esi=00000000 edi=00000000 esp=bfffef98 ebp=bfffffb8
+ cs=001b ds=0023 es=0023 ss=0023
+pt-grow-stack: exit(-1)
+Execution of 'pt-grow-stack' complete.
+Timer: 58 ticks
+Thread: 30 idle ticks, 25 kernel ticks, 3 user ticks
+hda2 (filesys): 65 reads, 248 writes
+hda3 (scratch): 121 reads, 2 writes
+hda4 (swap): 0 reads, 0 writes
+Console: 1415 characters output
+Keyboard: 0 keys pressed
+Exception: 1 page faults
+Powering off...
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+DETAILS OF tests/vm/pt-grow-stk-sc FAILURE:
+
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (pt-grow-stk-sc) begin
+  (pt-grow-stk-sc) create "sample.txt"
+  (pt-grow-stk-sc) open "sample.txt"
+  (pt-grow-stk-sc) write "sample.txt"
+  (pt-grow-stk-sc) 2nd open "sample.txt"
+  (pt-grow-stk-sc) read "sample.txt"
+  (pt-grow-stk-sc) compare written data against read data
+  (pt-grow-stk-sc) end
+Differences in `diff -u' format:
+  (pt-grow-stk-sc) begin
+- (pt-grow-stk-sc) create "sample.txt"
+- (pt-grow-stk-sc) open "sample.txt"
+- (pt-grow-stk-sc) write "sample.txt"
+- (pt-grow-stk-sc) 2nd open "sample.txt"
+- (pt-grow-stk-sc) read "sample.txt"
+- (pt-grow-stk-sc) compare written data against read data
+- (pt-grow-stk-sc) end
++ Page fault at 0xbfffef94: not present error reading page in user context.
++ pt-grow-stk-sc: dying due to interrupt 0x0e (#PF Page-Fault Exception).
++ Interrupt 0x0e (#PF Page-Fault Exception) at eip=0x80480af
++  cr2=bfffef94 error=00000004
++  eax=bffeff94 ebx=00000000 ecx=0000000e edx=00000027
++  esi=00000000 edi=00000000 esp=bfffef94 ebp=bfffffb8
++  cs=001b ds=0023 es=0023 ss=0023
+
+(Process exit codes are excluded for matching purposes.)
+
+OUTPUT FROM tests/vm/pt-grow-stk-sc:
+
+Copying tests/vm/pt-grow-stk-sc to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/qKRz0rSD9a.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run pt-grow-stk-sc
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  422,707,200 loops/s.
+ide0: unexpected interrupt
+hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 193 sectors (96 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 117 sectors (58 kB), Pintos scratch (22)
+hda4: 8,192 sectors (4 MB), Pintos swap (23)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+swap: using hda4
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'pt-grow-stk-sc' into the file system...
+Erasing ustar archive...
+Executing 'pt-grow-stk-sc':
+(pt-grow-stk-sc) begin
+Page fault at 0xbfffef94: not present error reading page in user context.
+pt-grow-stk-sc: dying due to interrupt 0x0e (#PF Page-Fault Exception).
+Interrupt 0x0e (#PF Page-Fault Exception) at eip=0x80480af
+ cr2=bfffef94 error=00000004
+ eax=bffeff94 ebx=00000000 ecx=0000000e edx=00000027
+ esi=00000000 edi=00000000 esp=bfffef94 ebp=bfffffb8
+ cs=001b ds=0023 es=0023 ss=0023
+pt-grow-stk-sc: exit(-1)
+Execution of 'pt-grow-stk-sc' complete.
+Timer: 66 ticks
+Thread: 30 idle ticks, 34 kernel ticks, 2 user ticks
+hda2 (filesys): 63 reads, 238 writes
+hda3 (scratch): 116 reads, 2 writes
+hda4 (swap): 0 reads, 0 writes
+Console: 1422 characters output
+Keyboard: 0 keys pressed
+Exception: 1 page faults
+Powering off...
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+DETAILS OF tests/vm/pt-big-stk-obj FAILURE:
+
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (pt-big-stk-obj) begin
+  (pt-big-stk-obj) cksum: 3256410166
+  (pt-big-stk-obj) end
+Differences in `diff -u' format:
+  (pt-big-stk-obj) begin
+- (pt-big-stk-obj) cksum: 3256410166
+- (pt-big-stk-obj) end
++ Page fault at 0xbfffef94: not present error reading page in user context.
++ pt-big-stk-obj: dying due to interrupt 0x0e (#PF Page-Fault Exception).
++ Interrupt 0x0e (#PF Page-Fault Exception) at eip=0x80480af
++  cr2=bfffef94 error=00000004
++  eax=bffeff94 ebx=00000000 ecx=0000000e edx=00000027
++  esi=00000000 edi=00000000 esp=bfffef94 ebp=bfffffb8
++  cs=001b ds=0023 es=0023 ss=0023
+
+(Process exit codes are excluded for matching purposes.)
+
+OUTPUT FROM tests/vm/pt-big-stk-obj:
+
+Copying tests/vm/pt-big-stk-obj to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/GulYqVHjmC.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run pt-big-stk-obj
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  471,040,000 loops/s.
+ide0: unexpected interrupt
+hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 193 sectors (96 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 122 sectors (61 kB), Pintos scratch (22)
+hda4: 8,192 sectors (4 MB), Pintos swap (23)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+swap: using hda4
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'pt-big-stk-obj' into the file system...
+Erasing ustar archive...
+Executing 'pt-big-stk-obj':
+(pt-big-stk-obj) begin
+Page fault at 0xbfffef94: not present error reading page in user context.
+pt-big-stk-obj: dying due to interrupt 0x0e (#PF Page-Fault Exception).
+Interrupt 0x0e (#PF Page-Fault Exception) at eip=0x80480af
+ cr2=bfffef94 error=00000004
+ eax=bffeff94 ebx=00000000 ecx=0000000e edx=00000027
+ esi=00000000 edi=00000000 esp=bfffef94 ebp=bfffffb8
+ cs=001b ds=0023 es=0023 ss=0023
+pt-big-stk-obj: exit(-1)
+Execution of 'pt-big-stk-obj' complete.
+Timer: 63 ticks
+Thread: 32 idle ticks, 30 kernel ticks, 1 user ticks
+hda2 (filesys): 65 reads, 248 writes
+hda3 (scratch): 121 reads, 2 writes
+hda4 (swap): 0 reads, 0 writes
+Console: 1422 characters output
+Keyboard: 0 keys pressed
+Exception: 1 page faults
+Powering off...
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+DETAILS OF tests/vm/pt-grow-pusha FAILURE:
+
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (pt-grow-pusha) begin
+  (pt-grow-pusha) end
+Differences in `diff -u' format:
+  (pt-grow-pusha) begin
+- (pt-grow-pusha) end
++ Page fault at 0xbfffefe0: not present error writing page in user context.
++ pt-grow-pusha: dying due to interrupt 0x0e (#PF Page-Fault Exception).
++ Interrupt 0x0e (#PF Page-Fault Exception) at eip=0x80480a8
++  cr2=bfffefe0 error=00000006
++  eax=bfffff9c ebx=00000000 ecx=0000000e edx=00000027
++  esi=00000000 edi=00000000 esp=bffff000 ebp=bfffffb8
++  cs=001b ds=0023 es=0023 ss=0023
+
+(Process exit codes are excluded for matching purposes.)
+
+OUTPUT FROM tests/vm/pt-grow-pusha:
+
+Copying tests/vm/pt-grow-pusha to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/NjVT92_ocH.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run pt-grow-pusha
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  753,664,000 loops/s.
+ide0: unexpected interrupt
+hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 193 sectors (96 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 112 sectors (56 kB), Pintos scratch (22)
+hda4: 8,192 sectors (4 MB), Pintos swap (23)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+swap: using hda4
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'pt-grow-pusha' into the file system...
+Erasing ustar archive...
+Executing 'pt-grow-pusha':
+(pt-grow-pusha) begin
+Page fault at 0xbfffefe0: not present error writing page in user context.
+pt-grow-pusha: dying due to interrupt 0x0e (#PF Page-Fault Exception).
+Interrupt 0x0e (#PF Page-Fault Exception) at eip=0x80480a8
+ cr2=bfffefe0 error=00000006
+ eax=bfffff9c ebx=00000000 ecx=0000000e edx=00000027
+ esi=00000000 edi=00000000 esp=bffff000 ebp=bfffffb8
+ cs=001b ds=0023 es=0023 ss=0023
+pt-grow-pusha: exit(-1)
+Execution of 'pt-grow-pusha' complete.
+Timer: 64 ticks
+Thread: 34 idle ticks, 29 kernel ticks, 1 user ticks
+hda2 (filesys): 59 reads, 228 writes
+hda3 (scratch): 111 reads, 2 writes
+hda4 (swap): 0 reads, 0 writes
+Console: 1415 characters output
+Keyboard: 0 keys pressed
+Exception: 1 page faults
+Powering off...
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+DETAILS OF tests/vm/page-linear FAILURE:
+
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (page-linear) begin
+  (page-linear) initialize
+  (page-linear) read pass
+  (page-linear) read/modify/write pass one
+  (page-linear) read/modify/write pass two
+  (page-linear) read pass
+  (page-linear) end
+Differences in `diff -u' format:
+- (page-linear) begin
+- (page-linear) initialize
+- (page-linear) read pass
+- (page-linear) read/modify/write pass one
+- (page-linear) read/modify/write pass two
+- (page-linear) read pass
+- (page-linear) end
+
+(Process exit codes are excluded for matching purposes.)
+
+OUTPUT FROM tests/vm/page-linear:
+
+Copying tests/vm/page-linear to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/tRRdo5w2Qc.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run page-linear
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  788,070,400 loops/s.
+ide0: unexpected interrupt
+hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 193 sectors (96 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 119 sectors (59 kB), Pintos scratch (22)
+hda4: 8,192 sectors (4 MB), Pintos swap (23)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+swap: using hda4
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'page-linear' into the file system...
+Erasing ustar archive...
+Executing 'page-linear':
+page-linear: exit(-1)
+Execution of 'page-linear' complete.
+Timer: 64 ticks
+Thread: 32 idle ticks, 30 kernel ticks, 2 user ticks
+hda2 (filesys): 60 reads, 242 writes
+hda3 (scratch): 118 reads, 2 writes
+hda4 (swap): 0 reads, 0 writes
+Console: 1011 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+DETAILS OF tests/vm/page-merge-seq FAILURE:
+
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (page-merge-seq) begin
+  (page-merge-seq) init
+  (page-merge-seq) sort chunk 0
+  (page-merge-seq) sort chunk 1
+  (page-merge-seq) sort chunk 2
+  (page-merge-seq) sort chunk 3
+  (page-merge-seq) sort chunk 4
+  (page-merge-seq) sort chunk 5
+  (page-merge-seq) sort chunk 6
+  (page-merge-seq) sort chunk 7
+  (page-merge-seq) sort chunk 8
+  (page-merge-seq) sort chunk 9
+  (page-merge-seq) sort chunk 10
+  (page-merge-seq) sort chunk 11
+  (page-merge-seq) sort chunk 12
+  (page-merge-seq) sort chunk 13
+  (page-merge-seq) sort chunk 14
+  (page-merge-seq) sort chunk 15
+  (page-merge-seq) merge
+  (page-merge-seq) verify
+  (page-merge-seq) success, buf_idx=1,032,192
+  (page-merge-seq) end
+Differences in `diff -u' format:
+- (page-merge-seq) begin
+- (page-merge-seq) init
+- (page-merge-seq) sort chunk 0
+- (page-merge-seq) sort chunk 1
+- (page-merge-seq) sort chunk 2
+- (page-merge-seq) sort chunk 3
+- (page-merge-seq) sort chunk 4
+- (page-merge-seq) sort chunk 5
+- (page-merge-seq) sort chunk 6
+- (page-merge-seq) sort chunk 7
+- (page-merge-seq) sort chunk 8
+- (page-merge-seq) sort chunk 9
+- (page-merge-seq) sort chunk 10
+- (page-merge-seq) sort chunk 11
+- (page-merge-seq) sort chunk 12
+- (page-merge-seq) sort chunk 13
+- (page-merge-seq) sort chunk 14
+- (page-merge-seq) sort chunk 15
+- (page-merge-seq) merge
+- (page-merge-seq) verify
+- (page-merge-seq) success, buf_idx=1,032,192
+- (page-merge-seq) end
+
+(Process exit codes are excluded for matching purposes.)
+
+OUTPUT FROM tests/vm/page-merge-seq:
+
+Copying tests/vm/page-merge-seq to scratch partition...
+Copying tests/vm/child-sort to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/wBCpkCBPdl.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run page-merge-seq
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  702,054,400 loops/s.
+ide0: unexpected interrupt
+hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 193 sectors (96 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 235 sectors (117 kB), Pintos scratch (22)
+hda4: 8,192 sectors (4 MB), Pintos swap (23)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+swap: using hda4
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'page-merge-seq' into the file system...
+Putting 'child-sort' into the file system...
+Erasing ustar archive...
+Executing 'page-merge-seq':
+page-merge-seq: exit(-1)
+Execution of 'page-merge-seq' complete.
+Timer: 72 ticks
+Thread: 39 idle ticks, 31 kernel ticks, 2 user ticks
+hda2 (filesys): 87 reads, 476 writes
+hda3 (scratch): 234 reads, 2 writes
+hda4 (swap): 0 reads, 0 writes
+Console: 1072 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+DETAILS OF tests/vm/page-merge-par FAILURE:
+
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (page-merge-par) begin
+  (page-merge-par) init
+  (page-merge-par) sort chunk 0
+  (page-merge-par) sort chunk 1
+  (page-merge-par) sort chunk 2
+  (page-merge-par) sort chunk 3
+  (page-merge-par) sort chunk 4
+  (page-merge-par) sort chunk 5
+  (page-merge-par) sort chunk 6
+  (page-merge-par) sort chunk 7
+  (page-merge-par) wait for child 0
+  (page-merge-par) wait for child 1
+  (page-merge-par) wait for child 2
+  (page-merge-par) wait for child 3
+  (page-merge-par) wait for child 4
+  (page-merge-par) wait for child 5
+  (page-merge-par) wait for child 6
+  (page-merge-par) wait for child 7
+  (page-merge-par) merge
+  (page-merge-par) verify
+  (page-merge-par) success, buf_idx=1,048,576
+  (page-merge-par) end
+Differences in `diff -u' format:
+- (page-merge-par) begin
+- (page-merge-par) init
+- (page-merge-par) sort chunk 0
+- (page-merge-par) sort chunk 1
+- (page-merge-par) sort chunk 2
+- (page-merge-par) sort chunk 3
+- (page-merge-par) sort chunk 4
+- (page-merge-par) sort chunk 5
+- (page-merge-par) sort chunk 6
+- (page-merge-par) sort chunk 7
+- (page-merge-par) wait for child 0
+- (page-merge-par) wait for child 1
+- (page-merge-par) wait for child 2
+- (page-merge-par) wait for child 3
+- (page-merge-par) wait for child 4
+- (page-merge-par) wait for child 5
+- (page-merge-par) wait for child 6
+- (page-merge-par) wait for child 7
+- (page-merge-par) merge
+- (page-merge-par) verify
+- (page-merge-par) success, buf_idx=1,048,576
+- (page-merge-par) end
+
+(Process exit codes are excluded for matching purposes.)
+
+OUTPUT FROM tests/vm/page-merge-par:
+
+Copying tests/vm/page-merge-par to scratch partition...
+Copying tests/vm/child-sort to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/guM5v0HvJz.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run page-merge-par
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  484,147,200 loops/s.
+ide0: unexpected interrupt
+hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 193 sectors (96 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 237 sectors (118 kB), Pintos scratch (22)
+hda4: 8,192 sectors (4 MB), Pintos swap (23)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+swap: using hda4
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'page-merge-par' into the file system...
+Putting 'child-sort' into the file system...
+Erasing ustar archive...
+Executing 'page-merge-par':
+page-merge-par: exit(-1)
+Execution of 'page-merge-par' complete.
+Timer: 66 ticks
+Thread: 31 idle ticks, 32 kernel ticks, 3 user ticks
+hda2 (filesys): 89 reads, 480 writes
+hda3 (scratch): 236 reads, 2 writes
+hda4 (swap): 0 reads, 0 writes
+Console: 1072 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+DETAILS OF tests/vm/page-merge-mm FAILURE:
+
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (page-merge-mm) begin
+  (page-merge-mm) init
+  (page-merge-mm) sort chunk 0
+  (page-merge-mm) sort chunk 1
+  (page-merge-mm) sort chunk 2
+  (page-merge-mm) sort chunk 3
+  (page-merge-mm) sort chunk 4
+  (page-merge-mm) sort chunk 5
+  (page-merge-mm) sort chunk 6
+  (page-merge-mm) sort chunk 7
+  (page-merge-mm) wait for child 0
+  (page-merge-mm) wait for child 1
+  (page-merge-mm) wait for child 2
+  (page-merge-mm) wait for child 3
+  (page-merge-mm) wait for child 4
+  (page-merge-mm) wait for child 5
+  (page-merge-mm) wait for child 6
+  (page-merge-mm) wait for child 7
+  (page-merge-mm) merge
+  (page-merge-mm) verify
+  (page-merge-mm) success, buf_idx=1,048,576
+  (page-merge-mm) end
+Differences in `diff -u' format:
+- (page-merge-mm) begin
+- (page-merge-mm) init
+- (page-merge-mm) sort chunk 0
+- (page-merge-mm) sort chunk 1
+- (page-merge-mm) sort chunk 2
+- (page-merge-mm) sort chunk 3
+- (page-merge-mm) sort chunk 4
+- (page-merge-mm) sort chunk 5
+- (page-merge-mm) sort chunk 6
+- (page-merge-mm) sort chunk 7
+- (page-merge-mm) wait for child 0
+- (page-merge-mm) wait for child 1
+- (page-merge-mm) wait for child 2
+- (page-merge-mm) wait for child 3
+- (page-merge-mm) wait for child 4
+- (page-merge-mm) wait for child 5
+- (page-merge-mm) wait for child 6
+- (page-merge-mm) wait for child 7
+- (page-merge-mm) merge
+- (page-merge-mm) verify
+- (page-merge-mm) success, buf_idx=1,048,576
+- (page-merge-mm) end
+
+(Process exit codes are excluded for matching purposes.)
+
+OUTPUT FROM tests/vm/page-merge-mm:
+
+Copying tests/vm/page-merge-mm to scratch partition...
+Copying tests/vm/child-qsort-mm to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/GuoWbWzSvG.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run page-merge-mm
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  738,918,400 loops/s.
+ide0: unexpected interrupt
+hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 193 sectors (96 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 244 sectors (122 kB), Pintos scratch (22)
+hda4: 8,192 sectors (4 MB), Pintos swap (23)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+swap: using hda4
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'page-merge-mm' into the file system...
+Putting 'child-qsort-mm' into the file system...
+Erasing ustar archive...
+Executing 'page-merge-mm':
+page-merge-mm: exit(-1)
+Execution of 'page-merge-mm' complete.
+Timer: 71 ticks
+Thread: 34 idle ticks, 35 kernel ticks, 2 user ticks
+hda2 (filesys): 89 reads, 494 writes
+hda3 (scratch): 243 reads, 2 writes
+hda4 (swap): 0 reads, 0 writes
+Console: 1071 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+DETAILS OF tests/vm/page-merge-stk FAILURE:
+
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (page-merge-stk) begin
+  (page-merge-stk) init
+  (page-merge-stk) sort chunk 0
+  (page-merge-stk) sort chunk 1
+  (page-merge-stk) sort chunk 2
+  (page-merge-stk) sort chunk 3
+  (page-merge-stk) sort chunk 4
+  (page-merge-stk) sort chunk 5
+  (page-merge-stk) sort chunk 6
+  (page-merge-stk) sort chunk 7
+  (page-merge-stk) wait for child 0
+  (page-merge-stk) wait for child 1
+  (page-merge-stk) wait for child 2
+  (page-merge-stk) wait for child 3
+  (page-merge-stk) wait for child 4
+  (page-merge-stk) wait for child 5
+  (page-merge-stk) wait for child 6
+  (page-merge-stk) wait for child 7
+  (page-merge-stk) merge
+  (page-merge-stk) verify
+  (page-merge-stk) success, buf_idx=1,048,576
+  (page-merge-stk) end
+Differences in `diff -u' format:
+- (page-merge-stk) begin
+- (page-merge-stk) init
+- (page-merge-stk) sort chunk 0
+- (page-merge-stk) sort chunk 1
+- (page-merge-stk) sort chunk 2
+- (page-merge-stk) sort chunk 3
+- (page-merge-stk) sort chunk 4
+- (page-merge-stk) sort chunk 5
+- (page-merge-stk) sort chunk 6
+- (page-merge-stk) sort chunk 7
+- (page-merge-stk) wait for child 0
+- (page-merge-stk) wait for child 1
+- (page-merge-stk) wait for child 2
+- (page-merge-stk) wait for child 3
+- (page-merge-stk) wait for child 4
+- (page-merge-stk) wait for child 5
+- (page-merge-stk) wait for child 6
+- (page-merge-stk) wait for child 7
+- (page-merge-stk) merge
+- (page-merge-stk) verify
+- (page-merge-stk) success, buf_idx=1,048,576
+- (page-merge-stk) end
+
+(Process exit codes are excluded for matching purposes.)
+
+OUTPUT FROM tests/vm/page-merge-stk:
+
+Copying tests/vm/page-merge-stk to scratch partition...
+Copying tests/vm/child-qsort to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/swp0FWW_io.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run page-merge-stk
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  734,003,200 loops/s.
+ide0: unexpected interrupt
+hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 193 sectors (96 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 244 sectors (122 kB), Pintos scratch (22)
+hda4: 8,192 sectors (4 MB), Pintos swap (23)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+swap: using hda4
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'page-merge-stk' into the file system...
+Putting 'child-qsort' into the file system...
+Erasing ustar archive...
+Executing 'page-merge-stk':
+page-merge-stk: exit(-1)
+Execution of 'page-merge-stk' complete.
+Timer: 69 ticks
+Thread: 30 idle ticks, 37 kernel ticks, 2 user ticks
+hda2 (filesys): 89 reads, 494 writes
+hda3 (scratch): 243 reads, 2 writes
+hda4 (swap): 0 reads, 0 writes
+Console: 1073 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+DETAILS OF tests/vm/mmap-read FAILURE:
+
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (mmap-read) begin
+  (mmap-read) open "sample.txt"
+  (mmap-read) mmap "sample.txt"
+  (mmap-read) end
+Differences in `diff -u' format:
+  (mmap-read) begin
+  (mmap-read) open "sample.txt"
+  (mmap-read) mmap "sample.txt"
+- (mmap-read) end
+
+(Process exit codes are excluded for matching purposes.)
+
+OUTPUT FROM tests/vm/mmap-read:
+
+Copying tests/vm/mmap-read to scratch partition...
+Copying ../../tests/vm/sample.txt to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/dRSAju6tDo.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run mmap-read
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  719,257,600 loops/s.
+ide0: unexpected interrupt
+hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 193 sectors (96 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 119 sectors (59 kB), Pintos scratch (22)
+hda4: 8,192 sectors (4 MB), Pintos swap (23)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+swap: using hda4
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'mmap-read' into the file system...
+Putting 'sample.txt' into the file system...
+Erasing ustar archive...
+Executing 'mmap-read':
+(mmap-read) begin
+(mmap-read) open "sample.txt"
+(mmap-read) mmap "sample.txt"
+mmap-read: exit(-1)
+Execution of 'mmap-read' complete.
+Timer: 68 ticks
+Thread: 37 idle ticks, 30 kernel ticks, 1 user ticks
+hda2 (filesys): 91 reads, 244 writes
+hda3 (scratch): 118 reads, 2 writes
+hda4 (swap): 0 reads, 0 writes
+Console: 1124 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+DETAILS OF tests/vm/mmap-write FAILURE:
+
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (mmap-write) begin
+  (mmap-write) create "sample.txt"
+  (mmap-write) open "sample.txt"
+  (mmap-write) mmap "sample.txt"
+  (mmap-write) compare read data against written data
+  (mmap-write) end
+Differences in `diff -u' format:
+  (mmap-write) begin
+  (mmap-write) create "sample.txt"
+  (mmap-write) open "sample.txt"
+  (mmap-write) mmap "sample.txt"
+- (mmap-write) compare read data against written data
+- (mmap-write) end
+
+(Process exit codes are excluded for matching purposes.)
+
+OUTPUT FROM tests/vm/mmap-write:
+
+Copying tests/vm/mmap-write to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/7siSgUEzv7.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run mmap-write
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  801,177,600 loops/s.
+ide0: unexpected interrupt
+hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 193 sectors (96 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 117 sectors (58 kB), Pintos scratch (22)
+hda4: 8,192 sectors (4 MB), Pintos swap (23)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+swap: using hda4
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'mmap-write' into the file system...
+Erasing ustar archive...
+Executing 'mmap-write':
+(mmap-write) begin
+(mmap-write) create "sample.txt"
+(mmap-write) open "sample.txt"
+(mmap-write) mmap "sample.txt"
+mmap-write: exit(-1)
+Execution of 'mmap-write' complete.
+Timer: 66 ticks
+Thread: 32 idle ticks, 31 kernel ticks, 3 user ticks
+hda2 (filesys): 87 reads, 244 writes
+hda3 (scratch): 116 reads, 2 writes
+hda4 (swap): 0 reads, 0 writes
+Console: 1120 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+DETAILS OF tests/vm/mmap-shuffle FAILURE:
+
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (mmap-shuffle) begin
+  (mmap-shuffle) create "buffer"
+  (mmap-shuffle) open "buffer"
+  (mmap-shuffle) mmap "buffer"
+  (mmap-shuffle) init: cksum=3115322833
+  (mmap-shuffle) shuffle 0: cksum=1691062564
+  (mmap-shuffle) shuffle 1: cksum=1973575879
+  (mmap-shuffle) shuffle 2: cksum=1647619479
+  (mmap-shuffle) shuffle 3: cksum=96566261
+  (mmap-shuffle) shuffle 4: cksum=3885786467
+  (mmap-shuffle) shuffle 5: cksum=3022003332
+  (mmap-shuffle) shuffle 6: cksum=3614934266
+  (mmap-shuffle) shuffle 7: cksum=2704001777
+  (mmap-shuffle) shuffle 8: cksum=735775156
+  (mmap-shuffle) shuffle 9: cksum=1864109763
+  (mmap-shuffle) end
+Differences in `diff -u' format:
+  (mmap-shuffle) begin
+  (mmap-shuffle) create "buffer"
+  (mmap-shuffle) open "buffer"
+  (mmap-shuffle) mmap "buffer"
+- (mmap-shuffle) init: cksum=3115322833
+- (mmap-shuffle) shuffle 0: cksum=1691062564
+- (mmap-shuffle) shuffle 1: cksum=1973575879
+- (mmap-shuffle) shuffle 2: cksum=1647619479
+- (mmap-shuffle) shuffle 3: cksum=96566261
+- (mmap-shuffle) shuffle 4: cksum=3885786467
+- (mmap-shuffle) shuffle 5: cksum=3022003332
+- (mmap-shuffle) shuffle 6: cksum=3614934266
+- (mmap-shuffle) shuffle 7: cksum=2704001777
+- (mmap-shuffle) shuffle 8: cksum=735775156
+- (mmap-shuffle) shuffle 9: cksum=1864109763
+- (mmap-shuffle) end
+
+(Process exit codes are excluded for matching purposes.)
+
+OUTPUT FROM tests/vm/mmap-shuffle:
+
+Copying tests/vm/mmap-shuffle to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/kHfRno_H5i.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run mmap-shuffle
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  838,860,800 loops/s.
+ide0: unexpected interrupt
+hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 193 sectors (96 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 123 sectors (61 kB), Pintos scratch (22)
+hda4: 8,192 sectors (4 MB), Pintos swap (23)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+swap: using hda4
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'mmap-shuffle' into the file system...
+Erasing ustar archive...
+Executing 'mmap-shuffle':
+(mmap-shuffle) begin
+(mmap-shuffle) create "buffer"
+(mmap-shuffle) open "buffer"
+(mmap-shuffle) mmap "buffer"
+mmap-shuffle: exit(-1)
+Execution of 'mmap-shuffle' complete.
+Timer: 80 ticks
+Thread: 38 idle ticks, 41 kernel ticks, 2 user ticks
+hda2 (filesys): 90 reads, 510 writes
+hda3 (scratch): 122 reads, 2 writes
+hda4 (swap): 0 reads, 0 writes
+Console: 1126 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+DETAILS OF tests/vm/mmap-twice FAILURE:
+
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (mmap-twice) begin
+  (mmap-twice) open "sample.txt" #0
+  (mmap-twice) mmap "sample.txt" #0 at 0x10000000
+  (mmap-twice) open "sample.txt" #1
+  (mmap-twice) mmap "sample.txt" #1 at 0x20000000
+  (mmap-twice) compare mmap'd file 0 against data
+  (mmap-twice) compare mmap'd file 1 against data
+  (mmap-twice) end
+Differences in `diff -u' format:
+  (mmap-twice) begin
+  (mmap-twice) open "sample.txt" #0
+  (mmap-twice) mmap "sample.txt" #0 at 0x10000000
+- (mmap-twice) open "sample.txt" #1
+- (mmap-twice) mmap "sample.txt" #1 at 0x20000000
+- (mmap-twice) compare mmap'd file 0 against data
+- (mmap-twice) compare mmap'd file 1 against data
+- (mmap-twice) end
+
+(Process exit codes are excluded for matching purposes.)
+
+OUTPUT FROM tests/vm/mmap-twice:
+
+Copying tests/vm/mmap-twice to scratch partition...
+Copying ../../tests/vm/sample.txt to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/KT2L9Q72R6.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run mmap-twice
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  399,360,000 loops/s.
+ide0: unexpected interrupt
+hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 193 sectors (96 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 119 sectors (59 kB), Pintos scratch (22)
+hda4: 8,192 sectors (4 MB), Pintos swap (23)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+swap: using hda4
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'mmap-twice' into the file system...
+Putting 'sample.txt' into the file system...
+Erasing ustar archive...
+Executing 'mmap-twice':
+(mmap-twice) begin
+(mmap-twice) open "sample.txt" #0
+(mmap-twice) mmap "sample.txt" #0 at 0x10000000
+mmap-twice: exit(-1)
+Execution of 'mmap-twice' complete.
+Timer: 65 ticks
+Thread: 36 idle ticks, 28 kernel ticks, 1 user ticks
+hda2 (filesys): 91 reads, 244 writes
+hda3 (scratch): 118 reads, 2 writes
+hda4 (swap): 0 reads, 0 writes
+Console: 1152 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+DETAILS OF tests/vm/mmap-exit FAILURE:
+
+run: wait for child (should return 0): FAILED
+
+OUTPUT FROM tests/vm/mmap-exit:
+
+Copying tests/vm/mmap-exit to scratch partition...
+Copying tests/vm/child-mm-wrt to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/caVbEyIvq0.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run mmap-exit
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  762,675,200 loops/s.
+ide0: unexpected interrupt
+hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 193 sectors (96 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 228 sectors (114 kB), Pintos scratch (22)
+hda4: 8,192 sectors (4 MB), Pintos swap (23)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+swap: using hda4
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'mmap-exit' into the file system...
+Putting 'child-mm-wrt' into the file system...
+Erasing ustar archive...
+Executing 'mmap-exit':
+(mmap-exit) begin
+(child-mm-wrt) begin
+(child-mm-wrt) create "sample.txt"
+(child-mm-wrt) open "sample.txt"
+(child-mm-wrt) mmap "sample.txt"
+child-mm-wrt: exit(-1)
+(mmap-exit) wait for child (should return 0): FAILED
+mmap-exit: exit(1)
+Execution of 'mmap-exit' complete.
+Timer: 69 ticks
+Thread: 36 idle ticks, 32 kernel ticks, 1 user ticks
+hda2 (filesys): 149 reads, 468 writes
+hda3 (scratch): 227 reads, 2 writes
+hda4 (swap): 0 reads, 0 writes
+Console: 1265 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+DETAILS OF tests/vm/mmap-clean FAILURE:
+
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (mmap-clean) begin
+  (mmap-clean) open "sample.txt"
+  (mmap-clean) mmap "sample.txt"
+  (mmap-clean) write "sample.txt"
+  (mmap-clean) munmap "sample.txt"
+  (mmap-clean) seek "sample.txt"
+  (mmap-clean) read "sample.txt"
+  (mmap-clean) file change was retained after munmap
+  (mmap-clean) end
+Differences in `diff -u' format:
+  (mmap-clean) begin
+  (mmap-clean) open "sample.txt"
+  (mmap-clean) mmap "sample.txt"
+- (mmap-clean) write "sample.txt"
+- (mmap-clean) munmap "sample.txt"
+- (mmap-clean) seek "sample.txt"
+- (mmap-clean) read "sample.txt"
+- (mmap-clean) file change was retained after munmap
+- (mmap-clean) end
+
+(Process exit codes are excluded for matching purposes.)
+
+OUTPUT FROM tests/vm/mmap-clean:
+
+Copying tests/vm/mmap-clean to scratch partition...
+Copying ../../tests/vm/sample.txt to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/2nbw9pGe0U.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run mmap-clean
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  682,393,600 loops/s.
+ide0: unexpected interrupt
+hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 193 sectors (96 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 121 sectors (60 kB), Pintos scratch (22)
+hda4: 8,192 sectors (4 MB), Pintos swap (23)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+swap: using hda4
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'mmap-clean' into the file system...
+Putting 'sample.txt' into the file system...
+Erasing ustar archive...
+Executing 'mmap-clean':
+(mmap-clean) begin
+(mmap-clean) open "sample.txt"
+(mmap-clean) mmap "sample.txt"
+mmap-clean: exit(-1)
+Execution of 'mmap-clean' complete.
+Timer: 71 ticks
+Thread: 34 idle ticks, 37 kernel ticks, 0 user ticks
+hda2 (filesys): 93 reads, 248 writes
+hda3 (scratch): 120 reads, 2 writes
+hda4 (swap): 0 reads, 0 writes
+Console: 1132 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+DETAILS OF tests/vm/mmap-close FAILURE:
+
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (mmap-close) begin
+  (mmap-close) open "sample.txt"
+  (mmap-close) mmap "sample.txt"
+  (mmap-close) end
+Differences in `diff -u' format:
+  (mmap-close) begin
+  (mmap-close) open "sample.txt"
+  (mmap-close) mmap "sample.txt"
+- (mmap-close) end
+
+(Process exit codes are excluded for matching purposes.)
+
+OUTPUT FROM tests/vm/mmap-close:
+
+Copying tests/vm/mmap-close to scratch partition...
+Copying ../../tests/vm/sample.txt to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/1EmIOjBgBC.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run mmap-close
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  543,948,800 loops/s.
+ide0: unexpected interrupt
+hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 193 sectors (96 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 119 sectors (59 kB), Pintos scratch (22)
+hda4: 8,192 sectors (4 MB), Pintos swap (23)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+swap: using hda4
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'mmap-close' into the file system...
+Putting 'sample.txt' into the file system...
+Erasing ustar archive...
+Executing 'mmap-close':
+(mmap-close) begin
+(mmap-close) open "sample.txt"
+(mmap-close) mmap "sample.txt"
+mmap-close: exit(-1)
+Execution of 'mmap-close' complete.
+Timer: 66 ticks
+Thread: 34 idle ticks, 32 kernel ticks, 0 user ticks
+hda2 (filesys): 90 reads, 244 writes
+hda3 (scratch): 118 reads, 2 writes
+hda4 (swap): 0 reads, 0 writes
+Console: 1132 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+DETAILS OF tests/vm/mmap-remove FAILURE:
+
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (mmap-remove) begin
+  (mmap-remove) open "sample.txt"
+  (mmap-remove) mmap "sample.txt"
+  (mmap-remove) remove "sample.txt"
+  (mmap-remove) try to open "sample.txt"
+  (mmap-remove) create "another"
+  (mmap-remove) end
+Differences in `diff -u' format:
+  (mmap-remove) begin
+  (mmap-remove) open "sample.txt"
+  (mmap-remove) mmap "sample.txt"
+- (mmap-remove) remove "sample.txt"
+- (mmap-remove) try to open "sample.txt"
+- (mmap-remove) create "another"
+- (mmap-remove) end
+
+(Process exit codes are excluded for matching purposes.)
+
+OUTPUT FROM tests/vm/mmap-remove:
+
+Copying tests/vm/mmap-remove to scratch partition...
+Copying ../../tests/vm/sample.txt to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/3Ti7qxEFT5.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run mmap-remove
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  679,936,000 loops/s.
+ide0: unexpected interrupt
+hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 193 sectors (96 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 120 sectors (60 kB), Pintos scratch (22)
+hda4: 8,192 sectors (4 MB), Pintos swap (23)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+swap: using hda4
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'mmap-remove' into the file system...
+Putting 'sample.txt' into the file system...
+Erasing ustar archive...
+Executing 'mmap-remove':
+(mmap-remove) begin
+(mmap-remove) open "sample.txt"
+(mmap-remove) mmap "sample.txt"
+mmap-remove: exit(-1)
+Execution of 'mmap-remove' complete.
+Timer: 61 ticks
+Thread: 32 idle ticks, 28 kernel ticks, 1 user ticks
+hda2 (filesys): 92 reads, 246 writes
+hda3 (scratch): 119 reads, 2 writes
+hda4 (swap): 0 reads, 0 writes
+Console: 1140 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+DETAILS OF tests/vm/mmap-inherit FAILURE:
+
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (mmap-inherit) begin
+  (mmap-inherit) open "sample.txt"
+  (mmap-inherit) mmap "sample.txt"
+  (mmap-inherit) exec "child-inherit"
+  (child-inherit) begin
+  child-inherit: exit(-1)
+  (mmap-inherit) checking that mmap'd file still has same data
+  (mmap-inherit) end
+  mmap-inherit: exit(0)
+Differences in `diff -u' format:
+  (mmap-inherit) begin
+  (mmap-inherit) open "sample.txt"
+  (mmap-inherit) mmap "sample.txt"
+- (mmap-inherit) exec "child-inherit"
+- (child-inherit) begin
+- child-inherit: exit(-1)
+- (mmap-inherit) checking that mmap'd file still has same data
+- (mmap-inherit) end
+- mmap-inherit: exit(0)
++ mmap-inherit: exit(-1)
+
+(User fault messages are excluded for matching purposes.)
+
+OUTPUT FROM tests/vm/mmap-inherit:
+
+Copying tests/vm/mmap-inherit to scratch partition...
+Copying ../../tests/vm/sample.txt to scratch partition...
+Copying tests/vm/child-inherit to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/6WSWo6YGRK.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run mmap-inherit
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  421,068,800 loops/s.
+ide0: unexpected interrupt
+hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 193 sectors (96 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 232 sectors (116 kB), Pintos scratch (22)
+hda4: 8,192 sectors (4 MB), Pintos swap (23)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+swap: using hda4
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'mmap-inherit' into the file system...
+Putting 'sample.txt' into the file system...
+Putting 'child-inherit' into the file system...
+Erasing ustar archive...
+Executing 'mmap-inherit':
+(mmap-inherit) begin
+(mmap-inherit) open "sample.txt"
+(mmap-inherit) mmap "sample.txt"
+mmap-inherit: exit(-1)
+Execution of 'mmap-inherit' complete.
+Timer: 73 ticks
+Thread: 31 idle ticks, 41 kernel ticks, 1 user ticks
+hda2 (filesys): 119 reads, 472 writes
+hda3 (scratch): 231 reads, 2 writes
+hda4 (swap): 0 reads, 0 writes
+Console: 1198 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+DETAILS OF tests/vm/mmap-null FAILURE:
+
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (mmap-null) begin
+  (mmap-null) open "sample.txt"
+  (mmap-null) try to mmap at address 0
+  (mmap-null) end
+Differences in `diff -u' format:
+  (mmap-null) begin
+  (mmap-null) open "sample.txt"
+  (mmap-null) try to mmap at address 0
+- (mmap-null) end
+
+(Process exit codes are excluded for matching purposes.)
+
+OUTPUT FROM tests/vm/mmap-null:
+
+Copying tests/vm/mmap-null to scratch partition...
+Copying ../../tests/vm/sample.txt to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/ZZZtU4pHdC.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run mmap-null
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  398,950,400 loops/s.
+ide0: unexpected interrupt
+hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 193 sectors (96 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 116 sectors (58 kB), Pintos scratch (22)
+hda4: 8,192 sectors (4 MB), Pintos swap (23)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+swap: using hda4
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'mmap-null' into the file system...
+Putting 'sample.txt' into the file system...
+Erasing ustar archive...
+Executing 'mmap-null':
+(mmap-null) begin
+(mmap-null) open "sample.txt"
+(mmap-null) try to mmap at address 0
+mmap-null: exit(-1)
+Execution of 'mmap-null' complete.
+Timer: 61 ticks
+Thread: 31 idle ticks, 30 kernel ticks, 1 user ticks
+hda2 (filesys): 88 reads, 238 writes
+hda3 (scratch): 115 reads, 2 writes
+hda4 (swap): 0 reads, 0 writes
+Console: 1131 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+DETAILS OF tests/vm/mmap-misalign FAILURE:
+
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (mmap-misalign) begin
+  (mmap-misalign) open "sample.txt"
+  (mmap-misalign) try to mmap at misaligned address
+  (mmap-misalign) end
+Differences in `diff -u' format:
+  (mmap-misalign) begin
+  (mmap-misalign) open "sample.txt"
+  (mmap-misalign) try to mmap at misaligned address
+- (mmap-misalign) end
+
+(Process exit codes are excluded for matching purposes.)
+
+OUTPUT FROM tests/vm/mmap-misalign:
+
+Copying tests/vm/mmap-misalign to scratch partition...
+Copying ../../tests/vm/sample.txt to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/RLkag24bkb.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run mmap-misalign
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  622,592,000 loops/s.
+ide0: unexpected interrupt
+hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 193 sectors (96 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 116 sectors (58 kB), Pintos scratch (22)
+hda4: 8,192 sectors (4 MB), Pintos swap (23)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+swap: using hda4
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'mmap-misalign' into the file system...
+Putting 'sample.txt' into the file system...
+Erasing ustar archive...
+Executing 'mmap-misalign':
+(mmap-misalign) begin
+(mmap-misalign) open "sample.txt"
+(mmap-misalign) try to mmap at misaligned address
+mmap-misalign: exit(-1)
+Execution of 'mmap-misalign' complete.
+Timer: 64 ticks
+Thread: 33 idle ticks, 30 kernel ticks, 1 user ticks
+hda2 (filesys): 88 reads, 238 writes
+hda3 (scratch): 115 reads, 2 writes
+hda4 (swap): 0 reads, 0 writes
+Console: 1172 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+DETAILS OF tests/vm/mmap-over-code FAILURE:
+
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (mmap-over-code) begin
+  (mmap-over-code) open "sample.txt"
+  (mmap-over-code) try to mmap over code segment
+  (mmap-over-code) end
+Differences in `diff -u' format:
+  (mmap-over-code) begin
+  (mmap-over-code) open "sample.txt"
+  (mmap-over-code) try to mmap over code segment
+- (mmap-over-code) end
+
+(Process exit codes are excluded for matching purposes.)
+
+OUTPUT FROM tests/vm/mmap-over-code:
+
+Copying tests/vm/mmap-over-code to scratch partition...
+Copying ../../tests/vm/sample.txt to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/UJxWiwhAwB.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run mmap-over-code
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  625,049,600 loops/s.
+ide0: unexpected interrupt
+hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 193 sectors (96 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 116 sectors (58 kB), Pintos scratch (22)
+hda4: 8,192 sectors (4 MB), Pintos swap (23)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+swap: using hda4
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'mmap-over-code' into the file system...
+Putting 'sample.txt' into the file system...
+Erasing ustar archive...
+Executing 'mmap-over-code':
+(mmap-over-code) begin
+(mmap-over-code) open "sample.txt"
+(mmap-over-code) try to mmap over code segment
+mmap-over-code: exit(-1)
+Execution of 'mmap-over-code' complete.
+Timer: 59 ticks
+Thread: 30 idle ticks, 28 kernel ticks, 1 user ticks
+hda2 (filesys): 88 reads, 238 writes
+hda3 (scratch): 115 reads, 2 writes
+hda4 (swap): 0 reads, 0 writes
+Console: 1176 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+DETAILS OF tests/vm/mmap-over-data FAILURE:
+
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (mmap-over-data) begin
+  (mmap-over-data) open "sample.txt"
+  (mmap-over-data) try to mmap over data segment
+  (mmap-over-data) end
+Differences in `diff -u' format:
+  (mmap-over-data) begin
+  (mmap-over-data) open "sample.txt"
+  (mmap-over-data) try to mmap over data segment
+- (mmap-over-data) end
+
+(Process exit codes are excluded for matching purposes.)
+
+OUTPUT FROM tests/vm/mmap-over-data:
+
+Copying tests/vm/mmap-over-data to scratch partition...
+Copying ../../tests/vm/sample.txt to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/_SRPnpsB45.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run mmap-over-data
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  468,582,400 loops/s.
+ide0: unexpected interrupt
+hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 193 sectors (96 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 116 sectors (58 kB), Pintos scratch (22)
+hda4: 8,192 sectors (4 MB), Pintos swap (23)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+swap: using hda4
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'mmap-over-data' into the file system...
+Putting 'sample.txt' into the file system...
+Erasing ustar archive...
+Executing 'mmap-over-data':
+(mmap-over-data) begin
+(mmap-over-data) open "sample.txt"
+(mmap-over-data) try to mmap over data segment
+mmap-over-data: exit(-1)
+Execution of 'mmap-over-data' complete.
+Timer: 61 ticks
+Thread: 30 idle ticks, 31 kernel ticks, 1 user ticks
+hda2 (filesys): 88 reads, 238 writes
+hda3 (scratch): 115 reads, 2 writes
+hda4 (swap): 0 reads, 0 writes
+Console: 1176 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+DETAILS OF tests/vm/mmap-over-stk FAILURE:
+
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (mmap-over-stk) begin
+  (mmap-over-stk) open "sample.txt"
+  (mmap-over-stk) try to mmap over stack segment
+  (mmap-over-stk) end
+Differences in `diff -u' format:
+  (mmap-over-stk) begin
+  (mmap-over-stk) open "sample.txt"
+  (mmap-over-stk) try to mmap over stack segment
+- (mmap-over-stk) end
+
+(Process exit codes are excluded for matching purposes.)
+
+OUTPUT FROM tests/vm/mmap-over-stk:
+
+Copying tests/vm/mmap-over-stk to scratch partition...
+Copying ../../tests/vm/sample.txt to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/bwX5bhHkoW.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run mmap-over-stk
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  628,326,400 loops/s.
+ide0: unexpected interrupt
+hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 193 sectors (96 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 116 sectors (58 kB), Pintos scratch (22)
+hda4: 8,192 sectors (4 MB), Pintos swap (23)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+swap: using hda4
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'mmap-over-stk' into the file system...
+Putting 'sample.txt' into the file system...
+Erasing ustar archive...
+Executing 'mmap-over-stk':
+(mmap-over-stk) begin
+(mmap-over-stk) open "sample.txt"
+(mmap-over-stk) try to mmap over stack segment
+mmap-over-stk: exit(-1)
+Execution of 'mmap-over-stk' complete.
+Timer: 62 ticks
+Thread: 36 idle ticks, 26 kernel ticks, 1 user ticks
+hda2 (filesys): 88 reads, 238 writes
+hda3 (scratch): 115 reads, 2 writes
+hda4 (swap): 0 reads, 0 writes
+Console: 1169 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+DETAILS OF tests/vm/mmap-overlap FAILURE:
+
+Test output failed to match any acceptable form.
+
+Acceptable output:
+  (mmap-overlap) begin
+  (mmap-overlap) open "zeros" once
+  (mmap-overlap) mmap "zeros"
+  (mmap-overlap) open "zeros" again
+  (mmap-overlap) try to mmap "zeros" again
+  (mmap-overlap) end
+Differences in `diff -u' format:
+  (mmap-overlap) begin
+  (mmap-overlap) open "zeros" once
+  (mmap-overlap) mmap "zeros"
+- (mmap-overlap) open "zeros" again
+- (mmap-overlap) try to mmap "zeros" again
+- (mmap-overlap) end
+
+(Process exit codes are excluded for matching purposes.)
+
+OUTPUT FROM tests/vm/mmap-overlap:
+
+Copying tests/vm/mmap-overlap to scratch partition...
+Copying tests/vm/zeros to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/k5YQ2z6igF.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run mmap-overlap
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  629,964,800 loops/s.
+ide0: unexpected interrupt
+hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 193 sectors (96 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 129 sectors (64 kB), Pintos scratch (22)
+hda4: 8,192 sectors (4 MB), Pintos swap (23)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+swap: using hda4
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'mmap-overlap' into the file system...
+Putting 'zeros' into the file system...
+Erasing ustar archive...
+Executing 'mmap-overlap':
+(mmap-overlap) begin
+(mmap-overlap) open "zeros" once
+(mmap-overlap) mmap "zeros"
+mmap-overlap: exit(-1)
+Execution of 'mmap-overlap' complete.
+Timer: 66 ticks
+Thread: 33 idle ticks, 32 kernel ticks, 1 user ticks
+hda2 (filesys): 90 reads, 264 writes
+hda3 (scratch): 128 reads, 2 writes
+hda4 (swap): 0 reads, 0 writes
+Console: 1138 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...

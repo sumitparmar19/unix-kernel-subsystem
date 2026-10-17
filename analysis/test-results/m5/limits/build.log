@@ -1,0 +1,124 @@
+make: Entering directory '/pintos/src/limits'
+mkdir -p build/devices
+mkdir -p build/filesys
+mkdir -p build/lib
+mkdir -p build/lib/kernel
+mkdir -p build/lib/user
+mkdir -p build/tests/limits
+mkdir -p build/threads
+mkdir -p build/userprog
+cp ../Makefile.build build/Makefile
+cd build && make all
+make[1]: Entering directory '/pintos/src/limits/build'
+gcc -m32 -E -nostdinc -I../.. -I../../lib -I../../lib/kernel -P ../../threads/kernel.lds.S > threads/kernel.lds.s
+gcc -m32 -c ../../threads/start.S -o threads/start.o -Wa,--gstabs -nostdinc -I../.. -I../../lib -I../../lib/kernel -DUSERPROG -DFILESYS -MMD -MF threads/start.d
+gcc -m32 -c ../../threads/init.c -o threads/init.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF threads/init.d
+../../threads/init.c: In function 'main':
+<built-in>: warning: function declared 'noreturn' has a 'return' statement
+gcc -m32 -c ../../threads/thread.c -o threads/thread.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF threads/thread.d
+gcc -m32 -c ../../threads/switch.S -o threads/switch.o -Wa,--gstabs -nostdinc -I../.. -I../../lib -I../../lib/kernel -DUSERPROG -DFILESYS -MMD -MF threads/switch.d
+gcc -m32 -c ../../threads/interrupt.c -o threads/interrupt.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF threads/interrupt.d
+gcc -m32 -c ../../threads/intr-stubs.S -o threads/intr-stubs.o -Wa,--gstabs -nostdinc -I../.. -I../../lib -I../../lib/kernel -DUSERPROG -DFILESYS -MMD -MF threads/intr-stubs.d
+gcc -m32 -c ../../threads/synch.c -o threads/synch.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF threads/synch.d
+gcc -m32 -c ../../threads/palloc.c -o threads/palloc.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF threads/palloc.d
+gcc -m32 -c ../../threads/malloc.c -o threads/malloc.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF threads/malloc.d
+gcc -m32 -c ../../threads/kstat.c -o threads/kstat.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -Werror -DUSERPROG -DFILESYS -MMD -MF threads/kstat.d
+gcc -m32 -c ../../threads/trace.c -o threads/trace.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -Werror -DUSERPROG -DFILESYS -MMD -MF threads/trace.d
+gcc -m32 -c ../../devices/pit.c -o devices/pit.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF devices/pit.d
+gcc -m32 -c ../../devices/timer.c -o devices/timer.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF devices/timer.d
+gcc -m32 -c ../../devices/kbd.c -o devices/kbd.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF devices/kbd.d
+gcc -m32 -c ../../devices/vga.c -o devices/vga.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF devices/vga.d
+gcc -m32 -c ../../devices/serial.c -o devices/serial.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF devices/serial.d
+gcc -m32 -c ../../devices/block.c -o devices/block.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF devices/block.d
+gcc -m32 -c ../../devices/partition.c -o devices/partition.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF devices/partition.d
+gcc -m32 -c ../../devices/ide.c -o devices/ide.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF devices/ide.d
+gcc -m32 -c ../../devices/input.c -o devices/input.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF devices/input.d
+gcc -m32 -c ../../devices/intq.c -o devices/intq.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF devices/intq.d
+gcc -m32 -c ../../devices/rtc.c -o devices/rtc.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF devices/rtc.d
+gcc -m32 -c ../../devices/shutdown.c -o devices/shutdown.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF devices/shutdown.d
+gcc -m32 -c ../../devices/speaker.c -o devices/speaker.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF devices/speaker.d
+gcc -m32 -c ../../lib/debug.c -o lib/debug.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF lib/debug.d
+../../lib/debug.c: In function 'debug_backtrace':
+../../lib/debug.c:19:16: warning: calling '__builtin_frame_address' with a nonzero argument is unsafe [-Wframe-address]
+   19 |   for (frame = __builtin_frame_address (1);
+      |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+gcc -m32 -c ../../lib/random.c -o lib/random.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF lib/random.d
+gcc -m32 -c ../../lib/stdio.c -o lib/stdio.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF lib/stdio.d
+gcc -m32 -c ../../lib/stdlib.c -o lib/stdlib.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF lib/stdlib.d
+gcc -m32 -c ../../lib/string.c -o lib/string.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF lib/string.d
+In file included from ../../lib/string.c:2:
+../../lib/string.c: In function 'strchr':
+../../lib/debug.h:32:12: warning: 'nonnull' argument 'string' compared to NULL [-Wnonnull-compare]
+   32 |         if (CONDITION) { } else {                               \
+      |            ^
+../../lib/string.c:117:3: note: in expansion of macro 'ASSERT'
+  117 |   ASSERT (string != NULL);
+      |   ^~~~~~
+../../lib/string.c: In function 'strlen':
+../../lib/debug.h:32:12: warning: 'nonnull' argument 'string' compared to NULL [-Wnonnull-compare]
+   32 |         if (CONDITION) { } else {                               \
+      |            ^
+../../lib/string.c:297:3: note: in expansion of macro 'ASSERT'
+  297 |   ASSERT (string != NULL);
+      |   ^~~~~~
+gcc -m32 -c ../../lib/arithmetic.c -o lib/arithmetic.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF lib/arithmetic.d
+gcc -m32 -c ../../lib/ustar.c -o lib/ustar.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF lib/ustar.d
+gcc -m32 -c ../../lib/kernel/debug.c -o lib/kernel/debug.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF lib/kernel/debug.d
+../../lib/kernel/debug.c: In function 'print_stacktrace':
+../../lib/kernel/debug.c:82:15: warning: calling '__builtin_frame_address' with a nonzero argument is unsafe [-Wframe-address]
+   82 |       frame = __builtin_frame_address (1);
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+gcc -m32 -c ../../lib/kernel/list.c -o lib/kernel/list.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF lib/kernel/list.d
+gcc -m32 -c ../../lib/kernel/bitmap.c -o lib/kernel/bitmap.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF lib/kernel/bitmap.d
+gcc -m32 -c ../../lib/kernel/hash.c -o lib/kernel/hash.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF lib/kernel/hash.d
+gcc -m32 -c ../../lib/kernel/console.c -o lib/kernel/console.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF lib/kernel/console.d
+gcc -m32 -c ../../userprog/process.c -o userprog/process.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF userprog/process.d
+gcc -m32 -c ../../userprog/pagedir.c -o userprog/pagedir.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF userprog/pagedir.d
+gcc -m32 -c ../../userprog/exception.c -o userprog/exception.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF userprog/exception.d
+gcc -m32 -c ../../userprog/syscall.c -o userprog/syscall.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF userprog/syscall.d
+gcc -m32 -c ../../userprog/gdt.c -o userprog/gdt.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF userprog/gdt.d
+gcc -m32 -c ../../userprog/tss.c -o userprog/tss.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF userprog/tss.d
+gcc -m32 -c ../../userprog/umem.c -o userprog/umem.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -Werror -DUSERPROG -DFILESYS -MMD -MF userprog/umem.d
+gcc -m32 -c ../../userprog/ofile.c -o userprog/ofile.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -Werror -DUSERPROG -DFILESYS -MMD -MF userprog/ofile.d
+gcc -m32 -c ../../userprog/pipe.c -o userprog/pipe.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -Werror -DUSERPROG -DFILESYS -MMD -MF userprog/pipe.d
+gcc -m32 -c ../../userprog/rlimit.c -o userprog/rlimit.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -Werror -DUSERPROG -DFILESYS -MMD -MF userprog/rlimit.d
+gcc -m32 -c ../../filesys/filesys.c -o filesys/filesys.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF filesys/filesys.d
+gcc -m32 -c ../../filesys/free-map.c -o filesys/free-map.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF filesys/free-map.d
+gcc -m32 -c ../../filesys/file.c -o filesys/file.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF filesys/file.d
+gcc -m32 -c ../../filesys/directory.c -o filesys/directory.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF filesys/directory.d
+gcc -m32 -c ../../filesys/inode.c -o filesys/inode.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF filesys/inode.d
+gcc -m32 -c ../../filesys/fsutil.c -o filesys/fsutil.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -DUSERPROG -DFILESYS -MMD -MF filesys/fsutil.d
+ld -melf_i386 -T threads/kernel.lds.s -o kernel.o threads/start.o threads/init.o threads/thread.o threads/switch.o threads/interrupt.o threads/intr-stubs.o threads/synch.o threads/palloc.o threads/malloc.o threads/kstat.o threads/trace.o devices/pit.o devices/timer.o devices/kbd.o devices/vga.o devices/serial.o devices/block.o devices/partition.o devices/ide.o devices/input.o devices/intq.o devices/rtc.o devices/shutdown.o devices/speaker.o lib/debug.o lib/random.o lib/stdio.o lib/stdlib.o lib/string.o lib/arithmetic.o lib/ustar.o lib/kernel/debug.o lib/kernel/list.o lib/kernel/bitmap.o lib/kernel/hash.o lib/kernel/console.o userprog/process.o userprog/pagedir.o userprog/exception.o userprog/syscall.o userprog/gdt.o userprog/tss.o userprog/umem.o userprog/ofile.o userprog/pipe.o userprog/rlimit.o filesys/filesys.o filesys/free-map.o filesys/file.o filesys/directory.o filesys/inode.o filesys/fsutil.o
+objcopy -R .note -R .comment -S kernel.o kernel.bin
+gcc -m32 -c ../../threads/loader.S -o threads/loader.o -Wa,--gstabs -nostdinc -I../.. -I../../lib 
+ld -melf_i386 -N -e 0 -Ttext 0x7c00 --oformat binary -o loader.bin threads/loader.o
+gcc -m32 -c ../../tests/limits/fork-bomb.c -o tests/limits/fork-bomb.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/user -I. -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/limits/fork-bomb.d
+gcc -m32 -c ../../tests/main.c -o tests/main.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/user -I. -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/main.d
+gcc -m32 -c ../../tests/lib.c -o tests/lib.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/user -I. -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/lib.d
+gcc -m32 -c ../../lib/user/entry.c -o lib/user/entry.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/user -I. -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF lib/user/entry.d
+gcc -m32 -c ../../lib/user/debug.c -o lib/user/debug.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/user -I. -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF lib/user/debug.d
+gcc -m32 -c ../../lib/user/syscall.c -o lib/user/syscall.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/user -I. -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF lib/user/syscall.d
+gcc -m32 -c ../../lib/user/console.c -o lib/user/console.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/user -I. -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF lib/user/console.d
+rm -f libc.a
+ar r libc.a lib/debug.o lib/random.o lib/stdio.o lib/stdlib.o lib/string.o lib/arithmetic.o lib/ustar.o lib/user/debug.o lib/user/syscall.o lib/user/console.o
+ar: creating libc.a
+ranlib libc.a
+gcc -m32 -z noseparate-code -no-pie -Wl,--build-id=none -nostdlib -static -Wl,-T,../../lib/user/user.lds tests/limits/fork-bomb.o tests/main.o tests/lib.o lib/user/entry.o libc.a -o tests/limits/fork-bomb
+gcc -m32 -c ../../tests/limits/fd-exhaust.c -o tests/limits/fd-exhaust.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/user -I. -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/limits/fd-exhaust.d
+gcc -m32 -z noseparate-code -no-pie -Wl,--build-id=none -nostdlib -static -Wl,-T,../../lib/user/user.lds tests/limits/fd-exhaust.o tests/main.o tests/lib.o lib/user/entry.o libc.a -o tests/limits/fd-exhaust
+gcc -m32 -c ../../tests/limits/cpu-spin.c -o tests/limits/cpu-spin.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/user -I. -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/limits/cpu-spin.d
+gcc -m32 -z noseparate-code -no-pie -Wl,--build-id=none -nostdlib -static -Wl,-T,../../lib/user/user.lds tests/limits/cpu-spin.o tests/main.o tests/lib.o lib/user/entry.o libc.a -o tests/limits/cpu-spin
+gcc -m32 -c ../../tests/limits/getlimit.c -o tests/limits/getlimit.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/user -I. -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/limits/getlimit.d
+gcc -m32 -z noseparate-code -no-pie -Wl,--build-id=none -nostdlib -static -Wl,-T,../../lib/user/user.lds tests/limits/getlimit.o tests/main.o tests/lib.o lib/user/entry.o libc.a -o tests/limits/getlimit
+gcc -m32 -c ../../tests/limits/neighbor.c -o tests/limits/neighbor.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/user -I. -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/limits/neighbor.d
+gcc -m32 -z noseparate-code -no-pie -Wl,--build-id=none -nostdlib -static -Wl,-T,../../lib/user/user.lds tests/limits/neighbor.o tests/main.o tests/lib.o lib/user/entry.o libc.a -o tests/limits/neighbor
+gcc -m32 -c ../../tests/limits/child-block.c -o tests/limits/child-block.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/user -I. -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/limits/child-block.d
+gcc -m32 -z noseparate-code -no-pie -Wl,--build-id=none -nostdlib -static -Wl,-T,../../lib/user/user.lds tests/limits/child-block.o lib/user/entry.o libc.a -o tests/limits/child-block
+gcc -m32 -c ../../tests/limits/child-work.c -o tests/limits/child-work.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/user -I. -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/limits/child-work.d
+gcc -m32 -z noseparate-code -no-pie -Wl,--build-id=none -nostdlib -static -Wl,-T,../../lib/user/user.lds tests/limits/child-work.o lib/user/entry.o libc.a -o tests/limits/child-work
+gcc -m32 -c ../../tests/limits/abuser-fork.c -o tests/limits/abuser-fork.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/user -I. -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/limits/abuser-fork.d
+gcc -m32 -z noseparate-code -no-pie -Wl,--build-id=none -nostdlib -static -Wl,-T,../../lib/user/user.lds tests/limits/abuser-fork.o lib/user/entry.o libc.a -o tests/limits/abuser-fork
+gcc -m32 -c ../../tests/limits/abuser-spin.c -o tests/limits/abuser-spin.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/user -I. -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/limits/abuser-spin.d
+gcc -m32 -z noseparate-code -no-pie -Wl,--build-id=none -nostdlib -static -Wl,-T,../../lib/user/user.lds tests/limits/abuser-spin.o lib/user/entry.o libc.a -o tests/limits/abuser-spin
+make[1]: Leaving directory '/pintos/src/limits/build'
+make: Leaving directory '/pintos/src/limits'

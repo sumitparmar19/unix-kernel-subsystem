@@ -1,0 +1,12 @@
+FAIL
+Kernel panic in run: PANIC at ../../userprog/exception.c:91 in kill(): Kernel bug - unexpected interrupt in kernel
+Call stack: 0xc002928b 0xc00285fc 0x804a2b4
+Translation of call stack:
+In kernel.o:
+0xc002928b: debug_panic (.../../lib/kernel/debug.c:38)
+0xc00285fc: strlen (...ld/../../lib/string.c:299)
+In tests/userprog/exec-bound-3:
+0x0804a2b4: exec (.../../lib/user/syscall.c:81)
+Translations of user virtual addresses above are based on a guess at
+the binary to use.  If this guess is incorrect, then those
+translations will be misleading.

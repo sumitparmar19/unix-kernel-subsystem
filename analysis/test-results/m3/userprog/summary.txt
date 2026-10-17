@@ -1,0 +1,4 @@
+project:  userprog
+passed:   80 / 80
+runtime:  65 s (make check, -j4, --qemu)
+failing:

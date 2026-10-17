@@ -1,0 +1,25 @@
+fuzz: userprog, seeds 1..25, 5000 calls each
+---- kernel output ----
+fuzz: exit(-1)
+fuzz: exit(-1)
+fuzz: exit(-1)
+fuzz: exit(-1)
+fuzz: exit(-1)
+fuzz: exit(-1)
+fuzz: exit(-1)
+fuzz: exit(-1)
+fuzz: exit(-1)
+fuzz: exit(-1)
+fuzz: exit(-1)
+fuzz: exit(-1)
+fuzz: exit(-1)
+fuzz: exit(-1)
+fuzz: exit(-1)
+fuzz: exit(-1)
+fuzz: exit(-1)
+fuzz: exit(-1)
+fuzz: exit(-1)
+fuzz: exit(-1)
+-----------------------
+fuzz: 125000 confirmed system calls with 
+fuzz: PASS

@@ -2,8 +2,15 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include "userprog/gdt.h"
+#include "userprog/syscall.h"
+#include "threads/vaddr.h"
+#ifdef VM
+#include "vm/page.h"
+#endif
 #include "threads/interrupt.h"
 #include "threads/thread.h"
+#include "threads/kstat.h"
+#include "threads/trace.h"
 
 /* Number of page faults processed. */
 static long long page_fault_cnt;
@@ -79,8 +86,8 @@ kill (struct intr_frame *f)
         struct thread *cur = thread_current ();
         cur->exit_status = -1;
 #endif
-        printf ("%s: dying due to interrupt %#04x\n",
-                thread_name (), f->vec_no);
+        printf ("%s: dying due to interrupt %#04x (%s).\n",
+                thread_name (), f->vec_no, intr_name (f->vec_no));
         intr_dump_frame (f);
         thread_exit ();
       }
@@ -94,8 +101,8 @@ kill (struct intr_frame *f)
     default:
       /* Some weird segment. */
       intr_dump_frame (f);
-      printf ("Interrupt %#04x in unknown segment %04x\n",
-              f->vec_no, f->cs);
+      printf ("Interrupt %#04x (%s) in unknown segment %04x\n",
+              f->vec_no, intr_name (f->vec_no), f->cs);
       thread_exit ();
     }
 }
@@ -135,11 +142,40 @@ page_fault (struct intr_frame *f)
 
   /* Count page faults. */
   page_fault_cnt++;
+  kstat_inc (KS_PAGE_FAULTS);
+  trace_event (TR_PAGE_FAULT, (uint32_t) fault_addr);
 
   /* Determine cause. */
   not_present = (f->error_code & PF_P) == 0;
   write = (f->error_code & PF_W) != 0;
   user = (f->error_code & PF_U) != 0;
+
+#ifdef VM
+  /* A not-present fault may be a page that is loaded lazily, has been
+     evicted to swap, or is a valid stack growth.  Try to satisfy it. */
+  if (not_present && thread_current ()->is_user)
+    {
+      void *esp = user ? f->esp : thread_current ()->user_esp;
+      if (esp != NULL && page_fault_handler (fault_addr, esp, write))
+        return;
+    }
+#endif
+
+#ifdef USERPROG
+  /* Defence in depth (ADR-001): system calls validate every user
+     pointer first, so the kernel should never fault on a user
+     address.  If it does anyway, end the offending process instead
+     of the whole kernel.  Faults on kernel addresses still panic. */
+  if (!user && is_user_vaddr (fault_addr) && thread_current ()->is_user)
+    {
+      printf ("%s: kernel fault on user address %p, terminating\n",
+              thread_name (), fault_addr);
+      if (lock_held_by_current_thread (&filesys_lock))
+        lock_release (&filesys_lock);
+      thread_current ()->exit_status = -1;
+      thread_exit ();
+    }
+#endif
 
   /* To implement virtual memory, delete the rest of the function
      body, and replace it with code that brings in the page to

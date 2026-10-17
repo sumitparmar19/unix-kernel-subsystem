@@ -1,0 +1,36 @@
+# -*- makefile -*-
+# Inter-process communication tests (kernel-v2, docs/adr/ADR-005).
+
+tests/%.output: FILESYSSOURCE = --filesys-size=2
+tests/%.output: PUTFILES = $(filter-out kernel.bin loader.bin, $^)
+
+tests/ipc_TESTS = $(addprefix tests/ipc/,pipe-basic pipe-eof pipe-full pipe-no-reader pipe-large pipe-multi pipe-bad-ptr redirect-basic redir-pipeline dup2-basic pipe-leak)
+
+tests/ipc_PROGS = $(tests/ipc_TESTS) $(addprefix tests/ipc/,child-echo child-upper child-cat child-drain child-sum child-writer)
+
+tests/ipc/pipe-basic_SRC = tests/ipc/pipe-basic.c tests/main.c
+tests/ipc/pipe-eof_SRC = tests/ipc/pipe-eof.c tests/main.c
+tests/ipc/pipe-full_SRC = tests/ipc/pipe-full.c tests/main.c
+tests/ipc/pipe-no-reader_SRC = tests/ipc/pipe-no-reader.c tests/main.c
+tests/ipc/pipe-large_SRC = tests/ipc/pipe-large.c tests/main.c
+tests/ipc/pipe-multi_SRC = tests/ipc/pipe-multi.c tests/main.c
+tests/ipc/pipe-bad-ptr_SRC = tests/ipc/pipe-bad-ptr.c tests/main.c
+tests/ipc/redirect-basic_SRC = tests/ipc/redirect-basic.c tests/main.c
+tests/ipc/redir-pipeline_SRC = tests/ipc/redir-pipeline.c tests/main.c
+tests/ipc/dup2-basic_SRC = tests/ipc/dup2-basic.c tests/main.c
+tests/ipc/pipe-leak_SRC = tests/ipc/pipe-leak.c tests/main.c
+tests/ipc/child-echo_SRC = tests/ipc/child-echo.c
+tests/ipc/child-upper_SRC = tests/ipc/child-upper.c
+tests/ipc/child-cat_SRC = tests/ipc/child-cat.c
+tests/ipc/child-drain_SRC = tests/ipc/child-drain.c
+tests/ipc/child-sum_SRC = tests/ipc/child-sum.c
+tests/ipc/child-writer_SRC = tests/ipc/child-writer.c
+
+$(foreach prog,$(tests/ipc_TESTS),$(eval $(prog)_SRC += tests/lib.c))
+
+tests/ipc/pipe-full_PUTFILES += tests/ipc/child-drain
+tests/ipc/pipe-large_PUTFILES += tests/ipc/child-sum
+tests/ipc/pipe-multi_PUTFILES += tests/ipc/child-writer
+tests/ipc/redirect-basic_PUTFILES += tests/ipc/child-echo
+tests/ipc/redir-pipeline_PUTFILES += tests/ipc/child-echo tests/ipc/child-upper tests/ipc/child-cat
+tests/ipc/pipe-leak_PUTFILES += tests/ipc/child-echo

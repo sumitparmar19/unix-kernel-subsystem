@@ -4,6 +4,13 @@
 #include <debug.h>
 #include <list.h>
 #include <stdint.h>
+#ifdef USERPROG
+#include "userprog/ofile.h"
+#include "userprog/rlimit.h"
+#endif
+#ifdef VM
+#include <hash.h>
+#endif
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -87,31 +94,43 @@ struct thread
     enum thread_status status;          /* Thread state. */
     char name[16];                      /* Name (for debugging purposes). */
     uint8_t *stack;                     /* Saved stack pointer. */
-    int priority;
-    int exit_status;                       /* Priority. */
-    int base_Priority;
+    int priority;                       /* Effective priority (with donations). */
+    int base_Priority;                  /* Priority set by thread_set_priority(). */
     struct list_elem allelem;           /* List element for all threads list. */
-    struct list locks_held;
-    struct lock *waiting_on;
+    struct list locks_held;             /* Locks held (donation sources). */
+    struct lock *waiting_on;            /* Lock being waited for, or NULL. */
 
-    int nice;
-    int recent_cpu;
+    int nice;                           /* MLFQS niceness. */
+    int recent_cpu;                     /* MLFQS recent CPU (17.14 fixed point). */
 
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
     struct list_elem sleep_elem;
 
 #ifdef USERPROG
-  /* Owned by userprog/process.c. */
-  uint32_t *pagedir;
+    /* Owned by userprog/process.c (docs/adr/ADR-002). */
+    uint32_t *pagedir;                  /* Page directory, or NULL. */
+    bool is_user;                       /* True for user processes. */
+    int exit_status;                    /* Reported to the parent; -1 by default. */
+    struct list children;               /* struct child_record of each child. */
+    struct child_record *record;        /* Shared with our parent, or NULL. */
+    struct file *exec_file;             /* Running executable (write-denied). */
 
-  /* Project 2: child process tracking. */
-  struct list children;              /* List of struct child_info. */
-  struct child_info *parent_info;    /* Info in parent's children list. */
+    /* Resource limits (userprog/rlimit.c, ADR-004). */
+    struct rgroup *rgroup;              /* Shared subtree group. */
+    int max_fds;                        /* Descriptor cap, or RLIMIT_NONE. */
+    int cpu_budget;                     /* Ticks left, or RLIMIT_NONE. */
+    int charged_pages;                  /* User pages this process charged. */
+    bool over_cpu;                      /* Set by the timer when budget hits 0. */
+#ifdef VM
+    struct hash spt;                    /* Supplemental page table (vm/page.c). */
+    struct list mmaps;                  /* struct mmap_region (vm/mmap.c). */
+    int next_mapid;                     /* Next mmap id to hand out. */
+    void *user_esp;                     /* User stack pointer, saved at syscall. */
+#endif
 
-  /* Project 2: per-process file descriptors. */
-  struct list fd_list;               /* List of struct fd_entry. */
-  int next_fd;                       /* Next FD number to hand out. */
+    /* Per-process file descriptors (userprog/ofile.c, ADR-005). */
+    struct fdtable fds;
 #endif
 
     int64_t wake_up_tick;
@@ -134,6 +153,7 @@ extern bool higher_prio(const struct list_elem *a,
                         void *aux);
 
 void donate_chain(struct thread *donor);
+void thread_recompute_priority (struct thread *t);
 
 void thread_init (void);
 void thread_start (void);
@@ -149,8 +169,11 @@ void thread_unblock (struct thread *);
 
 struct thread *thread_current (void);
 tid_t thread_tid (void);
+int running_thread_tid (void);
+#ifdef USERPROG
+bool thread_over_cpu (void);
+#endif
 const char *thread_name (void);
-struct thread *thread_get_by_tid (tid_t);
 
 void thread_exit (void) NO_RETURN;
 void thread_yield (void);

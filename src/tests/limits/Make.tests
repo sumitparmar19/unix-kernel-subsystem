@@ -1,0 +1,26 @@
+# -*- makefile -*-
+# Resource-limit tests (kernel-v2, docs/adr/ADR-004).
+
+tests/%.output: FILESYSSOURCE = --filesys-size=2
+tests/%.output: PUTFILES = $(filter-out kernel.bin loader.bin, $^)
+
+tests/limits_TESTS = $(addprefix tests/limits/,fork-bomb fd-exhaust cpu-spin getlimit neighbor mem-hog)
+
+tests/limits_PROGS = $(tests/limits_TESTS) $(addprefix tests/limits/,child-block child-work abuser-fork abuser-spin)
+
+tests/limits/fork-bomb_SRC = tests/limits/fork-bomb.c tests/main.c
+tests/limits/fd-exhaust_SRC = tests/limits/fd-exhaust.c tests/main.c
+tests/limits/cpu-spin_SRC = tests/limits/cpu-spin.c tests/main.c
+tests/limits/getlimit_SRC = tests/limits/getlimit.c tests/main.c
+tests/limits/neighbor_SRC = tests/limits/neighbor.c tests/main.c
+tests/limits/mem-hog_SRC = tests/limits/mem-hog.c tests/main.c
+tests/limits/child-block_SRC = tests/limits/child-block.c
+tests/limits/child-work_SRC = tests/limits/child-work.c
+tests/limits/abuser-fork_SRC = tests/limits/abuser-fork.c
+tests/limits/abuser-spin_SRC = tests/limits/abuser-spin.c
+
+$(foreach prog,$(tests/limits_TESTS),$(eval $(prog)_SRC += tests/lib.c))
+
+tests/limits/neighbor_PUTFILES += tests/limits/abuser-fork tests/limits/abuser-spin tests/limits/child-work tests/limits/child-block
+tests/limits/fork-bomb_PUTFILES += tests/limits/child-block
+tests/limits/abuser-fork_PUTFILES += tests/limits/child-block

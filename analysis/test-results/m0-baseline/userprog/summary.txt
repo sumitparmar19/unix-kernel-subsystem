@@ -1,0 +1,20 @@
+project:  userprog
+passed:   64 / 80
+runtime:  60 s (make check, -j4, --qemu)
+failing:
+  tests/filesys/base/syn-write
+  tests/userprog/bad-jump
+  tests/userprog/bad-jump2
+  tests/userprog/bad-read
+  tests/userprog/bad-read2
+  tests/userprog/bad-write
+  tests/userprog/bad-write2
+  tests/userprog/exec-bound-2
+  tests/userprog/exec-bound-3
+  tests/userprog/exec-missing
+  tests/userprog/no-vm/multi-oom
+  tests/userprog/rox-child
+  tests/userprog/rox-multichild
+  tests/userprog/rox-simple
+  tests/userprog/sc-bad-arg
+  tests/userprog/sc-boundary-3

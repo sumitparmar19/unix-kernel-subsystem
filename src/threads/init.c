@@ -22,8 +22,16 @@
 #include "threads/palloc.h"
 #include "threads/pte.h"
 #include "threads/thread.h"
+#include "threads/trace.h"
 #ifdef USERPROG
 #include "userprog/process.h"
+#include "userprog/rlimit.h"
+#endif
+#ifdef VM
+#include "vm/frame.h"
+#include "vm/swap.h"
+#endif
+#ifdef USERPROG
 #include "userprog/exception.h"
 #include "userprog/gdt.h"
 #include "userprog/syscall.h"
@@ -97,6 +105,13 @@ main (void)
   /* Initialize memory system. */
   palloc_init (user_page_limit);
   malloc_init ();
+  trace_init ();
+#ifdef USERPROG
+  rlimit_init_root (thread_current ());
+#endif
+#ifdef VM
+  frame_init ();
+#endif
   paging_init ();
 
   /* Segmentation. */
@@ -124,6 +139,9 @@ main (void)
   /* Initialize file system. */
   ide_init ();
   locate_block_devices ();
+#ifdef VM
+  swap_init ();
+#endif
   filesys_init (format_filesys);
 #endif
 
@@ -256,6 +274,13 @@ parse_options (char **argv)
         random_init (atoi (value));
       else if (!strcmp (name, "-mlfqs"))
         thread_mlfqs = true;
+      else if (!strcmp (name, "-trace"))
+        trace_enabled = true;
+#ifdef VM
+      else if (!strcmp (name, "-evict"))
+        frame_policy = !strcmp (value, "fifo") ? EVICT_FIFO
+                     : !strcmp (value, "random") ? EVICT_RANDOM : EVICT_CLOCK;
+#endif
 #ifdef USERPROG
       else if (!strcmp (name, "-ul"))
         user_page_limit = atoi (value);
@@ -381,6 +406,8 @@ usage (void)
           "  -mlfqs             Use multi-level feedback queue scheduler.\n"
 #ifdef USERPROG
           "  -ul=COUNT          Limit user memory to COUNT pages.\n"
+          "  -trace             Record kernel events; dump them at power-off.\n"
+          "  -evict=POLICY      Eviction policy: clock (default), fifo, random.\n"
 #endif
           );
   shutdown_power_off ();

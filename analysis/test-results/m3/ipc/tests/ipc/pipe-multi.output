@@ -1,0 +1,47 @@
+Copying tests/ipc/pipe-multi to scratch partition...
+Copying tests/ipc/child-writer to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/uJuJnCvZRs.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run pipe-multi
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  733,184,000 loops/s.
+ide0: unexpected interrupt
+hda: 5,040 sectors (2 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 193 sectors (96 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 216 sectors (108 kB), Pintos scratch (22)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'pipe-multi' into the file system...
+Putting 'child-writer' into the file system...
+Erasing ustar archive...
+Executing 'pipe-multi':
+(pipe-multi) begin
+(pipe-multi) pipe
+child-writer: exit(0)
+(pipe-multi) started 3 writers
+child-writer: exit(0)
+child-writer: exit(0)
+(pipe-multi) all writers exited 0
+(pipe-multi) read 3000 bytes from each writer
+(pipe-multi) end
+pipe-multi: exit(0)
+Execution of 'pipe-multi' complete.
+Timer: 72 ticks
+Thread: 41 idle ticks, 28 kernel ticks, 3 user ticks
+hda2 (filesys): 199 reads, 438 writes
+hda3 (scratch): 215 reads, 2 writes
+Console: 1191 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...

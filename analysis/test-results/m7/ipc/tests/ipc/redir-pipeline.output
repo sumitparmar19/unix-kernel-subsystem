@@ -1,0 +1,52 @@
+Copying tests/ipc/redir-pipeline to scratch partition...
+Copying tests/ipc/child-echo to scratch partition...
+Copying tests/ipc/child-upper to scratch partition...
+Copying tests/ipc/child-cat to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/DqNTfznNSR.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run redir-pipeline
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  457,932,800 loops/s.
+ide0: unexpected interrupt
+hda: 5,040 sectors (2 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 203 sectors (101 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 382 sectors (191 kB), Pintos scratch (22)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'redir-pipeline' into the file system...
+Putting 'child-echo' into the file system...
+Putting 'child-upper' into the file system...
+Putting 'child-cat' into the file system...
+Erasing ustar archive...
+Executing 'redir-pipeline':
+(redir-pipeline) begin
+(redir-pipeline) two pipes
+child-echo: exit(0)
+PIPES CONNECT PROCESSES
+child-upper: exit(0)
+child-cat: exit(0)
+(redir-pipeline) all three processes exited 0
+(redir-pipeline) end
+redir-pipeline: exit(0)
+Execution of 'redir-pipeline' complete.
+Timer: 84 ticks
+Thread: 46 idle ticks, 37 kernel ticks, 1 user ticks
+hda2 (filesys): 247 reads, 774 writes
+hda3 (scratch): 381 reads, 2 writes
+Console: 1270 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+KSTAT-SYSCALLS 1=4 3=3 8=4 9=12 12=4 20=2 21=3
+KSTAT syscalls=32 ctx_switches=2742 lock_waits=0 page_faults=0 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=48 pipe_blocks=2 limit_denials=0 limit_kills=0
+Powering off...
