@@ -1,0 +1,37 @@
+make: Entering directory '/pintos/src/ipc/build'
+../../tests/make-grade ../.. results ../../tests/ipc/Grading | tee grade
+TOTAL TESTING SCORE: 100.0%
+ALL TESTED PASSED -- PERFECT SCORE
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+SUMMARY BY TEST SET
+
+Test Set                                      Pts Max  % Ttl  % Max
+--------------------------------------------- --- --- ------ ------
+tests/ipc/Rubric                               11/ 11 100.0%/100.0%
+--------------------------------------------- --- --- ------ ------
+Total                                                 100.0%/100.0%
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+SUMMARY OF INDIVIDUAL TESTS
+
+Pipes, redirection and dup2 (kernel-v2) (tests/ipc/Rubric):
+	     1/ 1 tests/ipc/pipe-basic
+	     1/ 1 tests/ipc/pipe-eof
+	     1/ 1 tests/ipc/pipe-full
+	     1/ 1 tests/ipc/pipe-no-reader
+	     1/ 1 tests/ipc/pipe-large
+	     1/ 1 tests/ipc/pipe-multi
+	     1/ 1 tests/ipc/pipe-bad-ptr
+	     1/ 1 tests/ipc/redirect-basic
+	     1/ 1 tests/ipc/redir-pipeline
+	     1/ 1 tests/ipc/dup2-basic
+	     1/ 1 tests/ipc/pipe-leak
+
+	- Section summary.
+	     11/ 11 tests passed
+	     11/ 11 points subtotal
+
+make: Leaving directory '/pintos/src/ipc/build'

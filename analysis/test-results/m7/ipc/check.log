@@ -1,0 +1,47 @@
+make: Entering directory '/pintos/src/ipc/build'
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/ipc/pipe-basic -a pipe-basic -- -q  -f run pipe-basic < /dev/null 2> tests/ipc/pipe-basic.errors > tests/ipc/pipe-basic.output
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/ipc/pipe-eof -a pipe-eof -- -q  -f run pipe-eof < /dev/null 2> tests/ipc/pipe-eof.errors > tests/ipc/pipe-eof.output
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/ipc/pipe-full -a pipe-full -p tests/ipc/child-drain -a child-drain -- -q  -f run pipe-full < /dev/null 2> tests/ipc/pipe-full.errors > tests/ipc/pipe-full.output
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/ipc/pipe-no-reader -a pipe-no-reader -- -q  -f run pipe-no-reader < /dev/null 2> tests/ipc/pipe-no-reader.errors > tests/ipc/pipe-no-reader.output
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/ipc/pipe-large -a pipe-large -p tests/ipc/child-sum -a child-sum -- -q  -f run pipe-large < /dev/null 2> tests/ipc/pipe-large.errors > tests/ipc/pipe-large.output
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/ipc/pipe-multi -a pipe-multi -p tests/ipc/child-writer -a child-writer -- -q  -f run pipe-multi < /dev/null 2> tests/ipc/pipe-multi.errors > tests/ipc/pipe-multi.output
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/ipc/pipe-bad-ptr -a pipe-bad-ptr -- -q  -f run pipe-bad-ptr < /dev/null 2> tests/ipc/pipe-bad-ptr.errors > tests/ipc/pipe-bad-ptr.output
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/ipc/redirect-basic -a redirect-basic -p tests/ipc/child-echo -a child-echo -- -q  -f run redirect-basic < /dev/null 2> tests/ipc/redirect-basic.errors > tests/ipc/redirect-basic.output
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/ipc/redir-pipeline -a redir-pipeline -p tests/ipc/child-echo -a child-echo -p tests/ipc/child-upper -a child-upper -p tests/ipc/child-cat -a child-cat -- -q  -f run redir-pipeline < /dev/null 2> tests/ipc/redir-pipeline.errors > tests/ipc/redir-pipeline.output
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/ipc/dup2-basic -a dup2-basic -- -q  -f run dup2-basic < /dev/null 2> tests/ipc/dup2-basic.errors > tests/ipc/dup2-basic.output
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/ipc/pipe-leak -a pipe-leak -p tests/ipc/child-echo -a child-echo -- -q  -f run pipe-leak < /dev/null 2> tests/ipc/pipe-leak.errors > tests/ipc/pipe-leak.output
+perl -I../.. ../../tests/ipc/pipe-basic.ck tests/ipc/pipe-basic tests/ipc/pipe-basic.result
+pass tests/ipc/pipe-basic
+perl -I../.. ../../tests/ipc/pipe-eof.ck tests/ipc/pipe-eof tests/ipc/pipe-eof.result
+pass tests/ipc/pipe-eof
+perl -I../.. ../../tests/ipc/pipe-full.ck tests/ipc/pipe-full tests/ipc/pipe-full.result
+pass tests/ipc/pipe-full
+perl -I../.. ../../tests/ipc/pipe-no-reader.ck tests/ipc/pipe-no-reader tests/ipc/pipe-no-reader.result
+pass tests/ipc/pipe-no-reader
+perl -I../.. ../../tests/ipc/pipe-large.ck tests/ipc/pipe-large tests/ipc/pipe-large.result
+pass tests/ipc/pipe-large
+perl -I../.. ../../tests/ipc/pipe-multi.ck tests/ipc/pipe-multi tests/ipc/pipe-multi.result
+pass tests/ipc/pipe-multi
+perl -I../.. ../../tests/ipc/pipe-bad-ptr.ck tests/ipc/pipe-bad-ptr tests/ipc/pipe-bad-ptr.result
+pass tests/ipc/pipe-bad-ptr
+perl -I../.. ../../tests/ipc/redirect-basic.ck tests/ipc/redirect-basic tests/ipc/redirect-basic.result
+pass tests/ipc/redirect-basic
+perl -I../.. ../../tests/ipc/dup2-basic.ck tests/ipc/dup2-basic tests/ipc/dup2-basic.result
+pass tests/ipc/dup2-basic
+perl -I../.. ../../tests/ipc/redir-pipeline.ck tests/ipc/redir-pipeline tests/ipc/redir-pipeline.result
+pass tests/ipc/redir-pipeline
+perl -I../.. ../../tests/ipc/pipe-leak.ck tests/ipc/pipe-leak tests/ipc/pipe-leak.result
+pass tests/ipc/pipe-leak
+pass tests/ipc/pipe-basic
+pass tests/ipc/pipe-eof
+pass tests/ipc/pipe-full
+pass tests/ipc/pipe-no-reader
+pass tests/ipc/pipe-large
+pass tests/ipc/pipe-multi
+pass tests/ipc/pipe-bad-ptr
+pass tests/ipc/redirect-basic
+pass tests/ipc/redir-pipeline
+pass tests/ipc/dup2-basic
+pass tests/ipc/pipe-leak
+All 11 tests passed.
+make: Leaving directory '/pintos/src/ipc/build'

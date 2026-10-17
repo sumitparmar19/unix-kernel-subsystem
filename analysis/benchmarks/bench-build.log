@@ -1,0 +1,6 @@
+make: Entering directory '/pintos/src/vm'
+cd build && make all
+make[1]: Entering directory '/pintos/src/vm/build'
+make[1]: Nothing to be done for 'all'.
+make[1]: Leaving directory '/pintos/src/vm/build'
+make: Leaving directory '/pintos/src/vm'

@@ -1,0 +1,94 @@
+Copying tests/ipc/pipe-leak to scratch partition...
+Copying tests/ipc/child-echo to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/ywVuf0VcGa.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run pipe-leak
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  855,244,800 loops/s.
+ide0: unexpected interrupt
+hda: 5,040 sectors (2 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 203 sectors (101 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 205 sectors (102 kB), Pintos scratch (22)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'pipe-leak' into the file system...
+Putting 'child-echo' into the file system...
+Erasing ustar archive...
+Executing 'pipe-leak':
+(pipe-leak) begin
+(pipe-leak) created and closed 500 pipes
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+child-echo: exit(0)
+(pipe-leak) ran 50 redirected children
+(pipe-leak) end
+pipe-leak: exit(0)
+Execution of 'pipe-leak' complete.
+Timer: 111 ticks
+Thread: 50 idle ticks, 41 kernel ticks, 20 user ticks
+hda2 (filesys): 1786 reads, 416 writes
+hda3 (scratch): 204 reads, 2 writes
+Console: 2071 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+KSTAT-SYSCALLS 1=51 3=50 8=100 9=104 12=1100 20=550 21=50
+KSTAT syscalls=2005 ctx_switches=4919 lock_waits=0 page_faults=0 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=100 pipe_blocks=0 limit_denials=0 limit_kills=0
+Powering off...
