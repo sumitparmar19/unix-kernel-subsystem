@@ -1,0 +1,22 @@
+{
+  "threads": {
+    "passed": 27,
+    "total": 27
+  },
+  "userprog": {
+    "passed": 80,
+    "total": 80
+  },
+  "ipc": {
+    "passed": 11,
+    "total": 11
+  },
+  "vm": {
+    "passed": 113,
+    "total": 113
+  },
+  "limits": {
+    "passed": 6,
+    "total": 6
+  }
+}

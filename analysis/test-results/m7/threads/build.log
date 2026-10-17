@@ -1,0 +1,109 @@
+make: Entering directory '/pintos/src/threads'
+mkdir -p build/devices
+mkdir -p build/lib
+mkdir -p build/lib/kernel
+mkdir -p build/lib/user
+mkdir -p build/tests/threads
+mkdir -p build/threads
+cp ../Makefile.build build/Makefile
+cd build && make all
+make[1]: Entering directory '/pintos/src/threads/build'
+gcc -m32 -E -nostdinc -I../.. -I../../lib -I../../lib/kernel -P ../../threads/kernel.lds.S > threads/kernel.lds.s
+gcc -m32 -c ../../threads/start.S -o threads/start.o -Wa,--gstabs -nostdinc -I../.. -I../../lib -I../../lib/kernel  -MMD -MF threads/start.d
+gcc -m32 -c ../../threads/init.c -o threads/init.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF threads/init.d
+../../threads/init.c: In function 'main':
+<built-in>: warning: function declared 'noreturn' has a 'return' statement
+gcc -m32 -c ../../threads/thread.c -o threads/thread.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF threads/thread.d
+gcc -m32 -c ../../threads/switch.S -o threads/switch.o -Wa,--gstabs -nostdinc -I../.. -I../../lib -I../../lib/kernel  -MMD -MF threads/switch.d
+gcc -m32 -c ../../threads/interrupt.c -o threads/interrupt.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF threads/interrupt.d
+gcc -m32 -c ../../threads/intr-stubs.S -o threads/intr-stubs.o -Wa,--gstabs -nostdinc -I../.. -I../../lib -I../../lib/kernel  -MMD -MF threads/intr-stubs.d
+gcc -m32 -c ../../threads/synch.c -o threads/synch.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF threads/synch.d
+gcc -m32 -c ../../threads/palloc.c -o threads/palloc.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF threads/palloc.d
+gcc -m32 -c ../../threads/malloc.c -o threads/malloc.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF threads/malloc.d
+gcc -m32 -c ../../threads/kstat.c -o threads/kstat.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -Werror  -MMD -MF threads/kstat.d
+gcc -m32 -c ../../threads/trace.c -o threads/trace.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers -Werror  -MMD -MF threads/trace.d
+gcc -m32 -c ../../devices/pit.c -o devices/pit.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF devices/pit.d
+gcc -m32 -c ../../devices/timer.c -o devices/timer.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF devices/timer.d
+gcc -m32 -c ../../devices/kbd.c -o devices/kbd.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF devices/kbd.d
+gcc -m32 -c ../../devices/vga.c -o devices/vga.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF devices/vga.d
+gcc -m32 -c ../../devices/serial.c -o devices/serial.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF devices/serial.d
+gcc -m32 -c ../../devices/block.c -o devices/block.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF devices/block.d
+gcc -m32 -c ../../devices/partition.c -o devices/partition.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF devices/partition.d
+gcc -m32 -c ../../devices/ide.c -o devices/ide.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF devices/ide.d
+gcc -m32 -c ../../devices/input.c -o devices/input.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF devices/input.d
+gcc -m32 -c ../../devices/intq.c -o devices/intq.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF devices/intq.d
+gcc -m32 -c ../../devices/rtc.c -o devices/rtc.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF devices/rtc.d
+gcc -m32 -c ../../devices/shutdown.c -o devices/shutdown.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF devices/shutdown.d
+gcc -m32 -c ../../devices/speaker.c -o devices/speaker.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF devices/speaker.d
+gcc -m32 -c ../../lib/debug.c -o lib/debug.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF lib/debug.d
+../../lib/debug.c: In function 'debug_backtrace':
+../../lib/debug.c:19:16: warning: calling '__builtin_frame_address' with a nonzero argument is unsafe [-Wframe-address]
+   19 |   for (frame = __builtin_frame_address (1);
+      |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+gcc -m32 -c ../../lib/random.c -o lib/random.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF lib/random.d
+gcc -m32 -c ../../lib/stdio.c -o lib/stdio.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF lib/stdio.d
+gcc -m32 -c ../../lib/stdlib.c -o lib/stdlib.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF lib/stdlib.d
+gcc -m32 -c ../../lib/string.c -o lib/string.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF lib/string.d
+In file included from ../../lib/string.c:2:
+../../lib/string.c: In function 'strchr':
+../../lib/debug.h:32:12: warning: 'nonnull' argument 'string' compared to NULL [-Wnonnull-compare]
+   32 |         if (CONDITION) { } else {                               \
+      |            ^
+../../lib/string.c:117:3: note: in expansion of macro 'ASSERT'
+  117 |   ASSERT (string != NULL);
+      |   ^~~~~~
+../../lib/string.c: In function 'strlen':
+../../lib/debug.h:32:12: warning: 'nonnull' argument 'string' compared to NULL [-Wnonnull-compare]
+   32 |         if (CONDITION) { } else {                               \
+      |            ^
+../../lib/string.c:297:3: note: in expansion of macro 'ASSERT'
+  297 |   ASSERT (string != NULL);
+      |   ^~~~~~
+gcc -m32 -c ../../lib/arithmetic.c -o lib/arithmetic.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF lib/arithmetic.d
+gcc -m32 -c ../../lib/ustar.c -o lib/ustar.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF lib/ustar.d
+gcc -m32 -c ../../lib/kernel/debug.c -o lib/kernel/debug.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF lib/kernel/debug.d
+../../lib/kernel/debug.c: In function 'print_stacktrace':
+../../lib/kernel/debug.c:82:15: warning: calling '__builtin_frame_address' with a nonzero argument is unsafe [-Wframe-address]
+   82 |       frame = __builtin_frame_address (1);
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+gcc -m32 -c ../../lib/kernel/list.c -o lib/kernel/list.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF lib/kernel/list.d
+gcc -m32 -c ../../lib/kernel/bitmap.c -o lib/kernel/bitmap.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF lib/kernel/bitmap.d
+gcc -m32 -c ../../lib/kernel/hash.c -o lib/kernel/hash.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF lib/kernel/hash.d
+gcc -m32 -c ../../lib/kernel/console.c -o lib/kernel/console.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF lib/kernel/console.d
+gcc -m32 -c ../../tests/threads/tests.c -o tests/threads/tests.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/threads/tests.d
+gcc -m32 -c ../../tests/threads/alarm-wait.c -o tests/threads/alarm-wait.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/threads/alarm-wait.d
+../../tests/threads/alarm-wait.c: In function 'test_sleep':
+../../tests/threads/alarm-wait.c:92:46: warning: 'snprintf' output may be truncated before the last format character [-Wformat-truncation=]
+   92 |       snprintf (name, sizeof name, "thread %d", i);
+      |                                              ^
+../../tests/threads/alarm-wait.c:92:7: note: 'snprintf' output between 9 and 17 bytes into a destination of size 16
+   92 |       snprintf (name, sizeof name, "thread %d", i);
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+gcc -m32 -c ../../tests/threads/alarm-simultaneous.c -o tests/threads/alarm-simultaneous.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/threads/alarm-simultaneous.d
+gcc -m32 -c ../../tests/threads/alarm-priority.c -o tests/threads/alarm-priority.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/threads/alarm-priority.d
+gcc -m32 -c ../../tests/threads/alarm-zero.c -o tests/threads/alarm-zero.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/threads/alarm-zero.d
+gcc -m32 -c ../../tests/threads/alarm-negative.c -o tests/threads/alarm-negative.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/threads/alarm-negative.d
+gcc -m32 -c ../../tests/threads/priority-change.c -o tests/threads/priority-change.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/threads/priority-change.d
+gcc -m32 -c ../../tests/threads/priority-donate-one.c -o tests/threads/priority-donate-one.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/threads/priority-donate-one.d
+gcc -m32 -c ../../tests/threads/priority-donate-multiple.c -o tests/threads/priority-donate-multiple.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/threads/priority-donate-multiple.d
+gcc -m32 -c ../../tests/threads/priority-donate-multiple2.c -o tests/threads/priority-donate-multiple2.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/threads/priority-donate-multiple2.d
+gcc -m32 -c ../../tests/threads/priority-donate-nest.c -o tests/threads/priority-donate-nest.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/threads/priority-donate-nest.d
+gcc -m32 -c ../../tests/threads/priority-donate-sema.c -o tests/threads/priority-donate-sema.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/threads/priority-donate-sema.d
+gcc -m32 -c ../../tests/threads/priority-donate-lower.c -o tests/threads/priority-donate-lower.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/threads/priority-donate-lower.d
+gcc -m32 -c ../../tests/threads/priority-fifo.c -o tests/threads/priority-fifo.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/threads/priority-fifo.d
+gcc -m32 -c ../../tests/threads/priority-preempt.c -o tests/threads/priority-preempt.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/threads/priority-preempt.d
+gcc -m32 -c ../../tests/threads/priority-sema.c -o tests/threads/priority-sema.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/threads/priority-sema.d
+gcc -m32 -c ../../tests/threads/priority-condvar.c -o tests/threads/priority-condvar.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/threads/priority-condvar.d
+gcc -m32 -c ../../tests/threads/priority-donate-chain.c -o tests/threads/priority-donate-chain.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/threads/priority-donate-chain.d
+gcc -m32 -c ../../tests/threads/mlfqs-load-1.c -o tests/threads/mlfqs-load-1.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/threads/mlfqs-load-1.d
+gcc -m32 -c ../../tests/threads/mlfqs-load-60.c -o tests/threads/mlfqs-load-60.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/threads/mlfqs-load-60.d
+gcc -m32 -c ../../tests/threads/mlfqs-load-avg.c -o tests/threads/mlfqs-load-avg.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/threads/mlfqs-load-avg.d
+gcc -m32 -c ../../tests/threads/mlfqs-recent-1.c -o tests/threads/mlfqs-recent-1.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/threads/mlfqs-recent-1.d
+gcc -m32 -c ../../tests/threads/mlfqs-fair.c -o tests/threads/mlfqs-fair.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/threads/mlfqs-fair.d
+gcc -m32 -c ../../tests/threads/mlfqs-block.c -o tests/threads/mlfqs-block.o -g -msoft-float -O -march=i686 -fno-stack-protector -fno-pie -nostdinc -I../.. -I../../lib -I../../lib/kernel -Wall -W -Wstrict-prototypes -Wmissing-prototypes -Wsystem-headers  -MMD -MF tests/threads/mlfqs-block.d
+ld -melf_i386 -T threads/kernel.lds.s -o kernel.o threads/start.o threads/init.o threads/thread.o threads/switch.o threads/interrupt.o threads/intr-stubs.o threads/synch.o threads/palloc.o threads/malloc.o threads/kstat.o threads/trace.o devices/pit.o devices/timer.o devices/kbd.o devices/vga.o devices/serial.o devices/block.o devices/partition.o devices/ide.o devices/input.o devices/intq.o devices/rtc.o devices/shutdown.o devices/speaker.o lib/debug.o lib/random.o lib/stdio.o lib/stdlib.o lib/string.o lib/arithmetic.o lib/ustar.o lib/kernel/debug.o lib/kernel/list.o lib/kernel/bitmap.o lib/kernel/hash.o lib/kernel/console.o tests/threads/tests.o tests/threads/alarm-wait.o tests/threads/alarm-simultaneous.o tests/threads/alarm-priority.o tests/threads/alarm-zero.o tests/threads/alarm-negative.o tests/threads/priority-change.o tests/threads/priority-donate-one.o tests/threads/priority-donate-multiple.o tests/threads/priority-donate-multiple2.o tests/threads/priority-donate-nest.o tests/threads/priority-donate-sema.o tests/threads/priority-donate-lower.o tests/threads/priority-fifo.o tests/threads/priority-preempt.o tests/threads/priority-sema.o tests/threads/priority-condvar.o tests/threads/priority-donate-chain.o tests/threads/mlfqs-load-1.o tests/threads/mlfqs-load-60.o tests/threads/mlfqs-load-avg.o tests/threads/mlfqs-recent-1.o tests/threads/mlfqs-fair.o tests/threads/mlfqs-block.o
+objcopy -R .note -R .comment -S kernel.o kernel.bin
+gcc -m32 -c ../../threads/loader.S -o threads/loader.o -Wa,--gstabs -nostdinc -I../.. -I../../lib 
+ld -melf_i386 -N -e 0 -Ttext 0x7c00 --oformat binary -o loader.bin threads/loader.o
+make[1]: Leaving directory '/pintos/src/threads/build'
+make: Leaving directory '/pintos/src/threads'

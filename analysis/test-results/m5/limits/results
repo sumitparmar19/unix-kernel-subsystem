@@ -1,0 +1,5 @@
+pass tests/limits/fork-bomb
+pass tests/limits/fd-exhaust
+pass tests/limits/cpu-spin
+pass tests/limits/getlimit
+pass tests/limits/neighbor

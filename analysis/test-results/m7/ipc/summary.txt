@@ -1,0 +1,4 @@
+project:  ipc
+passed:   11 / 11
+runtime:  4 s (make check, -j4, --qemu)
+failing:

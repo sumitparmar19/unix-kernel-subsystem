@@ -12,11 +12,11 @@ if [ "$#" -gt 0 ]; then
   projects=("$@")
 else
   projects=()
-  for p in threads userprog vm filesys; do
+  for p in threads userprog vm filesys ipc limits; do
     [ -f "$SRC/$p/Make.vars" ] && projects+=("$p")
   done
   if [ "${#projects[@]}" -eq 0 ]; then
-    echo "No Pintos projects found under $SRC (expected threads/, userprog/, vm/ or filesys/)." >&2
+    echo "No Pintos projects found under $SRC (expected threads/, userprog/, vm/, filesys/, ipc/ or limits/)." >&2
     exit 2
   fi
 fi
@@ -71,6 +71,24 @@ for p in "${projects[@]}"; do
     echo "failing:"
     grep '^FAIL ' "$out/verdicts.txt" | sed 's/^FAIL /  /'
   } | tee "$out/summary.txt"
+
+  # Machine-readable results: one entry per test with its verdict and the
+  # kernel's own run time in timer ticks (100 ticks = 1 simulated second).
+  {
+    printf '{\n  "project": "%s",\n  "passed": %d,\n  "total": %d,\n' \
+      "$p" "$pass" "$((pass + fail))"
+    printf '  "wall_seconds": %d,\n  "jobs": %d,\n  "simulator": "%s",\n  "tests": [\n' \
+      "$((end - start))" "$JOBS" "${SIMULATOR:-default}"
+    first=1
+    while read -r verdict t; do
+      ticks=$(sed -n 's/^Timer: \([0-9]*\) ticks$/\1/p' "$out/$t.output" 2>/dev/null | tail -1)
+      [ "$first" -eq 1 ] || printf ',\n'
+      first=0
+      printf '    {"name": "%s", "result": "%s", "ticks": %s}' \
+        "$t" "$verdict" "${ticks:-null}"
+    done <"$out/verdicts.txt"
+    printf '\n  ]\n}\n'
+  } >"$out/results.json"
   [ "$fail" -eq 0 ] || status=1
 done
 exit $status

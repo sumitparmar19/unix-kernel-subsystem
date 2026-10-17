@@ -1,0 +1,4 @@
+project:  vm
+passed:   113 / 113
+runtime:  31 s (make check, -j4, --qemu)
+failing:

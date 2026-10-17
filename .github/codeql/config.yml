@@ -1,0 +1,12 @@
+name: kernel-v2 CodeQL config
+# Analyse the kernel; the imported Stanford Pintos base and the test
+# programs are not our code to fix, so scope queries to what kernel-v2
+# changed plus the core kernel it touches.
+paths:
+  - src/userprog
+  - src/threads
+  - src/devices
+paths-ignore:
+  - src/tests
+  - src/examples
+  - src/lib

@@ -1,0 +1,73 @@
+name: kernel-v2 CI
+
+# Builds the kernel in Docker and runs the test suites, a short fuzz,
+# and static analysis.  Fails on any regression against
+# analysis/expected-results.json.
+
+on:
+  push:
+    branches: [kernel-v2, main]
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [threads, userprog, ipc, vm, limits]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t pintos-kernel .
+      - name: Run ${{ matrix.suite }}
+        run: |
+          mkdir -p results
+          docker run --rm -e JOBS=2 -v "$PWD/results:/results" pintos-kernel ${{ matrix.suite }}
+      - name: Check against expected pass counts
+        run: python3 scripts/check_results.py analysis/expected-results.json results/${{ matrix.suite }}/results.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: results-${{ matrix.suite }}
+          path: results/
+
+  fuzz:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t pintos-kernel .
+      - name: Fuzz the system-call layer (fixed seeds)
+        run: |
+          docker run --rm --entrypoint bash pintos-kernel \
+            -c 'PINTOS_SRC=/pintos-src bash /pintos/scripts/fuzz.sh -k userprog -s 1 -n 5 -i 2000 -t 200'
+
+  static-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: cppcheck
+        run: |
+          sudo apt-get update && sudo apt-get install -y cppcheck
+          # Analyse the kernel-v2 modules; fail on a genuine error.
+          cppcheck --std=c99 --error-exitcode=1 --quiet \
+            --suppress=missingIncludeSystem --suppress=unusedFunction \
+            src/userprog/umem.c src/userprog/ofile.c src/userprog/pipe.c \
+            src/threads/kstat.c src/threads/trace.c
+
+  codeql:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: c-cpp
+          config-file: ./.github/codeql/config.yml
+      - name: Build kernel for CodeQL
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential gcc-multilib perl
+          make -C src/userprog
+      - uses: github/codeql-action/analyze@v3

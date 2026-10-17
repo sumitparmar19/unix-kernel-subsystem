@@ -1,0 +1,45 @@
+Copying tests/ipc/pipe-large to scratch partition...
+Copying tests/ipc/child-sum to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/y_KAgD4fsh.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run pipe-large
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  637,337,600 loops/s.
+ide0: unexpected interrupt
+hda: 5,040 sectors (2 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 193 sectors (96 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 203 sectors (101 kB), Pintos scratch (22)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'pipe-large' into the file system...
+Putting 'child-sum' into the file system...
+Erasing ustar archive...
+Executing 'pipe-large':
+(pipe-large) begin
+(pipe-large) pipe
+(pipe-large) start checksum child
+(pipe-large) wrote 1048576 bytes
+child-sum: exit(1653322515)
+(pipe-large) child's checksum matches
+(pipe-large) end
+pipe-large: exit(0)
+Execution of 'pipe-large' complete.
+Timer: 78 ticks
+Thread: 42 idle ticks, 30 kernel ticks, 6 user ticks
+hda2 (filesys): 118 reads, 412 writes
+hda3 (scratch): 202 reads, 2 writes
+Console: 1144 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...

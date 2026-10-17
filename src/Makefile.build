@@ -21,6 +21,8 @@ threads_SRC += threads/intr-stubs.S	# Interrupt stubs.
 threads_SRC += threads/synch.c		# Synchronization.
 threads_SRC += threads/palloc.c		# Page allocator.
 threads_SRC += threads/malloc.c		# Subpage allocator.
+threads_SRC += threads/kstat.c		# Statistics counters.
+threads_SRC += threads/trace.c		# Event tracing.
 
 # Device driver code.
 devices_SRC  = devices/pit.c		# Programmable interrupt timer chip.
@@ -60,9 +62,16 @@ userprog_SRC += userprog/exception.c	# User exception handler.
 userprog_SRC += userprog/syscall.c	# System call handler.
 userprog_SRC += userprog/gdt.c		# GDT initialization.
 userprog_SRC += userprog/tss.c		# TSS management.
+userprog_SRC += userprog/umem.c		# Validated user-memory access.
+userprog_SRC += userprog/ofile.c	# Open-file objects, fd tables.
+userprog_SRC += userprog/pipe.c		# Pipes.
+userprog_SRC += userprog/rlimit.c	# Resource limits.
 
-# No virtual memory code yet.
-#vm_SRC = vm/file.c			# Some file.
+# Virtual memory (docs/adr/ADR-003).
+vm_SRC  = vm/frame.c			# Frame table and eviction.
+vm_SRC += vm/page.c			# Supplemental page table.
+vm_SRC += vm/swap.c			# Swap.
+vm_SRC += vm/mmap.c			# Memory-mapped files.
 
 # Filesystem code.
 filesys_SRC  = filesys/filesys.c	# Filesystem core.
@@ -75,6 +84,11 @@ filesys_SRC += filesys/fsutil.c		# Utilities.
 SOURCES = $(foreach dir,$(KERNEL_SUBDIRS),$($(dir)_SRC))
 OBJECTS = $(patsubst %.c,%.o,$(patsubst %.S,%.o,$(SOURCES)))
 DEPENDS = $(patsubst %.o,%.d,$(OBJECTS))
+
+# Post-course modules build warning-free.
+threads/kstat.o threads/trace.o userprog/umem.o userprog/ofile.o \
+userprog/pipe.o userprog/rlimit.o vm/frame.o vm/page.o vm/swap.o \
+vm/mmap.o: WARNINGS += -Werror
 
 threads/kernel.lds.s: CPPFLAGS += -P
 threads/kernel.lds.s: threads/kernel.lds.S threads/loader.h

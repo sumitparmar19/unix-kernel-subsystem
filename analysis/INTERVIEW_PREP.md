@@ -218,3 +218,292 @@ Sumit should replace or extend them with what he actually remembers debugging.
   always **before** taking `filesys_lock`; `kill` sets exit status −1 on user faults.
 - **Result:** All `*-bad-ptr`, `*-null`, `*-bad-fd` and `sc-bad-sp` tests pass. The remaining cases
   (strings or arguments crossing a page boundary) are the known gap in Q3.
+
+## 4. Post-course changes (kernel-v2, written with AI pair-programming assistance)
+
+### M1 · Priority donation rewrite (`priority-donate-multiple2` now passes; threads 27/27)
+**What changed.** The course code cached donations in `lock->max_priority` (and `sema->max_priority`).
+That cache only ever grew, and `lock_release` read it through a thread comparator on a list of locks
+(Q5). The rewrite removes the cache. One function, `thread_recompute_priority (t)` (`thread.c`),
+derives `t->priority` from live state:
+
+    priority = max (base_Priority, priority of every thread in the waiter list of every lock t holds)
+
+It runs whenever a donation can end or a base priority changes: in `lock_release` (after the lock
+leaves `locks_held`), in `lock_acquire` once the lock is obtained (waiters still queued on it now
+donate to the new holder), and in `thread_set_priority`. It re-sorts the thread in the ready list if
+its priority changed.
+
+**Donation itself** is still `donate_chain`: walk `waiting_on → holder → holder's waiting_on`, up to
+8 levels, raising each holder to the donor's priority, stopping early once a holder is already at
+least that high. A raise can't disagree with the recompute, because `lock_acquire` keeps interrupts
+off from the donation until `sema_down` has put the donor on the lock's waiter list.
+
+**Other fixes in the same change.**
+- Semaphore-level donation removed from `sema_down`. A semaphore has no owner; `sema->holder` was just
+  the last thread to call down, so donating to it was wrong (it affected `wait`'s semaphore).
+- `lock_try_acquire` now adds the lock to `locks_held`; before, releasing a lock taken that way
+  removed an element that was never in the list.
+- `lock_release` keeps interrupts off through `sema_up`, so no thread can see `holder == NULL` while
+  the semaphore is still taken (and skip donating).
+
+**Trade-off to be ready for.** Recomputing walks every waiter of every held lock: O(locks × waiters)
+per release instead of O(locks). In Pintos those lists are a handful of threads, and a cache that has
+to be kept correct on every waiter change is exactly what caused the bug. Correct by construction
+was worth more than the constant factor.
+
+### M1 · Process lifecycle redesign (ADR-002) and file-system locking
+**What changed** (`userprog/process.[ch]`):
+- **Shared child record.** The parent allocates `struct child_record` *before* `thread_create` and hands
+  it to the child with the command line. Parent and child each hold one reference (`refs = 2`). Each
+  drops it exactly once (`child_record_release`), and the last one frees it. That replaced
+  `thread_get_by_tid`, which looked the child up after it might already have exited.
+- **Load handshake.** `exec` blocks on `load_sema` until the child reports `load_ok`. A missing program
+  now returns −1 (`exec-missing`), and a failed load exits with −1, because `exit_status` now defaults
+  to −1.
+- **Exit order.** Print `name: exit(n)` → close files and the executable → orphan our own children (drop
+  our references) → destroy the page directory → *then* publish the status and wake the parent. A
+  parent that wakes from `wait` sees the child's memory already freed (`multi-oom` passes).
+- **File-system lock in `load`.** `load` holds `filesys_lock` for every file access. Before, ten children
+  loading at once raced inside the non-thread-safe file system, and some failed to open their own
+  executable (`syn-read`/`syn-write` passed or failed depending on timing).
+- **Write-protected executables.** `load` keeps the executable open with `file_deny_write`;
+  `process_exit` closes it, which re-allows writes (`rox-*`).
+- **`cond_signal`** orders waiters by the thread recorded in `cond_wait`, instead of peeking at a
+  semaphore waiter list that can still be empty.
+
+**Interview question:** *"Why a refcount instead of letting the parent free the record?"* Either side can
+finish first. If the parent frees it, an orphaned child would write into freed memory when it exits; if
+the child frees it, a parent that waits later reads freed memory. Two owners with a count is the
+smallest design where neither order breaks.
+
+### M2 · Page-table validation of every user pointer (ADR-001)
+**What changed.** One module, `userprog/umem.c`, is the only code that touches user memory for a
+system call. `validate_range (uaddr, size, write)` walks **every page** of the range and requires each
+to be below `PHYS_BASE`, present in the process's page directory, and writable if the kernel will write
+it. Strings are checked page by page while scanning for the NUL. The syscall dispatcher reads the
+number and every argument word through `copy_in`; paths and command lines are copied into kernel
+buffers before use; read/write buffers are validated in full before the copy.
+
+**Why the old code failed.** It checked one byte. An argument slot sitting above `PHYS_BASE` was read
+straight out of kernel memory (`sc-bad-arg` "exited" with a kernel word), and data crossing into an
+unmapped page faulted *inside the kernel*, which panicked the whole machine (`sc-boundary-3`,
+`exec-bound-2/3`).
+
+**Interview question:** *"Why validate and then copy, rather than just copying and catching the
+fault?"* Both are legitimate (Pintos documents the fault-based `get_user`). Validation keeps every
+access decision in one auditable function and states the invariant explicitly; it costs one page-table
+walk per page touched. The fault handler still keeps a safety net: a kernel fault on a user address
+kills only the process.
+
+### M3 · Real IPC: pipes, `exec_redirect`, `dup2` (ADR-005)
+**What changed.**
+- A descriptor now points to a reference-counted **open-file object** (`userprog/ofile.c`): a file, a pipe
+  end, or the console. fd 0 and fd 1 are ordinary slots holding the console objects, so redirection just
+  puts a different object there. `read`/`write` dispatch on the object type, not the descriptor number.
+- **Pipe** (`userprog/pipe.c`): a 4096-byte ring buffer, one lock, and two condition variables
+  (`readable`, `writable`). `read` blocks while empty and a writer exists, and returns 0 at EOF. `write`
+  blocks while full and a reader exists, writes everything, and returns −1 if no reader exists. Closing an
+  end broadcasts both conditions so blocked peers re-check.
+- **`exec_redirect(cmd, in, out)`** is like `posix_spawn` with file actions: the child's fd 0/1 are the
+  parent's objects (shared, refcounted). **`dup2`** follows POSIX.
+- `minish` (`examples/minish.c`) runs `a | b | c`, closing its own pipe ends after each spawn so the next
+  stage sees EOF.
+
+**Proof.** `tests/ipc` 11/11: basic, EOF, a writer blocking on a full pipe, write with no reader,
+1 MB checksummed through a 4 KB pipe, three writers sharing one pipe, a bad pointer (killed, kernel
+fine), redirection, a three-process pipeline, `dup2` (shared offsets, stdout to a file and back), and
+550 pipes created and destroyed without leaking kernel memory.
+
+**Interview questions.**
+- *"How does the reader know the writer is done?"* EOF means no write-end **objects** remain. A pipe
+  counts objects, not descriptors: several descriptors (in several processes) can share one object, so
+  EOF arrives only when the last one closes. That's why `minish` must close its own copy of each write
+  end, or the last stage would wait forever.
+- *"Why condition variables in a `while` loop?"* Pintos condition variables are Mesa-style: a woken
+  thread re-acquires the lock later, and the state may have changed in between (another reader took the
+  data). The loop re-checks the condition.
+- *"Can pipes deadlock with the file system?"* No, by lock order: a thread holding a pipe lock never takes
+  `filesys_lock`, and the reverse never happens either. User buffers are validated **before** the pipe
+  lock is taken.
+- *"What's the one deliberate deviation from POSIX?"* No `SIGPIPE` (Pintos has no signals), so writing to
+  a pipe with no reader just returns −1. Also, closing the console descriptors is a no-op, to keep the
+  stock Pintos contract.
+
+### M4 · Fuzzing, stress, observability and CI
+**Fuzzer.** A user program (`examples/fuzz.c`) that makes random system calls with hostile arguments
+(bad pointers, pointers straddling `PHYS_BASE`, junk descriptors, huge sizes, unknown call numbers).
+Children split in two: *survivors* make only non-blocking valid-but-hostile calls and run to completion
+(so their call count is real — 125,000 over 25 seeds), and *bombs* pass bad pointers and must be killed
+by the kernel. A kernel panic or a hang fails the run; a killed bomb is the kernel working.
+
+**Why both kinds?** A child that passes a bad pointer is killed on that call, so it can't also prove
+"thousands of calls ran". Separating the two gives an honest large call count *and* exercises the kill
+path. Verified the fuzzer's class catches real regressions: `sc-boundary-3` panics the course
+submission but passes on kernel-v2.
+
+**Observability.** Counters (`kstat`) and a `-trace` ring buffer dumped at power-off, after the test
+checker's cut-off line so tests are unaffected. `scripts/trace2perfetto.py` turns a dump into a
+Perfetto timeline; the committed `priority-donation.json` shows donation unblocking a chain.
+
+**CI** gates every push: it fails if any suite's pass count drops below the recorded baseline
+(`expected-results.json`), runs a short fuzz, and runs cppcheck and CodeQL on the kernel sources.
+
+**Interview question:** *"How do you know your fuzzer actually tests anything, rather than dying
+immediately?"* The survivor children are the answer: each completes a fixed number of calls and exits
+with a recognisable code, so the parent counts only calls that genuinely ran. 125,000 of them, zero
+panics. And the same harness panics the old kernel on `sc-boundary-3`, which shows the checks are what's
+holding the line.
+
+### M5 · Resource limits, "cgroups-lite" (ADR-004)
+**What changed.** Four limits (`userprog/rlimit.c`): live processes and user pages are capped across a
+process **subtree** (a shared, reference-counted `struct rgroup`), while open descriptors and CPU time
+are **per process** and inherited by value. `setlimit` can only lower a limit; `getlimit` reads it; a
+new `uptime` returns timer ticks. Enforcement sits at the natural choke points: `process_execute`
+(fork bomb), the timer interrupt + `intr_handler` kill (CPU spinner), `open`/`pipe`/`dup2` (descriptor
+leak), and the user-page allocator (memory hog).
+
+**Why subtree scope for processes?** *This is the key design question.* A per-process child limit cannot
+stop a fork bomb: each new child would get its own fresh allowance and spawn N more, so the tree still
+explodes. Process and memory caps must be accounted over the whole subtree, exactly as Linux cgroup v2
+does. Descriptors and CPU are naturally per-process, like `RLIMIT_NOFILE` and `RLIMIT_CPU`.
+
+**How is a pure CPU spinner killed if it makes no system calls?** The only kernel entry left is the
+timer interrupt. It decrements the running user process's budget; when the budget hits zero it flags the
+process, and `intr_handler` — which runs just after the external interrupt with `in_external_intr`
+already cleared, so it is back in process context — calls `thread_exit()`. That's the one safe place to
+terminate from the timer path.
+
+**Proof.** `tests/limits` 5/5, including `neighbor`: a well-behaved process started next to a
+self-limited fork bomb and a self-limited CPU spinner still finishes, and within a recorded `uptime`
+deadline. No regression across threads/userprog/ipc/vm, fuzzer still clean.
+
+**Interview question:** *"A tenant sets its own limit — can it then raise it to escape?"* No: `setlimit`
+refuses any value above the current cap, like lowering a hard `rlimit`. And a child can never exceed what
+its parent allowed, because limits are inherited (per-process by value, subtree by shared group) and only
+ever tightened.
+
+### M6 · Demand-paged virtual memory (ADR-003)
+**What changed.** Four modules: a per-process **supplemental page table** (what each user page holds and
+how to fetch it), a global **frame table** with **clock** eviction, **swap** over the swap disk, and
+**mmap**. Programs now load pages lazily on fault, the stack grows on demand, and cold pages are evicted
+to swap or written back to their file, so a working set larger than RAM runs fine. vm 113/113.
+
+**The bug worth telling.** `page-linear` failed with `byte 0 != 0x5a` after heavy swapping. An
+anonymous page written by the program, swapped out, then swapped back in, is clean again (fresh mapping)
+but its only copy of the data is now in RAM. My first eviction logic treated a clean anonymous page as
+"re-zero on next fault" and dropped it — losing the data. The fix is a sticky `dirtied` flag: once a
+page has ever held written data, it is always preserved in swap. Knowing exactly why that corrupted is
+a good systems story.
+
+**The classic deadlock.** `read` holds the file-system lock while filling the user's buffer; if a buffer
+page isn't resident, the fault handler needs the file system too → deadlock. The fix is pinning:
+`read`/`write` fault in and pin every buffer page before taking the lock, then unpin after. Lock order
+is `frame_lock` → `filesys_lock`/`swap_lock`, never the reverse.
+
+**Interview questions.**
+- *"How do you pick a victim?"* Clock / second chance: a hand sweeps frames; a frame whose accessed bit
+  is set gets the bit cleared and a second chance; the first with a clear bit is evicted. It approximates
+  LRU without per-access bookkeeping.
+- *"What happens on a stack access below the stack?"* If the faulting address is within 32 bytes of the
+  user `esp` (the `PUSHA` case) and inside the 8 MB limit, a fresh zero page is mapped; otherwise the
+  process is killed. During a system call the kernel uses the `esp` it saved on entry, since the fault's
+  `esp` is then a kernel address.
+- *"Why is this relevant beyond a class project?"* It's the same mechanism as OS paging generally, and
+  vLLM's PagedAttention applies exactly this idea — a page table, on-demand allocation, eviction — to a
+  GPU's KV cache. Sandboxing untrusted code (the project's theme) needs both this and the limits from M5.
+
+### M7 · Measuring the eviction policies (benchmarks + simulation)
+**What changed.** Made the eviction policy selectable at boot (`-evict=clock|fifo|random`) and built a
+measurement pipeline around it: `scripts/bench.sh` runs a matrix of policy × workload × RAM × seed and
+records the kernel's own `KSTAT` counters; `analysis/analyze.py` aggregates mean±std over 5 seeds into
+tables and charts; `analysis/simulate.py` is a trace-driven FIFO/LRU/CLOCK/OPT simulator; and
+`docs/benchmarks/` is a GitHub Pages site built from the live data.
+
+**The headline result.** At 4 MB RAM on `page-parallel` (four processes scanning large arrays), clock
+evicts ~3× fewer pages than FIFO and — the number that matters — swaps just **3** pages back in vs
+FIFO's **~320**. A swap-in means the policy evicted a page the program immediately needed again, so
+FIFO is doing hundreds of avoidable disk round-trips. On the write-heavy `page-merge-par`, FIFO thrashes
+so hard it never finishes in the time budget (0/5) while clock finishes in ~3 simulated seconds. Random
+sits between the two, with large run-to-run variance (that's the point of random).
+
+**The bug worth telling (this milestone).** Running the benchmark under memory sizes the suite never
+uses, with four parallel faulting processes, exposed a nondeterministic crash: the *parent* died
+returning into `eip=0` — a corrupted return address. Two races, both in the swap/eviction path:
+1. `swap_in` cleared the slot's bitmap bit *before* reading the slot, so a concurrent `swap_out` could
+   grab that slot and overwrite it mid-read, mixing two pages — including a stack page. Fix: read first,
+   free second.
+2. The evictor drops `frame_lock` across swap I/O (lock order). In the window after it cleared the
+   victim's page-table entry but before it recorded `has_swap`, the owner could fault and the loader
+   would zero-fill the page, dropping data headed to swap. Fix: an "evicting" barrier — the owner waits
+   on a condition variable until the evictor records where the data went.
+The lesson: a single green test run hides timing bugs; deliberate parallel stress at varied pressure is
+what surfaces them. Write-up in `analysis/benchmarks/BUGS-FOUND.md`.
+
+**Interview questions.**
+- *"Why is clock better than FIFO here?"* FIFO evicts by age alone, so it throws out hot pages that are
+  old; the accessed bit lets clock skip a page that was touched recently. The measured swap-in gap
+  (3 vs ~320) is exactly that difference in avoidable faults.
+- *"What is Belady's anomaly and does your kernel's policy have it?"* FIFO can fault *more* with more
+  frames; LRU and OPT (stack algorithms) never do. Clock is not a true stack algorithm, so it can too —
+  my simulator shows it on an adversarial string — but on real workloads it tracks LRU closely for one
+  reference bit per frame, which is why it's the default.
+- *"How did you make the numbers trustworthy?"* Five seeds per configuration with mean±std, the kernel's
+  own counters rather than wall-clock guesses, failed/timed-out runs recorded honestly rather than
+  dropped, and a one-command reproduction (`scripts/bench-run.sh`).
+
+## 5. Two more STAR stories from the post-course work
+
+### Bug 4: a parent crashing at `eip=0` under parallel paging (the swap race)
+- **Situation.** Building the M7 benchmark, `page-parallel` (four processes faulting at once) failed
+  nondeterministically — ~1 run in 10 at 4 MB, nearly every run at 5 MB — with the *parent* dying at
+  `eip=0`, i.e. returning into address 0.
+- **Task.** `eip=0` means a corrupted return address: a stack page's contents were lost across a
+  page-out/page-in while the parent was blocked in `wait`. I had to find which, in a path with the
+  frame lock deliberately dropped across I/O.
+- **Action.** I read the swap path adversarially and found two races. (1) `swap_in` cleared the slot's
+  bitmap bit *before* reading the slot, so a concurrent `swap_out` could grab and overwrite it
+  mid-read. (2) The evictor, after clearing the victim's PTE but before recording `has_swap`, left a
+  window where the owner could fault and the loader would zero-fill a page whose data was still
+  heading to swap. Fixes: read-then-free in `swap_in`, and an "evicting" barrier (a condition
+  variable the faulting owner waits on) around the eviction.
+- **Result.** Every previously-flaky configuration now passes (`page-parallel` 5/5 at 5 MB, was 0/5),
+  the full vm suite stays 113/113, and the paging curve is clean. Write-up:
+  `analysis/benchmarks/BUGS-FOUND.md`. The lesson I lead with: one green run hides timing bugs;
+  deliberate parallel stress at varied pressure is what surfaces them.
+
+### Bug 5: a kill the kernel didn't count
+- **Situation.** The demo's `cpu-spin` test is killed for exceeding its CPU budget, yet the kernel's
+  `KSTAT` line reported `limit_kills=0`.
+- **Task / Action.** The CPU-budget kill happens at external-interrupt return in `interrupt.c`
+  (`thread_over_cpu()` → `exit(-1)`), a path that never incremented the counter. One line:
+  `kstat_inc(KS_LIMIT_KILLS)` at the kill site.
+- **Result.** `cpu-spin` now reports `limit_kills=1`; observability matches behaviour. Small, but it's
+  the kind of gap that makes a metric lie, and I found it by cross-checking the demo output against
+  the counters rather than trusting either alone.
+
+## 6. Rapid-fire (crisp answers)
+
+- *"What is a swap-in and why do you report it?"* A page the policy evicted that the program needed
+  right back — a direct, avoidable cost. It's the single clearest quality signal between policies
+  (clock 3 vs FIFO ~320 on the same workload).
+- *"Why is clock the default, not LRU?"* Clock approximates LRU using one hardware accessed-bit per
+  frame instead of per-access bookkeeping, so it's cheap enough to run in the fault path. The
+  benchmark shows it tracking LRU's behaviour on real workloads.
+- *"What's your lock order and why?"* `frame_lock` → `filesys_lock`/`swap_lock`, never the reverse. A
+  thread holding the frame lock never does I/O; the evictor drops the frame lock before swap/file
+  I/O. That rule is what makes the pinning scheme deadlock-free.
+- *"How do you contain a fork bomb?"* A per-subtree process count charged on `exec` and released on
+  exit; over the cap, `exec` fails rather than the machine falling over. Pages are charged the same
+  way; fds and CPU time are per-process.
+- *"How is a CPU hog stopped if it makes no syscalls?"* The timer interrupt charges each tick to the
+  running process's budget and flags it; the kill check at interrupt return ends it — no syscall
+  needed.
+- *"How do you validate a user pointer that straddles a page boundary?"* Check every page the range
+  touches, not just the first; under VM, fault each in and pin it so the whole call sees resident
+  memory. Boundary tests (`sc-boundary-*`, `exec-bound-*`) cover exactly this.
+- *"What couldn't you claim?"* A true `fork`/`execve` split — `exec` is `posix_spawn`-style — and I
+  don't claim hand-written x86 assembly; I work with the interrupt frame, TSS and page tables from C.
+- *"Where does this matter in industry?"* It's the shape of a container/sandbox runtime: isolation,
+  resource caps, and paging. vLLM's PagedAttention applies the same page-table + eviction idea to a
+  GPU KV cache.

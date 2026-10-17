@@ -12,6 +12,8 @@
 #include "threads/synch.h"
 #include "threads/vaddr.h"
 #include "threads/fixed-point.h"
+#include "threads/kstat.h"
+#include "threads/trace.h"
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
@@ -77,7 +79,6 @@ static void schedule (void);
 void thread_schedule_tail (struct thread *prev);
 static tid_t allocate_tid (void);
 void mlfqs_update_priority(struct thread *t);
-struct thread *thread_get_by_tid (tid_t);
 
 
 bool higher_prio(const struct list_elem *a,
@@ -88,27 +89,85 @@ bool higher_prio(const struct list_elem *a,
   return t1->priority > t2->priority;
 }
 
-void
-donate_chain(struct thread *donor) {
-  if (thread_mlfqs) return;
-  int depth = 0;
-  struct lock *lk = donor->waiting_on;
-  while (lk && lk->holder && depth < 8) {
-    struct thread *h = lk->holder;
-    if (donor->priority > h->priority) {
-      h->priority = donor->priority;
-      if (h->status == THREAD_READY) {
-        /* reinsert to maintain ready_list order */
-        list_remove(&h->elem);
-        list_insert_ordered(&ready_list, &h->elem, higher_prio, NULL);
-      }
+/* Moves READY thread T to its place in ready_list after its
+   priority changed.  Interrupts must be off. */
+static void
+ready_list_reposition (struct thread *t)
+{
+  if (t->status == THREAD_READY)
+    {
+      list_remove (&t->elem);
+      list_insert_ordered (&ready_list, &t->elem, higher_prio, NULL);
     }
-    /* keep max of donations seen on this lock */
-    if (donor->priority > lk->max_priority)
-      lk->max_priority = donor->priority;
-    lk = h->waiting_on;
-    depth++;
-  }
+}
+
+/* Donates DONOR's priority along its chain of lock waits: to the
+   holder of the lock DONOR waits on, then to the holder of the
+   lock that thread waits on, and so on (at most 8 levels).
+
+   Donation only ever raises a holder to DONOR's priority, which is
+   exactly what thread_recompute_priority() would derive once DONOR
+   is on the lock's waiter list.  Callers keep interrupts off from
+   here until DONOR is on that list, so the two never disagree.
+   Interrupts must be off. */
+void
+donate_chain (struct thread *donor)
+{
+  struct lock *lk;
+  int depth;
+
+  ASSERT (intr_get_level () == INTR_OFF);
+  if (thread_mlfqs)
+    return;
+
+  for (lk = donor->waiting_on, depth = 0;
+       lk != NULL && lk->holder != NULL && depth < 8;
+       lk = lk->holder->waiting_on, depth++)
+    {
+      struct thread *h = lk->holder;
+      if (donor->priority <= h->priority)
+        break;
+      h->priority = donor->priority;
+      trace_event (TR_DONATE, h->priority);
+      ready_list_reposition (h);
+    }
+}
+
+/* Sets T's effective priority from its base priority and the
+   donations it currently receives: the highest priority of any
+   thread waiting on a lock T holds.  Donations are read live from
+   each lock's waiter list, so a donor that got the lock or stopped
+   waiting no longer counts.  Interrupts must be off. */
+void
+thread_recompute_priority (struct thread *t)
+{
+  struct list_elem *le, *we;
+  int eff;
+
+  ASSERT (intr_get_level () == INTR_OFF);
+  if (thread_mlfqs)
+    return;
+
+  eff = t->base_Priority;
+  for (le = list_begin (&t->locks_held); le != list_end (&t->locks_held);
+       le = list_next (le))
+    {
+      struct list *waiters =
+        &list_entry (le, struct lock, holder_elem)->semaphore.waiters;
+      for (we = list_begin (waiters); we != list_end (waiters);
+           we = list_next (we))
+        {
+          int p = list_entry (we, struct thread, elem)->priority;
+          if (p > eff)
+            eff = p;
+        }
+    }
+
+  if (eff != t->priority)
+    {
+      t->priority = eff;
+      ready_list_reposition (t);
+    }
 }
 
 /* Initializes the threading system by transforming the code
@@ -209,6 +268,17 @@ thread_tick(void) {
     intr_yield_on_return();
 }
 
+#ifdef USERPROG
+/* True if the running thread exhausted its CPU budget (set from the
+   timer interrupt).  intr_handler() turns this into a kill once it is
+   back in process context. */
+bool
+thread_over_cpu (void)
+{
+  return thread_current ()->over_cpu;
+}
+#endif
+
 /* Prints thread statistics. */
 void
 thread_print_stats (void) 
@@ -252,6 +322,7 @@ thread_create (const char *name, int priority,
   /* Initialize thread. */
   init_thread (t, name, priority);
   tid = t->tid = allocate_tid ();
+  trace_thread_name (tid, t->name);
 
   /* Stack frame for kernel_thread(). */
   kf = alloc_frame (t, sizeof *kf);
@@ -430,29 +501,14 @@ thread_set_priority (int new_priority)
   enum intr_level old = intr_disable ();
   struct thread *cur = thread_current ();
   cur->base_Priority = new_priority;
+  thread_recompute_priority (cur);
 
-  /* Compute effective priority = base + any donations */
-  int eff = new_priority;
-  struct list_elem *e;
-  for (e = list_begin (&cur->locks_held);
-       e != list_end (&cur->locks_held);
-       e = list_next (e))
-    {
-      struct lock *l = list_entry (e, struct lock, holder_elem);
-      if (l->max_priority > eff)
-        eff = l->max_priority;
-    }
-  cur->priority = eff;
+  /* Yield if a ready thread now outranks us. */
+  if (!list_empty (&ready_list)
+      && list_entry (list_front (&ready_list), struct thread, elem)->priority
+         > cur->priority)
+    thread_yield ();
   intr_set_level (old);
-
-  /* Preempt if any thread now higher priority */
-  if (!thread_mlfqs && !list_empty (&ready_list))
-    {
-      struct thread *front =
-        list_entry (list_front (&ready_list), struct thread, elem);
-      if (front->priority > cur->priority)
-        thread_yield ();
-    }
 }
 
 /* Returns the current thread's priority. */
@@ -631,23 +687,23 @@ init_thread (struct thread *t, const char *name, int priority)
   t->priority = priority;
   t->base_Priority = priority;
   t->magic = THREAD_MAGIC;
-  t->exit_status = 0;
 
-  list_init(&t->locks_held);
+  list_init (&t->locks_held);
   t->waiting_on = NULL;
 
-  // mlfqs fields
+  /* MLFQS fields. */
   t->nice = 0;
-  t->recent_cpu = CONVERT_TO_FP(0);
+  t->recent_cpu = CONVERT_TO_FP (0);
 
 #ifdef USERPROG
+  t->exit_status = -1;
+  t->rgroup = NULL;
+  t->max_fds = RLIMIT_NONE;
+  t->cpu_budget = RLIMIT_NONE;
+  t->charged_pages = 0;
+  t->over_cpu = false;
   list_init (&t->children);
-  t->parent_info = NULL;
-
-  list_init (&t->fd_list);
-  t->next_fd = 2;        /* 0 = stdin, 1 = stdout, others start at 2. */
 #endif
-
 
   if (thread_mlfqs && t != initial_thread) {
     struct thread *cur = running_thread();
@@ -755,7 +811,11 @@ schedule (void)
   ASSERT (is_thread (next));
 
   if (cur != next)
-    prev = switch_threads (cur, next);
+    {
+      kstat_inc (KS_CTX_SWITCHES);
+      trace_event (TR_SWITCH, next->tid);
+      prev = switch_threads (cur, next);
+    }
   thread_schedule_tail (prev);
 }
 
@@ -778,18 +838,11 @@ allocate_tid (void)
 
 
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);
-struct thread *
-thread_get_by_tid (tid_t tid)
+
+/* Returns the running thread's tid.  Unlike thread_tid(), safe to call
+   from any context, including inside the scheduler (for tracing). */
+int
+running_thread_tid (void)
 {
-  struct list_elem *e;
-
-  for (e = list_begin (&all_list); e != list_end (&all_list);
-       e = list_next (e))
-    {
-      struct thread *t = list_entry (e, struct thread, allelem);
-      if (t->tid == tid)
-        return t;
-    }
-  return NULL;
+  return running_thread ()->tid;
 }
-

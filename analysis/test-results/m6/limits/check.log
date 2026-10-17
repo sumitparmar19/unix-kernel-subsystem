@@ -1,0 +1,27 @@
+make: Entering directory '/pintos/src/limits/build'
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/limits/fork-bomb -a fork-bomb -p tests/limits/child-block -a child-block --swap-size=4 -- -q  -f run fork-bomb < /dev/null 2> tests/limits/fork-bomb.errors > tests/limits/fork-bomb.output
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/limits/fd-exhaust -a fd-exhaust --swap-size=4 -- -q  -f run fd-exhaust < /dev/null 2> tests/limits/fd-exhaust.errors > tests/limits/fd-exhaust.output
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/limits/cpu-spin -a cpu-spin --swap-size=4 -- -q  -f run cpu-spin < /dev/null 2> tests/limits/cpu-spin.errors > tests/limits/cpu-spin.output
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/limits/getlimit -a getlimit --swap-size=4 -- -q  -f run getlimit < /dev/null 2> tests/limits/getlimit.errors > tests/limits/getlimit.output
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/limits/neighbor -a neighbor -p tests/limits/abuser-fork -a abuser-fork -p tests/limits/abuser-spin -a abuser-spin -p tests/limits/child-work -a child-work -p tests/limits/child-block -a child-block --swap-size=4 -- -q  -f run neighbor < /dev/null 2> tests/limits/neighbor.errors > tests/limits/neighbor.output
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/limits/mem-hog -a mem-hog --swap-size=4 -- -q  -f run mem-hog < /dev/null 2> tests/limits/mem-hog.errors > tests/limits/mem-hog.output
+perl -I../.. ../../tests/limits/fork-bomb.ck tests/limits/fork-bomb tests/limits/fork-bomb.result
+pass tests/limits/fork-bomb
+perl -I../.. ../../tests/limits/fd-exhaust.ck tests/limits/fd-exhaust tests/limits/fd-exhaust.result
+pass tests/limits/fd-exhaust
+perl -I../.. ../../tests/limits/getlimit.ck tests/limits/getlimit tests/limits/getlimit.result
+pass tests/limits/getlimit
+perl -I../.. ../../tests/limits/cpu-spin.ck tests/limits/cpu-spin tests/limits/cpu-spin.result
+pass tests/limits/cpu-spin
+perl -I../.. ../../tests/limits/mem-hog.ck tests/limits/mem-hog tests/limits/mem-hog.result
+pass tests/limits/mem-hog
+perl -I../.. ../../tests/limits/neighbor.ck tests/limits/neighbor tests/limits/neighbor.result
+pass tests/limits/neighbor
+pass tests/limits/fork-bomb
+pass tests/limits/fd-exhaust
+pass tests/limits/cpu-spin
+pass tests/limits/getlimit
+pass tests/limits/neighbor
+pass tests/limits/mem-hog
+All 6 tests passed.
+make: Leaving directory '/pintos/src/limits/build'
