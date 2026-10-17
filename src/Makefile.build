@@ -65,6 +65,7 @@ userprog_SRC += userprog/tss.c		# TSS management.
 userprog_SRC += userprog/umem.c		# Validated user-memory access.
 userprog_SRC += userprog/ofile.c	# Open-file objects, fd tables.
 userprog_SRC += userprog/pipe.c		# Pipes.
+userprog_SRC += userprog/rlimit.c	# Resource limits.
 
 # No virtual memory code yet.
 #vm_SRC = vm/file.c			# Some file.
@@ -83,7 +84,7 @@ DEPENDS = $(patsubst %.o,%.d,$(OBJECTS))
 
 # Post-course modules build warning-free.
 threads/kstat.o threads/trace.o userprog/umem.o userprog/ofile.o \
-userprog/pipe.o: WARNINGS += -Werror
+userprog/pipe.o userprog/rlimit.o: WARNINGS += -Werror
 
 threads/kernel.lds.s: CPPFLAGS += -P
 threads/kernel.lds.s: threads/kernel.lds.S threads/loader.h

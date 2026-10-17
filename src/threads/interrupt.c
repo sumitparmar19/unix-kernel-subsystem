@@ -381,7 +381,15 @@ intr_handler (struct intr_frame *frame)
       ASSERT (intr_context ());
 
       in_external_intr = false;
-      pic_end_of_interrupt (frame->vec_no); 
+      pic_end_of_interrupt (frame->vec_no);
+
+#ifdef USERPROG
+      if (thread_over_cpu ())
+        {
+          thread_current ()->exit_status = -1;
+          thread_exit ();        /* Does not return. */
+        }
+#endif
 
       if (yield_on_return) 
         thread_yield (); 

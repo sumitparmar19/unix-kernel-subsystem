@@ -33,7 +33,10 @@ enum
     /* kernel-v2 additions (docs/SYSCALLS.md). */
     SYS_PIPE,                   /* Create a pipe. */
     SYS_EXEC_REDIRECT,          /* exec with stdin/stdout redirected. */
-    SYS_DUP2                    /* Duplicate a file descriptor. */
+    SYS_DUP2,                   /* Duplicate a file descriptor. */
+    SYS_SETLIMIT,               /* Lower a resource limit. */
+    SYS_GETLIMIT,               /* Read a resource limit. */
+    SYS_UPTIME                  /* Timer ticks since boot. */
   };
 
 #endif /* lib/syscall-nr.h */

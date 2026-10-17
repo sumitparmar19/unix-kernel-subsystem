@@ -25,6 +25,7 @@
 #include "threads/trace.h"
 #ifdef USERPROG
 #include "userprog/process.h"
+#include "userprog/rlimit.h"
 #include "userprog/exception.h"
 #include "userprog/gdt.h"
 #include "userprog/syscall.h"
@@ -99,6 +100,9 @@ main (void)
   palloc_init (user_page_limit);
   malloc_init ();
   trace_init ();
+#ifdef USERPROG
+  rlimit_init_root (thread_current ());
+#endif
   paging_init ();
 
   /* Segmentation. */

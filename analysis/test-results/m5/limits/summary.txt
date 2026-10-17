@@ -1,0 +1,4 @@
+project:  limits
+passed:   5 / 5
+runtime:  5 s (make check, -j4, --qemu)
+failing:

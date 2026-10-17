@@ -6,6 +6,7 @@
 #include <stdint.h>
 #ifdef USERPROG
 #include "userprog/ofile.h"
+#include "userprog/rlimit.h"
 #endif
 
 /* States in a thread's life cycle. */
@@ -112,6 +113,13 @@ struct thread
     struct child_record *record;        /* Shared with our parent, or NULL. */
     struct file *exec_file;             /* Running executable (write-denied). */
 
+    /* Resource limits (userprog/rlimit.c, ADR-004). */
+    struct rgroup *rgroup;              /* Shared subtree group. */
+    int max_fds;                        /* Descriptor cap, or RLIMIT_NONE. */
+    int cpu_budget;                     /* Ticks left, or RLIMIT_NONE. */
+    int charged_pages;                  /* User pages this process charged. */
+    bool over_cpu;                      /* Set by the timer when budget hits 0. */
+
     /* Per-process file descriptors (userprog/ofile.c, ADR-005). */
     struct fdtable fds;
 #endif
@@ -153,6 +161,9 @@ void thread_unblock (struct thread *);
 struct thread *thread_current (void);
 tid_t thread_tid (void);
 int running_thread_tid (void);
+#ifdef USERPROG
+bool thread_over_cpu (void);
+#endif
 const char *thread_name (void);
 
 void thread_exit (void) NO_RETURN;

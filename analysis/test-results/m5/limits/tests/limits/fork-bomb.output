@@ -1,0 +1,54 @@
+Copying tests/limits/fork-bomb to scratch partition...
+Copying tests/limits/child-block to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/ehQXbv9zvb.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run fork-bomb
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  733,184,000 loops/s.
+ide0: unexpected interrupt
+hda: 5,040 sectors (2 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 203 sectors (101 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 204 sectors (102 kB), Pintos scratch (22)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'fork-bomb' into the file system...
+Putting 'child-block' into the file system...
+Erasing ustar archive...
+Executing 'fork-bomb':
+(fork-bomb) begin
+(fork-bomb) set process limit to 8
+(fork-bomb) pipe
+(fork-bomb) exec was capped at 7 children
+child-block: exit(0)
+child-block: exit(0)
+child-block: exit(0)
+child-block: exit(0)
+child-block: exit(0)
+child-block: exit(0)
+child-block: exit(0)
+(fork-bomb) all 7 contained children exited cleanly
+(fork-bomb) kernel still works after the bomb
+(fork-bomb) end
+fork-bomb: exit(0)
+Execution of 'fork-bomb' complete.
+Timer: 65 ticks
+Thread: 30 idle ticks, 30 kernel ticks, 5 user ticks
+hda2 (filesys): 325 reads, 419 writes
+hda3 (scratch): 203 reads, 2 writes
+Console: 1328 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+KSTAT-SYSCALLS 1=8 3=7 4=1 8=7 9=7 12=2 20=1 21=8 23=1
+KSTAT syscalls=42 ctx_switches=315 lock_waits=0 page_faults=0 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=0 pipe_blocks=7 limit_denials=1 limit_kills=0
+Powering off...

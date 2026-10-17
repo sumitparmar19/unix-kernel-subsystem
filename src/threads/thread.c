@@ -268,6 +268,17 @@ thread_tick(void) {
     intr_yield_on_return();
 }
 
+#ifdef USERPROG
+/* True if the running thread exhausted its CPU budget (set from the
+   timer interrupt).  intr_handler() turns this into a kill once it is
+   back in process context. */
+bool
+thread_over_cpu (void)
+{
+  return thread_current ()->over_cpu;
+}
+#endif
+
 /* Prints thread statistics. */
 void
 thread_print_stats (void) 
@@ -686,6 +697,11 @@ init_thread (struct thread *t, const char *name, int priority)
 
 #ifdef USERPROG
   t->exit_status = -1;
+  t->rgroup = NULL;
+  t->max_fds = RLIMIT_NONE;
+  t->cpu_budget = RLIMIT_NONE;
+  t->charged_pages = 0;
+  t->over_cpu = false;
   list_init (&t->children);
 #endif
 
