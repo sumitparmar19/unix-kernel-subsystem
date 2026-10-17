@@ -1,5 +1,5 @@
 Copying tests/userprog/sc-bad-sp to scratch partition...
-qemu-system-i386 -device isa-debug-exit -drive file=/tmp/qgLEgt2aWy.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/2TgPJ6bZF1.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
 c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
 Booting from Hard Disk...
 PPiiLLoo  hhddaa1
@@ -9,7 +9,7 @@ Kernel command line: -q -f extract run sc-bad-sp
 Pintos booting with 3,968 kB RAM...
 367 pages available in kernel pool.
 367 pages available in user pool.
-Calibrating timer...  838,860,800 loops/s.
+Calibrating timer...  497,254,400 loops/s.
 ide0: unexpected interrupt
 hda: 5,040 sectors (2 MB), model "QM00001", serial "QEMU HARDDISK"
 hda1: 203 sectors (101 kB), Pintos OS kernel (20)
@@ -27,13 +27,13 @@ Executing 'sc-bad-sp':
 (sc-bad-sp) begin
 sc-bad-sp: exit(-1)
 Execution of 'sc-bad-sp' complete.
-Timer: 73 ticks
-Thread: 36 idle ticks, 36 kernel ticks, 2 user ticks
+Timer: 69 ticks
+Thread: 38 idle ticks, 30 kernel ticks, 1 user ticks
 hda2 (filesys): 59 reads, 230 writes
 hda3 (scratch): 112 reads, 2 writes
 Console: 926 characters output
 Keyboard: 0 keys pressed
 Exception: 0 page faults
 KSTAT-SYSCALLS 9=1
-KSTAT syscalls=1 ctx_switches=736 lock_waits=0 page_faults=0 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=0 pipe_blocks=0 limit_denials=0 limit_kills=0
+KSTAT syscalls=1 ctx_switches=812 lock_waits=0 page_faults=0 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=0 pipe_blocks=0 limit_denials=0 limit_kills=0
 Powering off...

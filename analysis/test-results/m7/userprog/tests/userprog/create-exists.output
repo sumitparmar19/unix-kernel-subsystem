@@ -1,5 +1,5 @@
 Copying tests/userprog/create-exists to scratch partition...
-qemu-system-i386 -device isa-debug-exit -drive file=/tmp/x59_SMhwSe.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/F74kGx4taV.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
 c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
 Booting from Hard Disk...
 PPiiLLoo  hhddaa1
@@ -9,7 +9,7 @@ Kernel command line: -q -f extract run create-exists
 Pintos booting with 3,968 kB RAM...
 367 pages available in kernel pool.
 367 pages available in user pool.
-Calibrating timer...  728,268,800 loops/s.
+Calibrating timer...  629,145,600 loops/s.
 ide0: unexpected interrupt
 hda: 5,040 sectors (2 MB), model "QM00001", serial "QEMU HARDDISK"
 hda1: 203 sectors (101 kB), Pintos OS kernel (20)
@@ -33,13 +33,13 @@ Executing 'create-exists':
 (create-exists) end
 create-exists: exit(0)
 Execution of 'create-exists' complete.
-Timer: 66 ticks
-Thread: 35 idle ticks, 31 kernel ticks, 1 user ticks
+Timer: 76 ticks
+Thread: 38 idle ticks, 35 kernel ticks, 3 user ticks
 hda2 (filesys): 131 reads, 252 writes
 hda3 (scratch): 113 reads, 2 writes
 Console: 1154 characters output
 Keyboard: 0 keys pressed
 Exception: 0 page faults
 KSTAT-SYSCALLS 1=1 4=5 9=7
-KSTAT syscalls=13 ctx_switches=826 lock_waits=0 page_faults=0 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=0 pipe_blocks=0 limit_denials=0 limit_kills=0
+KSTAT syscalls=13 ctx_switches=1006 lock_waits=0 page_faults=0 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=0 pipe_blocks=0 limit_denials=0 limit_kills=0
 Powering off...

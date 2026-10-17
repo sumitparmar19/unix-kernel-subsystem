@@ -1,5 +1,5 @@
 Copying tests/userprog/args-many to scratch partition...
-qemu-system-i386 -device isa-debug-exit -drive file=/tmp/mT6HBHi7is.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/36Oe6kskxJ.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
 c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
 Booting from Hard Disk...
 PPiiLLoo  hhddaa1
@@ -9,7 +9,7 @@ Kernel command line: -q -f extract run 'args-many a b c d e f g h i j k l m n o 
 Pintos booting with 3,968 kB RAM...
 367 pages available in kernel pool.
 367 pages available in user pool.
-Calibrating timer...  758,579,200 loops/s.
+Calibrating timer...  840,499,200 loops/s.
 ide0: unexpected interrupt
 hda: 5,040 sectors (2 MB), model "QM00001", serial "QEMU HARDDISK"
 hda1: 203 sectors (101 kB), Pintos OS kernel (20)
@@ -53,13 +53,13 @@ Executing 'args-many a b c d e f g h i j k l m n o p q r s t u v':
 (args) end
 args-many: exit(0)
 Execution of 'args-many a b c d e f g h i j k l m n o p q r s t u v' complete.
-Timer: 64 ticks
-Thread: 35 idle ticks, 26 kernel ticks, 3 user ticks
+Timer: 73 ticks
+Thread: 35 idle ticks, 36 kernel ticks, 2 user ticks
 hda2 (filesys): 59 reads, 228 writes
 hda3 (scratch): 111 reads, 2 writes
 Console: 1609 characters output
 Keyboard: 0 keys pressed
 Exception: 0 page faults
 KSTAT-SYSCALLS 1=1 9=27
-KSTAT syscalls=28 ctx_switches=676 lock_waits=0 page_faults=0 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=0 pipe_blocks=0 limit_denials=0 limit_kills=0
+KSTAT syscalls=28 ctx_switches=722 lock_waits=0 page_faults=0 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=0 pipe_blocks=0 limit_denials=0 limit_kills=0
 Powering off...

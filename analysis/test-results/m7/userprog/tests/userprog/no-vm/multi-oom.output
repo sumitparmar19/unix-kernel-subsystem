@@ -1,5 +1,5 @@
 Copying tests/userprog/no-vm/multi-oom to scratch partition...
-qemu-system-i386 -device isa-debug-exit -drive file=/tmp/bF5L2ZNNG5.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/ahaN1DHpqE.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
 c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
 Booting from Hard Disk...
 PPiiLLoo  hhddaa1
@@ -9,7 +9,7 @@ Kernel command line: -q -f extract run multi-oom
 Pintos booting with 3,968 kB RAM...
 367 pages available in kernel pool.
 367 pages available in user pool.
-Calibrating timer...  642,252,800 loops/s.
+Calibrating timer...  785,612,800 loops/s.
 ide0: unexpected interrupt
 hda: 5,040 sectors (2 MB), model "QM00001", serial "QEMU HARDDISK"
 hda1: 203 sectors (101 kB), Pintos OS kernel (20)
@@ -3329,13 +3329,13 @@ multi-oom: exit(60)
 (multi-oom) end
 multi-oom: exit(60)
 Execution of 'multi-oom' complete.
-Timer: 5350 ticks
-Thread: 2388 idle ticks, 164 kernel ticks, 2798 user ticks
+Timer: 5349 ticks
+Thread: 2620 idle ticks, 152 kernel ticks, 2578 user ticks
 hda2 (filesys): 301719 reads, 270 writes
 hda3 (scratch): 132 reads, 2 writes
 Console: 139320 characters output
 Keyboard: 0 keys pressed
 Exception: 320 page faults
 KSTAT-SYSCALLS 1=601 2=1060 3=1040 6=130026 9=3
-KSTAT syscalls=132730 ctx_switches=533429 lock_waits=0 page_faults=320 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=0 pipe_blocks=0 limit_denials=0 limit_kills=0
+KSTAT syscalls=132730 ctx_switches=592608 lock_waits=0 page_faults=320 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=0 pipe_blocks=0 limit_denials=0 limit_kills=0
 Powering off...

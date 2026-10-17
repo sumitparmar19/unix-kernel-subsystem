@@ -1,5 +1,5 @@
 Copying tests/userprog/write-bad-fd to scratch partition...
-qemu-system-i386 -device isa-debug-exit -drive file=/tmp/txv75yGIVM.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/6nViJfYcIW.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
 c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
 Booting from Hard Disk...
 PPiiLLoo  hhddaa1
@@ -9,7 +9,7 @@ Kernel command line: -q -f extract run write-bad-fd
 Pintos booting with 3,968 kB RAM...
 367 pages available in kernel pool.
 367 pages available in user pool.
-Calibrating timer...  734,003,200 loops/s.
+Calibrating timer...  431,718,400 loops/s.
 ide0: unexpected interrupt
 hda: 5,040 sectors (2 MB), model "QM00001", serial "QEMU HARDDISK"
 hda1: 203 sectors (101 kB), Pintos OS kernel (20)
@@ -29,12 +29,12 @@ Executing 'write-bad-fd':
 write-bad-fd: exit(0)
 Execution of 'write-bad-fd' complete.
 Timer: 69 ticks
-Thread: 35 idle ticks, 32 kernel ticks, 2 user ticks
+Thread: 34 idle ticks, 32 kernel ticks, 3 user ticks
 hda2 (filesys): 60 reads, 232 writes
 hda3 (scratch): 113 reads, 2 writes
 Console: 962 characters output
 Keyboard: 0 keys pressed
 Exception: 0 page faults
 KSTAT-SYSCALLS 1=1 9=9
-KSTAT syscalls=10 ctx_switches=782 lock_waits=0 page_faults=0 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=0 pipe_blocks=0 limit_denials=0 limit_kills=0
+KSTAT syscalls=10 ctx_switches=820 lock_waits=0 page_faults=0 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=0 pipe_blocks=0 limit_denials=0 limit_kills=0
 Powering off...

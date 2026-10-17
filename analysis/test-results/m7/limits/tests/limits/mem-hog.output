@@ -1,5 +1,5 @@
 Copying tests/limits/mem-hog to scratch partition...
-qemu-system-i386 -device isa-debug-exit -drive file=/tmp/Z_ZcbeBW9g.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/XUYMiW9laF.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
 c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
 Booting from Hard Disk...
 PPiiLLoo  hhddaa1
@@ -9,7 +9,7 @@ Kernel command line: -q -f extract run mem-hog
 Pintos booting with 3,968 kB RAM...
 367 pages available in kernel pool.
 367 pages available in user pool.
-Calibrating timer...  602,112,000 loops/s.
+Calibrating timer...  471,859,200 loops/s.
 ide0: unexpected interrupt
 hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
 hda1: 221 sectors (110 kB), Pintos OS kernel (20)
@@ -38,8 +38,8 @@ Interrupt 0x0e (#PF Page-Fault Exception) at eip=0x80480a6
  cs=001b ds=0023 es=0023 ss=0023
 mem-hog: exit(-1)
 Execution of 'mem-hog' complete.
-Timer: 65 ticks
-Thread: 34 idle ticks, 28 kernel ticks, 3 user ticks
+Timer: 72 ticks
+Thread: 35 idle ticks, 36 kernel ticks, 2 user ticks
 hda2 (filesys): 59 reads, 232 writes
 hda3 (scratch): 113 reads, 2 writes
 hda4 (swap): 0 reads, 0 writes

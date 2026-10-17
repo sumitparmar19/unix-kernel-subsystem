@@ -1,5 +1,5 @@
 Copying tests/userprog/close-stdin to scratch partition...
-qemu-system-i386 -device isa-debug-exit -drive file=/tmp/6PsczpRQa5.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/PsnFOuxdY2.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
 c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
 Booting from Hard Disk...
 PPiiLLoo  hhddaa1
@@ -9,7 +9,7 @@ Kernel command line: -q -f extract run close-stdin
 Pintos booting with 3,968 kB RAM...
 367 pages available in kernel pool.
 367 pages available in user pool.
-Calibrating timer...  819,200,000 loops/s.
+Calibrating timer...  438,272,000 loops/s.
 ide0: unexpected interrupt
 hda: 5,040 sectors (2 MB), model "QM00001", serial "QEMU HARDDISK"
 hda1: 203 sectors (101 kB), Pintos OS kernel (20)
@@ -28,13 +28,13 @@ Executing 'close-stdin':
 (close-stdin) end
 close-stdin: exit(0)
 Execution of 'close-stdin' complete.
-Timer: 67 ticks
-Thread: 34 idle ticks, 32 kernel ticks, 1 user ticks
+Timer: 63 ticks
+Thread: 31 idle ticks, 31 kernel ticks, 1 user ticks
 hda2 (filesys): 59 reads, 230 writes
 hda3 (scratch): 112 reads, 2 writes
 Console: 955 characters output
 Keyboard: 0 keys pressed
 Exception: 0 page faults
 KSTAT-SYSCALLS 1=1 9=2 12=1
-KSTAT syscalls=4 ctx_switches=810 lock_waits=0 page_faults=0 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=0 pipe_blocks=0 limit_denials=0 limit_kills=0
+KSTAT syscalls=4 ctx_switches=96 lock_waits=0 page_faults=0 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=0 pipe_blocks=0 limit_denials=0 limit_kills=0
 Powering off...

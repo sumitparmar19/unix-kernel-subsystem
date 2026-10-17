@@ -8,6 +8,7 @@
 #include "threads/io.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
+#include "threads/kstat.h"
 #include "devices/timer.h"
 
 /* Programmable Interrupt Controller (PIC) registers.
@@ -386,6 +387,7 @@ intr_handler (struct intr_frame *frame)
 #ifdef USERPROG
       if (thread_over_cpu ())
         {
+          kstat_inc (KS_LIMIT_KILLS);   /* Count the CPU-budget kill. */
           thread_current ()->exit_status = -1;
           thread_exit ();        /* Does not return. */
         }

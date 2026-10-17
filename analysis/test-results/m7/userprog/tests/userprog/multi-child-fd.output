@@ -1,7 +1,7 @@
 Copying tests/userprog/multi-child-fd to scratch partition...
 Copying ../../tests/userprog/sample.txt to scratch partition...
 Copying tests/userprog/child-close to scratch partition...
-qemu-system-i386 -device isa-debug-exit -drive file=/tmp/P_bZWD8GEp.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/YLIrAIuKCk.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
 c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
 Booting from Hard Disk...
 PPiiLLoo  hhddaa1
@@ -11,7 +11,7 @@ Kernel command line: -q -f extract run multi-child-fd
 Pintos booting with 3,968 kB RAM...
 367 pages available in kernel pool.
 367 pages available in user pool.
-Calibrating timer...  471,040,000 loops/s.
+Calibrating timer...  733,184,000 loops/s.
 ide0: unexpected interrupt
 hda: 5,040 sectors (2 MB), model "QM00001", serial "QEMU HARDDISK"
 hda1: 203 sectors (101 kB), Pintos OS kernel (20)
@@ -38,13 +38,13 @@ child-close: exit(0)
 (multi-child-fd) end
 multi-child-fd: exit(0)
 Execution of 'multi-child-fd' complete.
-Timer: 67 ticks
-Thread: 37 idle ticks, 28 kernel ticks, 2 user ticks
+Timer: 60 ticks
+Thread: 30 idle ticks, 28 kernel ticks, 2 user ticks
 hda2 (filesys): 156 reads, 488 writes
 hda3 (scratch): 239 reads, 2 writes
 Console: 1248 characters output
 Keyboard: 0 keys pressed
 Exception: 0 page faults
 KSTAT-SYSCALLS 1=2 2=1 3=1 6=1 7=1 8=1 9=7 12=1
-KSTAT syscalls=15 ctx_switches=1269 lock_waits=0 page_faults=0 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=0 pipe_blocks=0 limit_denials=0 limit_kills=0
+KSTAT syscalls=15 ctx_switches=133 lock_waits=0 page_faults=0 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=0 pipe_blocks=0 limit_denials=0 limit_kills=0
 Powering off...

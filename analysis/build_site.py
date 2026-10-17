@@ -10,6 +10,7 @@ Run after analyze.py and simulate.py:
 """
 import csv
 import html
+import json
 import pathlib
 import shutil
 
@@ -131,6 +132,14 @@ TEMPLATE = """<!doctype html>
     color:var(--muted); font-size:.88rem; }}
   .note {{ background:var(--card); border-left:3px solid var(--accent);
     padding:.8em 1em; border-radius:0 8px 8px 0; margin:1.3em 0; }}
+  #term {{ margin:1.3em 0; background:#0d1117; color:#c9d1d9; border-radius:10px;
+    padding:16px 18px; font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+    white-space:pre-wrap; word-break:break-word; min-height:22em; overflow:hidden;
+    border:1px solid var(--line); }}
+  #term b {{ font-weight:700; }}
+  .t-g {{ color:#3fb950; }} .t-c {{ color:#8b949e; }} .t-y {{ color:#d29922; }}
+  .t-r {{ color:#f85149; }}
+  .replay {{ font-size:.8rem; color:var(--muted); margin:-.6em 0 0; }}
 </style>
 </head>
 <body>
@@ -157,6 +166,13 @@ TEMPLATE = """<!doctype html>
       <code>page-merge-par</code> past the time budget; clock finishes in
       ~3&nbsp;s</span></div>
   </div>
+
+  <h2>Watch it run</h2>
+  <p>A replay of the kernel's real output: a fork bomb contained, a CPU hog
+  killed at its budget, a well-behaved process still finishing on time beside
+  both, and demand-paged VM swapping a working set larger than RAM.</p>
+  <div id="term"></div>
+  <p class="replay">Recorded kernel output, replayed. Click to pause/resume.</p>
 
   <h2>Policy comparison at a fixed memory budget (4&nbsp;MB)</h2>
   <p>At 4&nbsp;MB every workload pages heavily, so the policy alone decides how
@@ -201,9 +217,65 @@ TEMPLATE = """<!doctype html>
     repository README.
   </footer>
 </main>
+__PLAYER__
 </body>
 </html>
 """
+
+# A tiny self-contained asciicast v2 player: no external JS, cast inlined.
+# Parses the SGR colours the cast uses (0/1/31/32/33/36) into spans.
+PLAYER = """<script>
+(function () {
+  var EV = __CAST__;
+  var term = document.getElementById('term');
+  var SGR = {31:'t-r',32:'t-g',33:'t-y',36:'t-c'};
+  function render(raw) {
+    var out = '', i = 0, cls = '', bold = false, open = false;
+    function close() { if (open) { out += '</span>'; open = false; } }
+    function esc(c){ return c==='&'?'&amp;':c==='<'?'&lt;':c==='>'?'&gt;':c; }
+    while (i < raw.length) {
+      if (raw[i] === '\\x1b' && raw[i+1] === '[') {
+        var j = raw.indexOf('m', i);
+        if (j > 0) {
+          raw.slice(i+2, j).split(';').forEach(function (n) {
+            n = parseInt(n||'0', 10);
+            if (n === 0) { cls=''; bold=false; }
+            else if (n === 1) bold = true;
+            else if (SGR[n]) cls = SGR[n];
+          });
+          close();
+          if (cls || bold) {
+            out += '<span class="' + cls + '"' + (bold?' style="font-weight:700"':'') + '>';
+            open = true;
+          }
+          i = j + 1; continue;
+        }
+      }
+      out += esc(raw[i]); i++;
+    }
+    close();
+    return out;
+  }
+  var raw = '', k = 0, timer = null, paused = false;
+  function step() {
+    if (k >= EV.length) {           // loop
+      setTimeout(function () { raw=''; k=0; term.innerHTML=''; step(); }, 2500);
+      return;
+    }
+    raw += EV[k][2];
+    term.innerHTML = render(raw);
+    var cur = EV[k][0], nxt = (k+1 < EV.length) ? EV[k+1][0] : cur;
+    k++;
+    var d = Math.min((nxt - cur) * 1000, 1200);
+    timer = setTimeout(step, Math.max(d, 0));
+  }
+  term.addEventListener('click', function () {
+    paused = !paused;
+    if (paused) clearTimeout(timer); else step();
+  });
+  step();
+})();
+</script>"""
 
 
 def main():
@@ -234,6 +306,17 @@ def main():
         policy_table=policy_table(data),
         curve_table=curve_table(data),
     )
+
+    # Inline the recorded demo cast into the self-contained player.
+    cast_path = BENCH / "demo.cast"
+    if cast_path.exists():
+        lines = [l for l in cast_path.read_text().splitlines() if l.strip()]
+        events = [json.loads(l) for l in lines[1:]]   # skip the header line
+        cast_json = json.dumps(events, ensure_ascii=True)
+        htmltext = htmltext.replace("__PLAYER__", PLAYER.replace("__CAST__", cast_json))
+    else:
+        htmltext = htmltext.replace("__PLAYER__", "")
+
     (SITE / "index.html").write_text(htmltext)
     print(f"wrote {SITE/'index.html'} and charts")
 

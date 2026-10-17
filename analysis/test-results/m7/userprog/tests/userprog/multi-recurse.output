@@ -1,5 +1,5 @@
 Copying tests/userprog/multi-recurse to scratch partition...
-qemu-system-i386 -device isa-debug-exit -drive file=/tmp/ndHIwc3Wr6.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/WVcGvr6Vfy.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
 c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
 Booting from Hard Disk...
 PPiiLLoo  hhddaa1
@@ -9,7 +9,7 @@ Kernel command line: -q -f extract run 'multi-recurse 15'
 Pintos booting with 3,968 kB RAM...
 367 pages available in kernel pool.
 367 pages available in user pool.
-Calibrating timer...  616,038,400 loops/s.
+Calibrating timer...  444,825,600 loops/s.
 ide0: unexpected interrupt
 hda: 5,040 sectors (2 MB), model "QM00001", serial "QEMU HARDDISK"
 hda1: 203 sectors (101 kB), Pintos OS kernel (20)
@@ -88,13 +88,13 @@ multi-recurse: exit(14)
 (multi-recurse) end 15
 multi-recurse: exit(15)
 Execution of 'multi-recurse 15' complete.
-Timer: 78 ticks
-Thread: 37 idle ticks, 31 kernel ticks, 10 user ticks
+Timer: 75 ticks
+Thread: 33 idle ticks, 33 kernel ticks, 9 user ticks
 hda2 (filesys): 635 reads, 256 writes
 hda3 (scratch): 125 reads, 2 writes
-Console: 2644 characters output
+Console: 2643 characters output
 Keyboard: 0 keys pressed
 Exception: 0 page faults
 KSTAT-SYSCALLS 1=16 2=15 3=15 9=47
-KSTAT syscalls=93 ctx_switches=563 lock_waits=0 page_faults=0 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=0 pipe_blocks=0 limit_denials=0 limit_kills=0
+KSTAT syscalls=93 ctx_switches=255 lock_waits=0 page_faults=0 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=0 pipe_blocks=0 limit_denials=0 limit_kills=0
 Powering off...

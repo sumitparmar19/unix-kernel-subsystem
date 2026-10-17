@@ -1,5 +1,5 @@
 Copying tests/filesys/base/sm-seq-block to scratch partition...
-qemu-system-i386 -device isa-debug-exit -drive file=/tmp/FlVgDXurtW.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/X0ebLH6F6Z.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
 c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
 Booting from Hard Disk...
 PPiiLLoo  hhddaa1
@@ -9,7 +9,7 @@ Kernel command line: -q -f extract run sm-seq-block
 Pintos booting with 3,968 kB RAM...
 367 pages available in kernel pool.
 367 pages available in user pool.
-Calibrating timer...  707,788,800 loops/s.
+Calibrating timer...  744,652,800 loops/s.
 ide0: unexpected interrupt
 hda: 5,040 sectors (2 MB), model "QM00001", serial "QEMU HARDDISK"
 hda1: 203 sectors (101 kB), Pintos OS kernel (20)
@@ -35,13 +35,13 @@ Executing 'sm-seq-block':
 (sm-seq-block) end
 sm-seq-block: exit(0)
 Execution of 'sm-seq-block' complete.
-Timer: 80 ticks
-Thread: 37 idle ticks, 40 kernel ticks, 3 user ticks
+Timer: 62 ticks
+Thread: 31 idle ticks, 29 kernel ticks, 2 user ticks
 hda2 (filesys): 123 reads, 279 writes
 hda3 (scratch): 117 reads, 2 writes
 Console: 1206 characters output
 Keyboard: 0 keys pressed
 Exception: 0 page faults
 KSTAT-SYSCALLS 1=1 4=1 6=2 7=1 8=12 9=21 12=2
-KSTAT syscalls=40 ctx_switches=729 lock_waits=0 page_faults=0 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=0 pipe_blocks=0 limit_denials=0 limit_kills=0
+KSTAT syscalls=40 ctx_switches=83 lock_waits=0 page_faults=0 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=0 pipe_blocks=0 limit_denials=0 limit_kills=0
 Powering off...
