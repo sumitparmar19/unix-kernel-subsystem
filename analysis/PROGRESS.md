@@ -143,3 +143,20 @@ and `analysis/IMPLEMENTATION_PLAN.md`. One branch (`kernel-v2`), one draft PR, u
 - No regression: vm 113/113, userprog 80/80, ipc 11/11, limits 6/6. Results: `analysis/test-results/m7/`.
 - **Pages:** site prebuilt under `docs/`; enabling is a one-click repo setting (Settings → Pages →
   Deploy from branch, `/docs`).
+
+## M8 notes
+- **Demo.** `scripts/make_demo_cast.py` builds an asciicast from the kernel's real M7 test output
+  (fork bomb contained, CPU hog killed, well-behaved neighbour on time, demand-paged VM). A tiny
+  self-contained vanilla-JS terminal player (no CDN) replays it on `docs/benchmarks/`.
+- **Fix.** CPU-budget kills now increment `KS_LIMIT_KILLS` (`threads/interrupt.c`); `cpu-spin` reports
+  `limit_kills=1`. No regression: userprog 80/80, limits 6/6.
+
+## M9 notes
+- **README** rewritten as a design document: capabilities table with evidence links, test-results
+  table (stock vs mine), the measured eviction result, Mermaid architecture + syscall-flow diagrams,
+  how-to-run, repo map, and an explicit AI-assisted authorship note.
+- **`analysis/RESUME_EVIDENCE.md`**: every résumé claim C1–C9 mapped to code + ADR + the test or
+  measurement that backs it, plus résumé-ready bullets.
+- **`analysis/INTERVIEW_PREP.md`**: added two STAR stories (the swap `eip=0` race; the uncounted CPU
+  kill) and a rapid-fire Q&A section.
+- Tagged **v2.0**; the single draft PR is marked ready for review at this milestone.

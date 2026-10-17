@@ -451,3 +451,59 @@ what surfaces them. Write-up in `analysis/benchmarks/BUGS-FOUND.md`.
 - *"How did you make the numbers trustworthy?"* Five seeds per configuration with mean±std, the kernel's
   own counters rather than wall-clock guesses, failed/timed-out runs recorded honestly rather than
   dropped, and a one-command reproduction (`scripts/bench-run.sh`).
+
+## 5. Two more STAR stories from the post-course work
+
+### Bug 4: a parent crashing at `eip=0` under parallel paging (the swap race)
+- **Situation.** Building the M7 benchmark, `page-parallel` (four processes faulting at once) failed
+  nondeterministically — ~1 run in 10 at 4 MB, nearly every run at 5 MB — with the *parent* dying at
+  `eip=0`, i.e. returning into address 0.
+- **Task.** `eip=0` means a corrupted return address: a stack page's contents were lost across a
+  page-out/page-in while the parent was blocked in `wait`. I had to find which, in a path with the
+  frame lock deliberately dropped across I/O.
+- **Action.** I read the swap path adversarially and found two races. (1) `swap_in` cleared the slot's
+  bitmap bit *before* reading the slot, so a concurrent `swap_out` could grab and overwrite it
+  mid-read. (2) The evictor, after clearing the victim's PTE but before recording `has_swap`, left a
+  window where the owner could fault and the loader would zero-fill a page whose data was still
+  heading to swap. Fixes: read-then-free in `swap_in`, and an "evicting" barrier (a condition
+  variable the faulting owner waits on) around the eviction.
+- **Result.** Every previously-flaky configuration now passes (`page-parallel` 5/5 at 5 MB, was 0/5),
+  the full vm suite stays 113/113, and the paging curve is clean. Write-up:
+  `analysis/benchmarks/BUGS-FOUND.md`. The lesson I lead with: one green run hides timing bugs;
+  deliberate parallel stress at varied pressure is what surfaces them.
+
+### Bug 5: a kill the kernel didn't count
+- **Situation.** The demo's `cpu-spin` test is killed for exceeding its CPU budget, yet the kernel's
+  `KSTAT` line reported `limit_kills=0`.
+- **Task / Action.** The CPU-budget kill happens at external-interrupt return in `interrupt.c`
+  (`thread_over_cpu()` → `exit(-1)`), a path that never incremented the counter. One line:
+  `kstat_inc(KS_LIMIT_KILLS)` at the kill site.
+- **Result.** `cpu-spin` now reports `limit_kills=1`; observability matches behaviour. Small, but it's
+  the kind of gap that makes a metric lie, and I found it by cross-checking the demo output against
+  the counters rather than trusting either alone.
+
+## 6. Rapid-fire (crisp answers)
+
+- *"What is a swap-in and why do you report it?"* A page the policy evicted that the program needed
+  right back — a direct, avoidable cost. It's the single clearest quality signal between policies
+  (clock 3 vs FIFO ~320 on the same workload).
+- *"Why is clock the default, not LRU?"* Clock approximates LRU using one hardware accessed-bit per
+  frame instead of per-access bookkeeping, so it's cheap enough to run in the fault path. The
+  benchmark shows it tracking LRU's behaviour on real workloads.
+- *"What's your lock order and why?"* `frame_lock` → `filesys_lock`/`swap_lock`, never the reverse. A
+  thread holding the frame lock never does I/O; the evictor drops the frame lock before swap/file
+  I/O. That rule is what makes the pinning scheme deadlock-free.
+- *"How do you contain a fork bomb?"* A per-subtree process count charged on `exec` and released on
+  exit; over the cap, `exec` fails rather than the machine falling over. Pages are charged the same
+  way; fds and CPU time are per-process.
+- *"How is a CPU hog stopped if it makes no syscalls?"* The timer interrupt charges each tick to the
+  running process's budget and flags it; the kill check at interrupt return ends it — no syscall
+  needed.
+- *"How do you validate a user pointer that straddles a page boundary?"* Check every page the range
+  touches, not just the first; under VM, fault each in and pin it so the whole call sees resident
+  memory. Boundary tests (`sc-boundary-*`, `exec-bound-*`) cover exactly this.
+- *"What couldn't you claim?"* A true `fork`/`execve` split — `exec` is `posix_spawn`-style — and I
+  don't claim hand-written x86 assembly; I work with the interrupt frame, TSS and page tables from C.
+- *"Where does this matter in industry?"* It's the shape of a container/sandbox runtime: isolation,
+  resource caps, and paging. vLLM's PagedAttention applies the same page-table + eviction idea to a
+  GPU KV cache.
