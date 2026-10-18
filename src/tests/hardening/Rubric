@@ -1,0 +1,9 @@
+Hardening regression (kernel-v2.1):
+1	esc-procs
+1	esc-pages
+1	pin-read
+1	pin-write
+1	pin-pipe
+1	exit-evict
+1	rw-pressure
+1	exec-empty
