@@ -1,7 +1,8 @@
 # ADR-003: Demand-paged virtual memory
 
-**Status:** accepted (M6) · **Code:** `src/vm/{page,frame,swap,mmap}.[ch]`, `userprog/process.c`,
-`userprog/exception.c`, `userprog/syscall.c`, `userprog/umem.c` · **Claim:** C9 · **Result:** vm 113/113
+**Status:** accepted (M6), hardened (v2.1: B2–B4) · **Code:** `src/vm/{page,frame,swap,mmap}.[ch]`,
+`userprog/process.c`, `userprog/exception.c`, `userprog/syscall.c`, `userprog/umem.c` · **Claim:** C9 ·
+**Result:** vm 113/113, hardening 7/7
 
 ## Context
 The course kernel loaded each program's pages eagerly at `exec` and gave every process a single stack
@@ -58,6 +59,14 @@ pinned frame. After the I/O the pages are unpinned. `umem`'s `copy_in`/`copy_out
 the same way for arguments, paths and command lines. **Lock order:** a thread holding `frame_lock` never
 takes `filesys_lock` or `swap_lock`.
 
+**Bounded pinning (B2, v2.1).** `read`/`write` must not pin their *whole* buffer: a buffer larger than
+the user frame pool would pin every frame, leaving the evictor no victim — `evict()` used to
+`PANIC`. Now `read`/`write` pin at most `PIN_CHUNK` pages (64 KB) at a time, do that chunk's I/O,
+unpin, and continue, stopping at end of file or a short transfer. And `evict()` **returns NULL instead
+of panicking** when everything is pinned; `frame_alloc` propagates NULL, the faulting process is
+killed (exit −1), and only a true kernel invariant still panics. A blocked pipe reader therefore holds
+only a bounded pin across its wait (`tests/hardening/pin-read`, `pin-write`, `pin-pipe`).
+
 ### Two paging races (found by the M7 benchmark)
 Dropping `frame_lock` across eviction I/O is necessary for lock order but opens two windows that the
 M7 benchmark's parallel-fault stress (`tests/vm/page-parallel`, five faulting processes) exposed as
@@ -66,9 +75,27 @@ nondeterministic corruption — a parent returning into `eip=0`. Both are fixed 
   overwrite it mid-read, mixing two pages. Fixed by reading the page out *before* clearing the bitmap bit.
 - **Load during eviction.** Between `page_evict` clearing the victim's PTE and recording `has_swap`, the
   owner could fault and `load_frame` would zero-fill the page, dropping data still headed to swap. Fixed
-  with an **eviction barrier**: the evictor marks the victim `evicting` under `frame_lock`; a faulting
-  owner calls `frame_await_eviction` and waits on a condition variable until the evictor has recorded
-  where the data went.
+  with an **eviction barrier**: the evictor marks the victim `evicting` under `frame_lock`, and a
+  faulting owner waits on a condition variable until the evictor has recorded where the data went.
+
+### Three more races the barrier alone did not close (B3, B4, v2.1)
+The M7 barrier covered only the *fault→load* path. Reading the eviction code again found that eviction
+races the *teardown* and *pin* paths too (`analysis/benchmarks/BUGS-FOUND.md`):
+- **B3 — use-after-free on exit / `munmap` during eviction.** `page_free` (and the `munmap` path) freed
+  a page's frame without waiting out an in-progress eviction, so it could free a frame the evictor was
+  still writing out and about to hand back — a double-use of one physical page. Fixed: teardown now goes
+  through `frame_release`, which waits while `p->evicting` under `frame_lock` and only then frees the
+  frame; a frame the evictor holds is marked `f->evicting` and `frame_free` asserts it is never freed by
+  anyone else. Rule: **only the evictor may free a frame it is evicting; owners wait.**
+- **B4 — check-then-pin.** `spt_load` waited out eviction, *dropped* the lock, then separately checked
+  "resident?" and pinned — so the page could be evicted in between and the pin would silently miss,
+  leaving a buffer reported as pinned-and-resident when it was not. The following file I/O then faulted
+  in the kernel while holding `filesys_lock` (non-recursive → panic). Fixed with `frame_pin_resident`,
+  which waits, checks residence, and pins **in a single `frame_lock` hold**. A debug `ASSERT` in the
+  fault handler now also fails fast if any kernel fault is ever taken while holding `filesys_lock`.
+
+These make "a read-into-unloaded-buffer deadlock eliminated by construction" actually true, and
+`tests/hardening/exit-evict` and `rw-pressure` exercise the teardown and pin paths under load.
 
 ### Cleanup order
 `process_exit` runs `mmap_cleanup` (write back dirty mappings) and `spt_destroy` (free frames, clear

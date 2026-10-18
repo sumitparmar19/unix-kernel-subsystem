@@ -1,7 +1,16 @@
 # Project report & handoff — unix-kernel-subsystem
 
-**Date:** 2026-10-17 · **State:** v2.0 build complete, **all merged to `main`**, CI green.
+**Date:** 2026-10-18 · **State:** v2.1 hardening pass (on top of the merged v2.0).
 **Repo:** https://github.com/sumitparmar19/unix-kernel-subsystem (public)
+
+> **v2.1 update.** A code-review pass found **five kernel bugs** the v2.0 tests never reached — a
+> sandbox escape via `setlimit` (B1), a user-triggerable panic from pinning an over-large buffer (B2),
+> a use-after-free on exit-during-eviction (B3), a check-then-pin TOCTOU in the load path (B4), and a
+> `dir_lookup` panic on `exec("")` found by the extended fuzzer (B5). All are fixed, each with a
+> regression test in the new `tests/hardening/` suite (8/8). Details: §6 below and
+> `analysis/benchmarks/BUGS-FOUND.md`. The notes elsewhere in this file describe the v2.0 structure,
+> which still holds; v2.1 adds the hardening suite, the hierarchical resource groups (ADR-004), and the
+> bounded-pinning / eviction-safety rules (ADR-003).
 
 This document is the single place a new person — or a new Claude session — can read to understand
 what this project is, everything that was built, how it is organized, how to run it, and what comes
@@ -24,10 +33,10 @@ pair-programming assistance (Claude), disclosed per commit.
 
 | Thing | State |
 |---|---|
-| Build | Milestones M0–M9 complete |
-| Git | Everything merged to **`main`** (PR #1 then PR #2, merge commits, history preserved) |
-| CI | **Green** on the merged commit (`7879bb0`): 5 suites + fuzz + cppcheck + CodeQL |
-| Tests | threads **27/27**, userprog **80/80**, ipc **11/11**, vm **113/113**, limits **6/6** |
+| Build | Milestones M0–M9 (v2.0, merged to `main`) + v2.1 hardening (branch `kernel-v2.1`, one PR) |
+| Git | v2.0 merged to **`main`**; v2.1 is a new PR on top |
+| CI | 6 suites + fuzz (userprog+vm) + cppcheck (+ UTF-8 guard) + CodeQL |
+| Tests | threads **27/27**, userprog **80/80**, ipc **11/11**, vm **113/113**, limits **6/6**, hardening **8/8** |
 | Fuzzer | ~125k adversarial syscalls, **0 kernel panics** |
 | Tag | `v2.0` created **locally** (token can't push tags — a one-click for the user) |
 | Course freeze | tag `course-submission-2025-11` + branch `archive/course-submission-2025-11` |
