@@ -1,7 +1,8 @@
 # ADR-004: Per-process resource limits ("cgroups-lite")
 
-**Status:** accepted (M5) · **Code:** `src/userprog/rlimit.[ch]`, `syscall.c`, `process.c`,
-`threads/thread.[ch]`, `devices/timer.c` · **Proof:** `src/tests/limits`
+**Status:** accepted (M5), hardened (v2.1: hierarchical groups, B1) · **Code:** `src/userprog/rlimit.[ch]`,
+`syscall.c`, `process.c`, `threads/thread.[ch]`, `devices/timer.c` · **Proof:** `src/tests/limits`,
+`src/tests/hardening/esc-procs`, `esc-pages`
 
 ## Context
 A sandbox must stop one program from starving the others: a fork bomb, a memory hog, a descriptor
@@ -23,19 +24,28 @@ fresh allowance and could spawn N more, so the tree still explodes. Process and 
 therefore be **shared across the whole subtree**, exactly as cgroup v2 accounts a subtree. Descriptors
 and CPU are naturally per-process, like POSIX `RLIMIT_NOFILE` and `RLIMIT_CPU`.
 
-### Resource groups
-Subtree limits live in a reference-counted `struct rgroup` that a process shares with its descendants:
+### Resource groups — a hierarchy
+Subtree limits live in reference-counted `struct rgroup`s arranged in a **tree**, so a process is
+counted in its own group *and in every ancestor up to the root*:
 ```
-struct rgroup { int max_procs, procs;  int32_t max_pages, pages;  int refs; };
+struct rgroup { struct rgroup *parent;  int max_procs, procs;  int32_t max_pages, pages;  int refs; };
 ```
-- At boot the initial process gets a root group with unlimited caps.
-- A new process **joins its parent's group** at creation (`procs++`), and leaves it at exit
-  (`procs--`); the group is freed when the last member exits. Pages a process charged are returned to
-  the group when it exits.
-- `setlimit(LIMIT_PROCS|LIMIT_PAGES, n)` makes the caller **split off a new, tighter group** (seeded
-  with its current usage) that it and its *future* descendants share. Already-running descendants stay
-  in the old group. This matches how the sandbox tests work: a process lowers its own limit and *then*
-  spawns the workload it wants to contain, so the workload is created into the tightened group.
+- At boot the initial process gets a root group (no parent) with unlimited caps.
+- A new process **joins its parent's leaf group** at creation and leaves it at exit; the group is freed
+  when its last member and child group go away, dropping a reference on its parent in turn.
+- `setlimit(LIMIT_PROCS|LIMIT_PAGES, n)` makes the caller a **child group inside its current one**
+  (cap `n ≤` the current cap, seeded with the caller's current usage). The caller stays counted in the
+  old group and all its ancestors.
+- **Admission and page charges walk from the leaf to the root, all-or-nothing:** a new process or page
+  is allowed only if *every* level is under its cap, and is then counted at every level. So the subtree
+  total is bounded at every ancestor no matter how descendants carve up their own sub-limits.
+
+**The escape bug this prevents (B1, fixed in v2.1).** The original design instead let `setlimit`
+**split off a flat new group** seeded with the caller's usage and *detach from the old one*. A
+descendant could then call `setlimit` to its current cap, get a brand-new full-sized allowance, and
+free a slot back in its parent — so every child could repeat it and the subtree grew without bound.
+The existing tests missed it because their abusers capped *themselves* rather than trying to escape;
+`tests/hardening/esc-procs` and `esc-pages` now attack the limit directly and confirm containment.
 
 ### Per-process limits
 `max_fds` and a `cpu_budget` (ticks remaining, −1 = unlimited) live in `struct thread`. They are copied
@@ -50,8 +60,9 @@ struct rgroup { int max_procs, procs;  int32_t max_pages, pages;  int refs; };
 | `int uptime (void)` | Timer ticks since boot. Lets a test assert a neighbour finished *within a time bound* while an abuser ran. |
 
 ### Enforcement details
-- **Fork bomb:** `process_execute` checks `procs < max_procs` in the caller's group before creating a
-  child; on success the child joins and `procs++`. The group's count falls as children exit.
+- **Fork bomb:** `process_execute` admits a child only if `procs < max_procs` at **every** level from
+  the caller's group to the root, then counts it at every level; the counts fall as children exit. A
+  descendant cannot escape by making its own sub-group (B1).
 - **CPU spinner:** the timer interrupt decrements the running user process's `cpu_budget`; at zero it
   flags the process, which `thread_tick` turns into a kill (exit −1). Checked in the interrupt so a
   pure busy loop that makes no system calls is still caught.
@@ -66,9 +77,12 @@ run from the timer interrupt), consistent with the rest of this uniprocessor ker
 ## Alternatives considered
 - **A single global limit:** would make one tenant's fork bomb cap everyone, the opposite of isolation.
 - **Pure per-process limits inherited by value:** simplest, but can't bound a fork bomb (above).
-- **A full cgroup hierarchy with live re-parenting of running descendants:** more faithful to Linux,
-  but the extra bookkeeping buys nothing the sandbox tests need; splitting a new group for future
-  descendants is enough and much simpler to reason about.
+- **A flat "split a new group" scheme (original M5 design):** simplest, but it let a descendant mint a
+  fresh full allowance and escape its ancestor's cap (B1). Replaced by the hierarchy above.
+- **A full cgroup hierarchy with live re-parenting of running descendants:** more faithful to Linux;
+  the extra bookkeeping to move *already-running* processes between groups buys nothing the sandbox
+  needs, so limits still apply to a process's *future* descendants, but accounting now walks the whole
+  ancestor chain so the subtree cap cannot be escaped.
 
 ## Consequences
 - The `neighbor-survives` test proves the key property: a well-behaved process started next to each

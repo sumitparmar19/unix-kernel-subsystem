@@ -44,7 +44,19 @@ at most 14 characters.
 
 `resource` is 0 `LIMIT_PROCS`, 1 `LIMIT_PAGES`, 2 `LIMIT_FDS`, 3 `LIMIT_CPU`. Over a subtree process or
 page cap, `exec` / allocation fails; over the CPU budget, the process is killed (exit −1); over the fd
-cap, `open`/`pipe`/`dup2` return −1.
+cap, `open`/`pipe`/`dup2` return −1. Subtree caps are **hierarchical** (ADR-004): a descendant that
+lowers its own cap makes a tighter child group inside its parent's, so it can never mint a fresh
+allowance to escape an ancestor's limit.
+
+## Memory mapping (VM builds only, docs/adr/ADR-003)
+
+Compiled only with `-DVM`, so there are 19 system calls in a plain user-program kernel and **21** with
+virtual memory.
+
+| Call | Behaviour | POSIX counterpart | Comparison |
+|---|---|---|---|
+| `mapid_t mmap (int fd, void *addr)` | Maps the open file `fd` into the caller's address space at page-aligned `addr`, lazily; dirty pages are written back on eviction and at unmap. Fails (−1) on fd 0/1, a zero/misaligned `addr`, a zero-length file, or any overlap with existing pages. | `mmap(addr, len, PROT_READ\|PROT_WRITE, MAP_SHARED, fd, 0)` | **differs:** length comes from the file; address must be given (no kernel-chosen placement) |
+| `void munmap (mapid_t mapping)` | Unmaps a region, writing back any dirty pages first. | `munmap` | **same** effect; identified by the id `mmap` returned |
 
 ## Limits
 

@@ -24,8 +24,16 @@ void frame_free (void *kpage);        /* Frees a frame (page is going away). */
 void frame_pin (void *kpage);         /* Protects a frame from eviction. */
 void frame_unpin (void *kpage);
 
-/* Blocks while P's frame is mid-eviction, so the owner never loads a
-   page whose contents are still being written out (ADR-003). */
-void frame_await_eviction (struct spt_entry *p);
+/* Atomically (under the frame lock): wait out any in-progress eviction
+   of P, then, if P is resident, pin its frame and return true; else
+   return false.  One lock hold closes the check-then-pin race, so a
+   caller never treats a just-evicted page as resident (ADR-003). */
+bool frame_pin_resident (struct spt_entry *p);
+
+/* Teardown: wait out any in-progress eviction of P, then free P's
+   resident frame (if any) and clear its mapping, leaving p->kpage NULL.
+   Only the evictor may free a frame it is evicting; owners wait for it
+   here first (ADR-003).  Does not touch swap. */
+void frame_release (struct spt_entry *p);
 
 #endif /* vm/frame.h */

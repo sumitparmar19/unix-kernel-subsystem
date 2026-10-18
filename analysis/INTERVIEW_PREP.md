@@ -507,3 +507,71 @@ what surfaces them. Write-up in `analysis/benchmarks/BUGS-FOUND.md`.
 - *"Where does this matter in industry?"* It's the shape of a container/sandbox runtime: isolation,
   resource caps, and paging. vLLM's PagedAttention applies the same page-table + eviction idea to a
   GPU KV cache.
+
+## 7. Hardening pass (v2.1): four kernel bugs found by code review
+
+These were found by reading the new VM and limits code against the concurrency and resource-exhaustion
+cases the tests had not reached, then fixed with a regression test each (`tests/hardening/`). B1 and B2
+fail/panic on v2.0 and pass now; B3 and B4 are narrow races whose fix is correct by construction, pass
+under load, and carry debug assertions that fire on regression.
+
+### B1 — sandbox escape via setlimit (STAR)
+- **S:** The whole project's claim is "contain untrusted programs." The resource groups were meant to
+  cap a subtree's processes and pages.
+- **T:** I checked whether a process could *escape* its own cap, not just stay under it.
+- **A:** It could. `setlimit` split off a brand-new flat group seeded with the caller's usage and
+  detached from the old one, so a child could call `setlimit` to its current cap, receive a fresh
+  full-sized allowance, and even hand a slot back to its parent. Every descendant could repeat it — an
+  unbounded fork / memory bomb. Fix: make groups a **tree**; `setlimit` creates a *child* group, and
+  admission/charging walk from the leaf to the root all-or-nothing, so every ancestor's cap binds.
+- **R:** `tests/hardening/esc-procs` builds a 30-deep attacker chain that escapes at every level; on
+  v2.0 it runs to the full depth, now it is contained at the cap. `esc-pages` is the same for memory.
+
+### B2 — a user program could panic the kernel by pinning a huge buffer (STAR)
+- **S:** `read`/`write` pin every page of the user buffer before I/O so the file read can't fault under
+  `filesys_lock`.
+- **T:** What if the buffer is larger than physical RAM?
+- **A:** Then every frame gets pinned, the evictor finds no victim, and the kernel hit
+  `PANIC("frame: no evictable frame found")` — reachable from a normal `read` into a big array, no
+  limit needed. Fix: pin at most a 64 KB **chunk** at a time, I/O it, unpin, continue; and make
+  `evict()` return NULL instead of panicking, so an impossible allocation kills the offending process,
+  never the kernel.
+- **R:** `pin-read`/`pin-write` read/write a 200-byte file through a 3 MB buffer; v2.0 panics, now they
+  pass. `pin-pipe` shows eight processes blocking in a pipe read with 1 MB buffers coexisting fine.
+
+### B3 — use-after-free when a process exits mid-eviction (STAR)
+- **S:** Eviction drops `frame_lock` across its swap/file I/O (lock order).
+- **T:** What if the evicted page's owner exits (or unmaps) exactly then?
+- **A:** The teardown path (`page_free`, `munmap`) freed the frame without waiting, so it could free a
+  frame the evictor was still writing out and about to reuse — one physical page used twice. Fix: a
+  teardown waits out `p->evicting` under `frame_lock` (`frame_release`) and the evicted frame is marked
+  so `frame_free` asserts no one else frees it. Rule: *only the evictor frees a frame it's evicting.*
+- **R:** `exit-evict` runs 30 rounds of children exiting under heavy paging; it passes, and debug
+  asserts guard the invariant.
+
+### B4 — check-then-pin race in the load path (STAR)
+- **S:** On a fault, `spt_load` found a page already resident and pinned it for the system call.
+- **T:** The "resident?" check and the pin were two steps with the frame lock dropped in between.
+- **A:** A timer preemption there let another process evict the page; the pin then silently missed, and
+  the buffer was reported pinned-and-resident when it wasn't. The following file I/O faulted in the
+  kernel while holding `filesys_lock` — a non-recursive re-acquire, i.e. a panic. Fix: `frame_pin_resident`
+  does wait-check-pin in a single lock hold; a debug assert fails fast if any kernel fault is taken
+  under `filesys_lock`.
+- **R:** `rw-pressure` loops read/write on multi-page buffers under memory pressure; the fix makes the
+  deadlock impossible by construction, so "eliminated by construction" is now literally true.
+
+### Q&A
+- **"Why do cgroups need a hierarchy?"** So a limit can't be escaped by subdividing. If a child could
+  mint its own fresh group, the parent's cap would mean nothing; charging up the whole chain keeps the
+  subtree total bounded at every ancestor (B1).
+- **"Why can't a syscall pin an unbounded buffer?"** Pinning makes a frame unevictable; pin more than
+  RAM and eviction is impossible. Bound the pin to a chunk and stream the I/O (B2).
+- **"How can a uniprocessor kernel have races?"** Preemptive timer interrupts switch threads between any
+  two instructions, and a thread that blocks on I/O (swap, pipe) yields mid-operation. Dropping a lock
+  across blocking I/O is where all three VM races lived.
+- **"What's a TOCTOU bug and how did you close one?"** Time-of-check to time-of-use: you check a
+  condition, it changes, you act on the stale result. B4 checked "resident" then pinned separately;
+  the fix does both under one lock so nothing changes in between.
+- **"Why must only the evictor free a frame it's evicting?"** Because the evictor still holds the frame
+  across its I/O and will hand it back to the allocator; if an exiting owner frees it meanwhile, the
+  same physical page is used twice (B3).

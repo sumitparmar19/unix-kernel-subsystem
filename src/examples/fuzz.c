@@ -30,6 +30,18 @@ static void *const BAD_PTRS[] = {
    valid, the rest is not. */
 static char boundary_probe[1];
 
+/* Set when fuzzing a VM kernel, so mmap/munmap are exercised only where
+   they exist (on a non-VM kernel they are unknown calls that would kill
+   the survivor). */
+static int vm_mode;
+
+/* A multi-chunk buffer for fuzzing bounded pinning (B2): a read of a huge
+   size into it must be chunked.  Kept to 256 KB (4 pin chunks) so it also
+   fits the non-VM kernel's eagerly-mapped, fixed-size user pool. */
+static char bigbuf[256 * 1024];
+
+#define SHARED_FILE "fuzz.chk"          /* Created by the parent first. */
+
 static void *
 rand_ptr (void)
 {
@@ -83,7 +95,7 @@ safe_call (void)
   static char buf[64];
   int fds[2];
 
-  switch (random_ulong () % 14)
+  switch (random_ulong () % 20)
     {
     case 0: filesize (rand_fd ()); break;
     case 1: seek (rand_fd (), random_ulong ()); break;
@@ -97,6 +109,50 @@ safe_call (void)
     case 9: filesize ((int) random_ulong ()); break;
     case 10: dup2 (rand_noncon_fd (), (int) (random_ulong () % 2048)); break;
     case 11: dup2 (rand_fd (), -(int) (random_ulong () % 4)); break;  /* bad newfd */
+    case 12:
+      /* setlimit with a negative or impossibly-large value: always
+         refused, so it never kills or hobbles this survivor. */
+      setlimit ((int) (random_ulong () % 4),
+                random_ulong () % 2 ? -(int) (1 + random_ulong () % 1000)
+                                    : (int) (0x40000000 + random_ulong () % 1000));
+      break;
+    case 13: getlimit ((int) (random_ulong () % 6)); break;
+    case 14: uptime (); break;
+    case 15:
+      /* exec_redirect with a missing program or a bad fd: returns -1. */
+      exec_redirect ("nope-nope", rand_noncon_fd (), rand_noncon_fd ());
+      break;
+    case 16:
+      {
+        /* Bounded-pinning path (B2): read a huge size into a huge buffer
+           from a real file.  Must be chunked, never pin everything. */
+        int fd = open (SHARED_FILE);
+        if (fd > 1)
+          {
+            read (fd, bigbuf, sizeof bigbuf);
+            close (fd);
+          }
+      }
+      break;
+    case 17:
+    case 18:
+      if (vm_mode)
+        {
+          /* mmap/munmap with a mix of good and bad arguments. */
+          int fd = open (SHARED_FILE);
+          void *addr = random_ulong () % 2
+                       ? (void *) (0x10000000 + (random_ulong () % 32) * 4096)
+                       : rand_ptr ();        /* bad/misaligned -> MAP_FAILED */
+          mapid_t m = mmap (fd, addr);
+          if (m != MAP_FAILED)
+            munmap (m);
+          munmap ((mapid_t) random_ulong ());  /* bogus id: ignored */
+          if (fd > 1)
+            close (fd);
+        }
+      else
+        getlimit ((int) (random_ulong () % 4));
+      break;
     default:
       /* Open a pipe and close both ends at once.  Never read our own
          pipe (EOF or block) and never write more than it holds. */
@@ -169,11 +225,22 @@ parent (unsigned seed0, int nseeds, int iters)
 {
   int survived = 0, killed = 0, leaked = 0, s, fd;
   char cmd[64], buf[16];
+  const char *vm = vm_mode ? " v" : "";
+
+  /* Seed the shared file first, so survivors can open it for the
+     big-buffer read and mmap cases. */
+  create (SHARED_FILE, 16);
+  fd = open (SHARED_FILE);
+  if (fd > 1)
+    {
+      write (fd, "healthy", 7);
+      close (fd);
+    }
 
   for (s = 0; s < nseeds; s++)
     {
       pid_t pid;
-      snprintf (cmd, sizeof cmd, "fuzz S %u %d", seed0 + s, iters);
+      snprintf (cmd, sizeof cmd, "fuzz S %u %d%s", seed0 + s, iters, vm);
       pid = exec (cmd);
       if (pid != PID_ERROR && wait (pid) == (int) ((seed0 + s) % 128))
         survived++;
@@ -181,7 +248,7 @@ parent (unsigned seed0, int nseeds, int iters)
   for (s = 0; s < nseeds; s++)
     {
       pid_t pid;
-      snprintf (cmd, sizeof cmd, "fuzz B %u %d", seed0 + s, iters);
+      snprintf (cmd, sizeof cmd, "fuzz B %u %d%s", seed0 + s, iters, vm);
       pid = exec (cmd);
       if (pid == PID_ERROR)
         continue;
@@ -218,6 +285,11 @@ parent (unsigned seed0, int nseeds, int iters)
 int
 main (int argc, char *argv[])
 {
+  int i;
+  for (i = 1; i < argc; i++)            /* "v" anywhere enables VM calls. */
+    if (argv[i][0] == 'v' && argv[i][1] == '\0')
+      vm_mode = 1;
+
   if (argc >= 4 && argv[1][0] == 'P')
     return parent (atoi (argv[2]), atoi (argv[3]),
                    argc > 4 ? atoi (argv[4]) : 2000);

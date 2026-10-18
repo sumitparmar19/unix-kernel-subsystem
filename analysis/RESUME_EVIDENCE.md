@@ -10,6 +10,12 @@ that I can't explain** (`analysis/INTERVIEW_PREP.md`). Results are reproduced ea
 with AI pair-programming assistance (Claude), disclosed per-commit; the design, diagnosis and review
 are mine.
 
+**Course result → now.** The frozen course submission scored **userprog 63/80** and **threads 26/27**.
+The post-course work raised these to **80/80** and **27/27** (the 27th scheduler test and the 17
+remaining user-program tests — a cosmetic exit-message fix plus the exec load-failure handshake and
+per-byte pointer checks). So where C1/C3/C5/C7 show full green, part of that total is post-course, not
+the original grade.
+
 | # | Claim | Backed by (code) | Design record | Evidence |
 |---|---|---|---|---|
 | C1 | System-call layer (19 POSIX-style calls) in C for the Pintos x86 kernel | `src/userprog/syscall.c`, `userprog/umem.c` | [SYSCALLS.md](../docs/SYSCALLS.md) | userprog 80/80; fuzzer ~125k calls, 0 panics |

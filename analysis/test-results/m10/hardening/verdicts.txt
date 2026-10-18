@@ -1,0 +1,8 @@
+PASS tests/hardening/esc-pages
+PASS tests/hardening/esc-procs
+PASS tests/hardening/exec-empty
+PASS tests/hardening/exit-evict
+PASS tests/hardening/pin-pipe
+PASS tests/hardening/pin-read
+PASS tests/hardening/pin-write
+PASS tests/hardening/rw-pressure

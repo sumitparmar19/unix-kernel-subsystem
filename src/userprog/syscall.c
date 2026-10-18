@@ -198,6 +198,46 @@ sys_filesize (const uint32_t *args)
   return size;
 }
 
+#ifdef VM
+/* Largest span of the user buffer pinned at once (ADR-003 "bounded
+   pinning").  Keeps read/write from locking every frame in memory --
+   which would make eviction impossible -- so a buffer far larger than
+   RAM is handled in pieces instead of panicking the kernel. */
+#define PIN_CHUNK_PAGES 16
+#define PIN_CHUNK_BYTES (PIN_CHUNK_PAGES * PGSIZE)
+
+/* Copies between OF and the user BUFFER one bounded chunk at a time:
+   pin a chunk (which also validates it), do the I/O, unpin, advance.
+   A bad user pointer kills the caller.  Stops at EOF / a short transfer
+   (a file's end, or all a pipe currently has).  Returns the total, or
+   -1 if nothing could be transferred. */
+static int
+io_chunked (struct ofile *of, uint8_t *buffer, unsigned size,
+            bool is_read, void *esp)
+{
+  unsigned done = 0;
+
+  while (done < size)
+    {
+      unsigned chunk = size - done;
+      int n;
+      if (chunk > PIN_CHUNK_BYTES)
+        chunk = PIN_CHUNK_BYTES;
+      if (!page_pin_range (buffer + done, chunk, esp, is_read))
+        kill_process ();
+      n = is_read ? ofile_read (of, buffer + done, chunk)
+                  : ofile_write (of, buffer + done, chunk);
+      page_unpin_range (buffer + done, chunk);
+      if (n < 0)
+        return done > 0 ? (int) done : -1;
+      done += n;
+      if ((unsigned) n < chunk)
+        break;                  /* EOF / short: nothing more right now. */
+    }
+  return (int) done;
+}
+#endif
+
 static uint32_t
 sys_read (const uint32_t *args)
 {
@@ -205,21 +245,15 @@ sys_read (const uint32_t *args)
   void *buffer = (void *) args[1];
   unsigned size = args[2];
 
-  /* The kernel writes into BUFFER: every page must be writable.  Under
-     VM, pin the pages for the whole read so file I/O can't fault while
-     holding the file-system lock (ADR-003 deadlock rule). */
-  uint32_t n;
 #ifdef VM
-  if (!page_pin_range (buffer, size, thread_current ()->user_esp, true))
-    kill_process ();
-  n = of != NULL ? (uint32_t) ofile_read (of, buffer, size) : (uint32_t) -1;
-  page_unpin_range (buffer, size);
-  return n;
+  if (of == NULL)               /* Bad/unreadable fd: don't touch the buffer. */
+    return (uint32_t) -1;
+  return (uint32_t) io_chunked (of, buffer, size, true,
+                                thread_current ()->user_esp);
 #else
   if (!validate_range (buffer, size, true))
     kill_process ();
-  n = of != NULL ? (uint32_t) ofile_read (of, buffer, size) : (uint32_t) -1;
-  return n;
+  return of != NULL ? (uint32_t) ofile_read (of, buffer, size) : (uint32_t) -1;
 #endif
 }
 
@@ -230,18 +264,15 @@ sys_write (const uint32_t *args)
   const void *buffer = (const void *) args[1];
   unsigned size = args[2];
 
-  uint32_t n;
 #ifdef VM
-  if (!page_pin_range (buffer, size, thread_current ()->user_esp, false))
-    kill_process ();
-  n = of != NULL ? (uint32_t) ofile_write (of, buffer, size) : (uint32_t) -1;
-  page_unpin_range (buffer, size);
-  return n;
+  if (of == NULL)
+    return (uint32_t) -1;
+  return (uint32_t) io_chunked (of, (uint8_t *) buffer, size, false,
+                                thread_current ()->user_esp);
 #else
   if (!validate_range (buffer, size, false))
     kill_process ();
-  n = of != NULL ? (uint32_t) ofile_write (of, buffer, size) : (uint32_t) -1;
-  return n;
+  return of != NULL ? (uint32_t) ofile_write (of, buffer, size) : (uint32_t) -1;
 #endif
 }
 

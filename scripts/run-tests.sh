@@ -12,7 +12,7 @@ if [ "$#" -gt 0 ]; then
   projects=("$@")
 else
   projects=()
-  for p in threads userprog vm filesys ipc limits; do
+  for p in threads userprog vm filesys ipc limits hardening; do
     [ -f "$SRC/$p/Make.vars" ] && projects+=("$p")
   done
   if [ "${#projects[@]}" -eq 0 ]; then

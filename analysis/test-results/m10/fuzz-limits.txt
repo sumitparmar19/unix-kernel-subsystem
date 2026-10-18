@@ -1,0 +1,13 @@
+fuzz: limits, seeds 1..4, 2000 calls each
+---- kernel output ----
+fuzz: exit(-1)
+fuzz: exit(-1)
+fuzz: exit(-1)
+fuzz: exit(-1)
+fuzz: survivors 4/4 (2000 calls each), bombs killed 4/4, leaked 0
+fuzz: 8000 confirmed system calls with no panic or hang
+fuzz: kernel healthy after fuzzing
+fuzz: exit(0)
+-----------------------
+fuzz: 8000 confirmed system calls with 
+fuzz: PASS

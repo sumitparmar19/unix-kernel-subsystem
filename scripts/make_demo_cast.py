@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Generate docs/benchmarks/demo.cast -- an asciicast v2 recording of the
-kernel running, played on the benchmark site with asciinema-player.
+"""Generate analysis/benchmarks/demo.cast -- an asciicast v2 recording of the
+kernel running, inlined into the benchmark site's self-contained player by
+analysis/build_site.py.
 
 The terminal output below is the *real* output the kernel produced in the
 M7 test runs (analysis/test-results/m7/.../*.output) and the M7 benchmark
