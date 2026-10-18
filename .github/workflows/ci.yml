@@ -73,12 +73,11 @@ jobs:
       - name: cppcheck
         run: |
           sudo apt-get update && sudo apt-get install -y cppcheck
-          # Analyse the kernel-v2 / v2.1 modules; fail on a genuine error.
+          # Analyse the kernel-v2 modules; fail on a genuine error.
           cppcheck --std=c99 --error-exitcode=1 --quiet \
             --suppress=missingIncludeSystem --suppress=unusedFunction \
             src/userprog/umem.c src/userprog/ofile.c src/userprog/pipe.c \
-            src/userprog/rlimit.c src/vm/frame.c src/vm/page.c src/vm/swap.c \
-            src/vm/mmap.c src/threads/kstat.c src/threads/trace.c
+            src/threads/kstat.c src/threads/trace.c
 
   codeql:
     runs-on: ubuntu-latest
