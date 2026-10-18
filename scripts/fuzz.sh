@@ -9,11 +9,12 @@
 #   docker run --rm pintos-kernel ... or scripts/in-docker.sh.
 set -euo pipefail
 
-proj=userprog seed0=1 nseeds=10 iters=2000 timeout=300
-while getopts "k:s:n:i:t:" o; do case $o in
+proj=userprog seed0=1 nseeds=10 iters=2000 timeout=300 vm=
+while getopts "k:s:n:i:t:m" o; do case $o in
   k) proj=$OPTARG ;; s) seed0=$OPTARG ;; n) nseeds=$OPTARG ;;
   i) iters=$OPTARG ;; t) timeout=$OPTARG ;;
-  *) echo "usage: $0 [-k proj] [-s seed0] [-n nseeds] [-i iters] [-t secs]" >&2; exit 2 ;;
+  m) vm=" v" ;;   # VM mode: also fuzz mmap/munmap (only on a VM kernel)
+  *) echo "usage: $0 [-k proj] [-s seed0] [-n nseeds] [-i iters] [-t secs] [-m]" >&2; exit 2 ;;
 esac; done
 
 src="${PINTOS_SRC:-/pintos-src}"
@@ -22,9 +23,9 @@ make -s -C "$src/examples" fuzz >/dev/null
 make -s -C "$src/$proj" >/dev/null
 
 log=$(mktemp)
-cmd="fuzz P $seed0 $nseeds $iters"
-echo "fuzz: $proj, seeds $seed0..$((seed0 + nseeds - 1)), $iters calls each"
-( cd "$build" && pintos -v -k -T "$timeout" --qemu --filesys-size=4 \
+cmd="fuzz P $seed0 $nseeds $iters$vm"
+echo "fuzz: $proj, seeds $seed0..$((seed0 + nseeds - 1)), $iters calls each${vm:+ (vm)}"
+( cd "$build" && pintos -v -k -T "$timeout" --qemu --filesys-size=4 ${vm:+--swap-size=4} \
     -p ../../examples/fuzz -a fuzz -- -q -f run "$cmd" ) >"$log" 2>&1 || true
 
 echo "---- kernel output ----"

@@ -1,0 +1,34 @@
+# -*- makefile -*-
+# Hardening regression tests (kernel-v2.1): one per kernel bug B1-B4.
+
+tests/%.output: FILESYSSOURCE = --filesys-size=2
+tests/%.output: PUTFILES = $(filter-out kernel.bin loader.bin, $^)
+
+tests/hardening_TESTS = $(addprefix tests/hardening/,esc-procs esc-pages \
+	pin-read pin-write pin-pipe exit-evict rw-pressure exec-empty)
+
+tests/hardening_PROGS = $(tests/hardening_TESTS) $(addprefix tests/hardening/,\
+	esc-child esc-pgchild pin-pipe-rd evict-child grind-child)
+
+tests/hardening/esc-procs_SRC   = tests/hardening/esc-procs.c tests/main.c
+tests/hardening/esc-pages_SRC   = tests/hardening/esc-pages.c tests/main.c
+tests/hardening/pin-read_SRC    = tests/hardening/pin-read.c tests/main.c
+tests/hardening/pin-write_SRC   = tests/hardening/pin-write.c tests/main.c
+tests/hardening/pin-pipe_SRC    = tests/hardening/pin-pipe.c tests/main.c
+tests/hardening/exit-evict_SRC  = tests/hardening/exit-evict.c tests/main.c
+tests/hardening/rw-pressure_SRC = tests/hardening/rw-pressure.c tests/main.c
+tests/hardening/exec-empty_SRC  = tests/hardening/exec-empty.c tests/main.c
+
+tests/hardening/esc-child_SRC    = tests/hardening/esc-child.c
+tests/hardening/esc-pgchild_SRC  = tests/hardening/esc-pgchild.c
+tests/hardening/pin-pipe-rd_SRC  = tests/hardening/pin-pipe-rd.c
+tests/hardening/evict-child_SRC  = tests/hardening/evict-child.c
+tests/hardening/grind-child_SRC  = tests/hardening/grind-child.c
+
+$(foreach prog,$(tests/hardening_TESTS),$(eval $(prog)_SRC += tests/lib.c))
+
+tests/hardening/esc-procs_PUTFILES   += tests/hardening/esc-child
+tests/hardening/esc-pages_PUTFILES   += tests/hardening/esc-pgchild
+tests/hardening/pin-pipe_PUTFILES    += tests/hardening/pin-pipe-rd
+tests/hardening/exit-evict_PUTFILES  += tests/hardening/evict-child
+tests/hardening/rw-pressure_PUTFILES += tests/hardening/grind-child

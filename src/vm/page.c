@@ -149,15 +149,15 @@ spt_load (struct spt_entry *p, bool keep_pinned)
 {
   void *kpage;
 
-  /* If this page is being evicted right now, wait for the evictor to
-     finish recording where its data went; otherwise we could load a
-     stale or zero-filled copy over data still on its way to swap. */
-  frame_await_eviction (p);
-
-  if (p->kpage != NULL)
+  /* Atomically wait out any eviction and, if the page is resident, pin it
+     in one lock hold.  Doing the wait, the resident check and the pin
+     separately would let another process evict the page in between, so a
+     later I/O would fault on a page we reported as pinned and resident --
+     under filesys_lock, that is a deadlock (ADR-003). */
+  if (frame_pin_resident (p))
     {
-      if (keep_pinned)
-        frame_pin (p->kpage);
+      if (!keep_pinned)
+        frame_unpin (p->kpage);
       return true;              /* Already resident. */
     }
   kpage = frame_alloc (p);      /* Returns pinned. */
@@ -302,13 +302,12 @@ page_free (struct hash_elem *e, void *aux UNUSED)
 {
   struct spt_entry *p = hash_entry (e, struct spt_entry, elem);
 
-  if (p->kpage != NULL)
-    {
-      if (p->owner->pagedir != NULL)
-        pagedir_clear_page (p->owner->pagedir, p->upage);
-      frame_free (p->kpage);
-    }
-  else if (p->has_swap)
+  /* Wait out any in-progress eviction of this page before freeing its
+     frame, so we never free a frame the evictor is still writing out or
+     about to hand back (use-after-free / double free, ADR-003).  After
+     this p->kpage is NULL; a page that went to swap is freed below. */
+  frame_release (p);
+  if (p->has_swap)
     swap_free (p->swap_slot);
   rlimit_uncharge_pages (p->owner, 1);
   free (p);

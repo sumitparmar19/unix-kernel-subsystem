@@ -64,9 +64,7 @@ mmap_create (struct file *file, void *addr)
               if (p != NULL)
                 {
                   hash_delete (&t->spt, &p->elem);
-                  if (p->kpage != NULL)
-                    { pagedir_clear_page (t->pagedir, p->upage);
-                      frame_free (p->kpage); }
+                  frame_release (p);    /* No-op here (never faulted in yet). */
                   free (p);
                 }
             }
@@ -85,7 +83,11 @@ unmap_page (struct thread *t, struct file *file, void *upage)
   struct spt_entry *p = spt_lookup (upage);
   if (p == NULL)
     return;
-  if (p->kpage != NULL)
+  /* Pin the page if resident, waiting out any in-progress eviction, so it
+     can't be evicted or freed under us while we write it back (ADR-003).
+     If it is not resident, an evictor already wrote back any dirty data to
+     the file, so there is nothing to do. */
+  if (frame_pin_resident (p))
     {
       if (pagedir_is_dirty (t->pagedir, upage))
         {
@@ -95,6 +97,7 @@ unmap_page (struct thread *t, struct file *file, void *upage)
         }
       pagedir_clear_page (t->pagedir, upage);
       frame_free (p->kpage);
+      p->kpage = NULL;
     }
   hash_delete (&t->spt, &p->elem);
   free (p);

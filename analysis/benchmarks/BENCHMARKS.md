@@ -17,12 +17,12 @@ system does for the *same* program.
 
 | workload | policy | runs | evictions | swap-ins | swap-outs | page-faults | ticks |
 |---|---|---|---|---|---|---|---|
-| page-merge-par | clock | 10/10 ok | 334 | 179 | 331 | 732 | 296±20 |
+| page-merge-par | clock | 10/10 ok | 334 | 179 | 331 | 732 | 283±8 |
 | page-merge-par | fifo | 0/5 ok | -- | -- | -- | -- | -- |
-| page-merge-par | random | 5/5 ok | 299±6 | 145±7 | 297±7 | 697±6 | 299±10 |
-| page-parallel | clock | 10/10 ok | 164±1 | 3 | 159±1 | 1050 | 120±8 |
-| page-parallel | fifo | 4/5 ok | 478±1 | 319±0 | 478±0 | 1364±1 | 174±17 |
-| page-parallel | random | 5/5 ok | 540±184 | 362±137 | 532±181 | 1413±140 | 208±38 |
+| page-merge-par | random | 5/5 ok | 301±15 | 147±15 | 299±15 | 699±15 | 286±13 |
+| page-parallel | clock | 10/10 ok | 164±1 | 3 | 159±1 | 1050 | 118±5 |
+| page-parallel | fifo | 5/5 ok | 480 | 320 | 479 | 1365 | 179±9 |
+| page-parallel | random | 5/5 ok | 470±100 | 284±93 | 462±98 | 1333±95 | 175±23 |
 
 ![evictions by policy](evictions.png)
 
@@ -32,9 +32,19 @@ back. On `page-parallel` (sequential scans) clock evicts about 3x fewer pages
 than FIFO and, decisively, swaps almost nothing back in (3 vs ~320) because the
 accessed bit lets it keep the pages still in use; FIFO blindly evicts by age
 and random by luck, so both pay far more swap traffic and run longer (random's
-large standard deviation shows how unpredictable luck-based eviction is). On
-the write-heavy `page-merge-par`, FIFO's extra traffic pushes every run past
-the time budget (0/5 ok) while clock finishes in ~3 simulated seconds.
+large standard deviation shows how unpredictable luck-based eviction is).
+
+**Where clock does *not* win.** On the write-heavy `page-merge-par`, **random
+slightly beats clock** (about 300 evictions / 145 swap-ins vs 334 / 179): a
+merge sort rewrites its pages, so almost every frame's accessed bit is set and
+clock's second-chance pass degenerates into an extra sweep before it evicts
+roughly who FIFO/random would anyway — the bookkeeping is pure cost here. Clock
+still wins decisively on the time budget: FIFO exceeds it on **every**
+`page-merge-par` run (0/5 finish) and sometimes on `page-parallel` too (its
+extra swap traffic makes run time erratic), while clock and random always
+finish. The headline is "clock is the safe default," not "clock always has the
+fewest evictions"; the "ok" counts above show how many runs of each config
+finished within the budget.
 
 ## Paging curve: clock vs physical RAM
 

@@ -1,0 +1,52 @@
+Copying tests/ipc/dup2-basic to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/jhC1ocNfBD.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.......................
+Kernel command line: -q -f extract run dup2-basic
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  699,596,800 loops/s.
+ide0: unexpected interrupt
+hda: 5,040 sectors (2 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 203 sectors (101 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 119 sectors (59 kB), Pintos scratch (22)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'dup2-basic' into the file system...
+Erasing ustar archive...
+Executing 'dup2-basic':
+(dup2-basic) begin
+(dup2-basic) create "dup.txt" (6 bytes)
+(dup2-basic) open "dup.txt"
+(dup2-basic) dup2 (fd, 7)
+(dup2-basic) write through fd 7
+(dup2-basic) the original fd shares the offset
+(dup2-basic) dup2 of a descriptor onto itself
+(dup2-basic) dup2 from a closed descriptor fails
+(dup2-basic) dup2 to a negative descriptor fails
+(dup2-basic) save stdout as fd 9
+(dup2-basic) stdout restored
+(dup2-basic) file holds 6 bytes
+(dup2-basic) file reads "abcdef"
+(dup2-basic) end
+dup2-basic: exit(0)
+Execution of 'dup2-basic' complete.
+Timer: 68 ticks
+Thread: 37 idle ticks, 28 kernel ticks, 3 user ticks
+hda2 (filesys): 90 reads, 249 writes
+hda3 (scratch): 118 reads, 2 writes
+Console: 1392 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+KSTAT-SYSCALLS 1=1 4=1 6=1 8=1 9=16 10=1 11=1 12=3 22=7
+KSTAT syscalls=32 ctx_switches=928 lock_waits=0 page_faults=0 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=0 pipe_blocks=0 limit_denials=0 limit_kills=0
+Powering off...

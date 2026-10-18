@@ -18,5 +18,9 @@
   "limits": {
     "passed": 6,
     "total": 6
+  },
+  "hardening": {
+    "passed": 8,
+    "total": 8
   }
 }

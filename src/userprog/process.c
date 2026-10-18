@@ -455,7 +455,10 @@ load (const char *file_name, void (**eip) (void), void **esp)
   char *save_ptr;
   char *prog_name = strtok_r (cmd_copy, " ", &save_ptr);
 
-  file = filesys_open (prog_name);
+  /* An empty or all-spaces command line has no program name; fail the
+     load rather than passing NULL to the file system (found by the v2.1
+     fuzzer: exec("") panicked dir_lookup). */
+  file = prog_name != NULL ? filesys_open (prog_name) : NULL;
   palloc_free_page (cmd_copy);
 
   if (file == NULL)
