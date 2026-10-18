@@ -1,0 +1,16 @@
+{
+  "project": "limits",
+  "passed": 6,
+  "total": 6,
+  "wall_seconds": 5,
+  "jobs": 4,
+  "simulator": "--qemu",
+  "tests": [
+    {"name": "tests/limits/cpu-spin", "result": "PASS", "ticks": 114},
+    {"name": "tests/limits/fd-exhaust", "result": "PASS", "ticks": 61},
+    {"name": "tests/limits/fork-bomb", "result": "PASS", "ticks": 67},
+    {"name": "tests/limits/getlimit", "result": "PASS", "ticks": 68},
+    {"name": "tests/limits/mem-hog", "result": "PASS", "ticks": 65},
+    {"name": "tests/limits/neighbor", "result": "PASS", "ticks": 380}
+  ]
+}

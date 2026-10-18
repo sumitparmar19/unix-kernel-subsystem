@@ -1,0 +1,18 @@
+{
+  "project": "hardening",
+  "passed": 8,
+  "total": 8,
+  "wall_seconds": 16,
+  "jobs": 4,
+  "simulator": "--qemu",
+  "tests": [
+    {"name": "tests/hardening/esc-pages", "result": "PASS", "ticks": 73},
+    {"name": "tests/hardening/esc-procs", "result": "PASS", "ticks": 76},
+    {"name": "tests/hardening/exec-empty", "result": "PASS", "ticks": 61},
+    {"name": "tests/hardening/exit-evict", "result": "PASS", "ticks": 279},
+    {"name": "tests/hardening/pin-pipe", "result": "PASS", "ticks": 77},
+    {"name": "tests/hardening/pin-read", "result": "PASS", "ticks": 63},
+    {"name": "tests/hardening/pin-write", "result": "PASS", "ticks": 73},
+    {"name": "tests/hardening/rw-pressure", "result": "PASS", "ticks": 1509}
+  ]
+}

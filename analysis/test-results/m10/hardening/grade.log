@@ -1,0 +1,34 @@
+make: Entering directory '/pintos/src/hardening/build'
+../../tests/make-grade ../.. results ../../tests/hardening/Grading | tee grade
+TOTAL TESTING SCORE: 100.0%
+ALL TESTED PASSED -- PERFECT SCORE
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+SUMMARY BY TEST SET
+
+Test Set                                      Pts Max  % Ttl  % Max
+--------------------------------------------- --- --- ------ ------
+tests/hardening/Rubric                          8/  8 100.0%/100.0%
+--------------------------------------------- --- --- ------ ------
+Total                                                 100.0%/100.0%
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+SUMMARY OF INDIVIDUAL TESTS
+
+Hardening regression (kernel-v2.1) (tests/hardening/Rubric):
+	     1/ 1 tests/hardening/esc-procs
+	     1/ 1 tests/hardening/esc-pages
+	     1/ 1 tests/hardening/pin-read
+	     1/ 1 tests/hardening/pin-write
+	     1/ 1 tests/hardening/pin-pipe
+	     1/ 1 tests/hardening/exit-evict
+	     1/ 1 tests/hardening/rw-pressure
+	     1/ 1 tests/hardening/exec-empty
+
+	- Section summary.
+	      8/  8 tests passed
+	      8/  8 points subtotal
+
+make: Leaving directory '/pintos/src/hardening/build'

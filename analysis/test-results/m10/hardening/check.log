@@ -1,0 +1,35 @@
+make: Entering directory '/pintos/src/hardening/build'
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/hardening/esc-procs -a esc-procs -p tests/hardening/esc-child -a esc-child --swap-size=4 -- -q  -f run esc-procs < /dev/null 2> tests/hardening/esc-procs.errors > tests/hardening/esc-procs.output
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/hardening/esc-pages -a esc-pages -p tests/hardening/esc-pgchild -a esc-pgchild --swap-size=4 -- -q  -f run esc-pages < /dev/null 2> tests/hardening/esc-pages.errors > tests/hardening/esc-pages.output
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/hardening/pin-read -a pin-read --swap-size=4 -- -q  -f run pin-read < /dev/null 2> tests/hardening/pin-read.errors > tests/hardening/pin-read.output
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/hardening/pin-write -a pin-write --swap-size=4 -- -q  -f run pin-write < /dev/null 2> tests/hardening/pin-write.errors > tests/hardening/pin-write.output
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/hardening/pin-pipe -a pin-pipe -p tests/hardening/pin-pipe-rd -a pin-pipe-rd --swap-size=4 -- -q  -f run pin-pipe < /dev/null 2> tests/hardening/pin-pipe.errors > tests/hardening/pin-pipe.output
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/hardening/exit-evict -a exit-evict -p tests/hardening/evict-child -a evict-child --swap-size=4 -- -q  -f run exit-evict < /dev/null 2> tests/hardening/exit-evict.errors > tests/hardening/exit-evict.output
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/hardening/rw-pressure -a rw-pressure -p tests/hardening/grind-child -a grind-child --swap-size=4 -- -q  -f run rw-pressure < /dev/null 2> tests/hardening/rw-pressure.errors > tests/hardening/rw-pressure.output
+pintos -v -k -T 60 --qemu  --filesys-size=2 -p tests/hardening/exec-empty -a exec-empty --swap-size=4 -- -q  -f run exec-empty < /dev/null 2> tests/hardening/exec-empty.errors > tests/hardening/exec-empty.output
+perl -I../.. ../../tests/hardening/esc-procs.ck tests/hardening/esc-procs tests/hardening/esc-procs.result
+pass tests/hardening/esc-procs
+perl -I../.. ../../tests/hardening/esc-pages.ck tests/hardening/esc-pages tests/hardening/esc-pages.result
+pass tests/hardening/esc-pages
+perl -I../.. ../../tests/hardening/pin-read.ck tests/hardening/pin-read tests/hardening/pin-read.result
+pass tests/hardening/pin-read
+perl -I../.. ../../tests/hardening/pin-write.ck tests/hardening/pin-write tests/hardening/pin-write.result
+perl -I../.. ../../tests/hardening/exec-empty.ck tests/hardening/exec-empty tests/hardening/exec-empty.result
+pass tests/hardening/pin-write
+perl -I../.. ../../tests/hardening/pin-pipe.ck tests/hardening/pin-pipe tests/hardening/pin-pipe.result
+pass tests/hardening/exec-empty
+pass tests/hardening/pin-pipe
+perl -I../.. ../../tests/hardening/exit-evict.ck tests/hardening/exit-evict tests/hardening/exit-evict.result
+pass tests/hardening/exit-evict
+perl -I../.. ../../tests/hardening/rw-pressure.ck tests/hardening/rw-pressure tests/hardening/rw-pressure.result
+pass tests/hardening/rw-pressure
+pass tests/hardening/esc-procs
+pass tests/hardening/esc-pages
+pass tests/hardening/pin-read
+pass tests/hardening/pin-write
+pass tests/hardening/pin-pipe
+pass tests/hardening/exit-evict
+pass tests/hardening/rw-pressure
+pass tests/hardening/exec-empty
+All 8 tests passed.
+make: Leaving directory '/pintos/src/hardening/build'
