@@ -1,0 +1,4 @@
+project:  hardening
+passed:   8 / 8
+runtime:  16 s (make check, -j4, --qemu)
+failing:

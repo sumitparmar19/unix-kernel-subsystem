@@ -1,0 +1,21 @@
+{
+  "project": "ipc",
+  "passed": 11,
+  "total": 11,
+  "wall_seconds": 3,
+  "jobs": 4,
+  "simulator": "--qemu",
+  "tests": [
+    {"name": "tests/ipc/dup2-basic", "result": "PASS", "ticks": 68},
+    {"name": "tests/ipc/pipe-bad-ptr", "result": "PASS", "ticks": 62},
+    {"name": "tests/ipc/pipe-basic", "result": "PASS", "ticks": 74},
+    {"name": "tests/ipc/pipe-eof", "result": "PASS", "ticks": 67},
+    {"name": "tests/ipc/pipe-full", "result": "PASS", "ticks": 69},
+    {"name": "tests/ipc/pipe-large", "result": "PASS", "ticks": 69},
+    {"name": "tests/ipc/pipe-leak", "result": "PASS", "ticks": 108},
+    {"name": "tests/ipc/pipe-multi", "result": "PASS", "ticks": 75},
+    {"name": "tests/ipc/pipe-no-reader", "result": "PASS", "ticks": 71},
+    {"name": "tests/ipc/redir-pipeline", "result": "PASS", "ticks": 83},
+    {"name": "tests/ipc/redirect-basic", "result": "PASS", "ticks": 68}
+  ]
+}

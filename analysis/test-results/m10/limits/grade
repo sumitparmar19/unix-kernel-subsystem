@@ -1,0 +1,29 @@
+TOTAL TESTING SCORE: 100.0%
+ALL TESTED PASSED -- PERFECT SCORE
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+SUMMARY BY TEST SET
+
+Test Set                                      Pts Max  % Ttl  % Max
+--------------------------------------------- --- --- ------ ------
+tests/limits/Rubric                             6/  6 100.0%/100.0%
+--------------------------------------------- --- --- ------ ------
+Total                                                 100.0%/100.0%
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+SUMMARY OF INDIVIDUAL TESTS
+
+Resource limits (kernel-v2) (tests/limits/Rubric):
+	     1/ 1 tests/limits/fork-bomb
+	     1/ 1 tests/limits/fd-exhaust
+	     1/ 1 tests/limits/cpu-spin
+	     1/ 1 tests/limits/getlimit
+	     1/ 1 tests/limits/neighbor
+	     1/ 1 tests/limits/mem-hog
+
+	- Section summary.
+	      6/  6 tests passed
+	      6/  6 points subtotal
+

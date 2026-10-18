@@ -1,0 +1,49 @@
+Copying tests/vm/mmap-overlap to scratch partition...
+Copying tests/vm/zeros to scratch partition...
+qemu-system-i386 -device isa-debug-exit -drive file=/tmp/Z2fCZgMu0R.dsk,format=raw,index=0,media=disk -m 4 -net none -nographic -monitor null
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+Booting from Hard Disk...
+PPiiLLoo  hhddaa1
+1
+LLooaaddiinngg.........................
+Kernel command line: -q -f extract run mmap-overlap
+Pintos booting with 3,968 kB RAM...
+367 pages available in kernel pool.
+367 pages available in user pool.
+Calibrating timer...  523,468,800 loops/s.
+ide0: unexpected interrupt
+hda: 13,104 sectors (6 MB), model "QM00001", serial "QEMU HARDDISK"
+hda1: 221 sectors (110 kB), Pintos OS kernel (20)
+hda2: 4,096 sectors (2 MB), Pintos file system (21)
+hda3: 130 sectors (65 kB), Pintos scratch (22)
+hda4: 8,192 sectors (4 MB), Pintos swap (23)
+ide1: unexpected interrupt
+filesys: using hda2
+scratch: using hda3
+swap: using hda4
+Formatting file system...done.
+Boot complete.
+Extracting ustar archive from scratch device into file system...
+Putting 'mmap-overlap' into the file system...
+Putting 'zeros' into the file system...
+Erasing ustar archive...
+Executing 'mmap-overlap':
+(mmap-overlap) begin
+(mmap-overlap) open "zeros" once
+(mmap-overlap) mmap "zeros"
+(mmap-overlap) open "zeros" again
+(mmap-overlap) try to mmap "zeros" again
+(mmap-overlap) end
+mmap-overlap: exit(0)
+Execution of 'mmap-overlap' complete.
+Timer: 62 ticks
+Thread: 34 idle ticks, 26 kernel ticks, 2 user ticks
+hda2 (filesys): 91 reads, 266 writes
+hda3 (scratch): 129 reads, 2 writes
+hda4 (swap): 0 reads, 0 writes
+Console: 1232 characters output
+Keyboard: 0 keys pressed
+Exception: 4 page faults
+KSTAT-SYSCALLS 1=1 6=2 9=6 13=2
+KSTAT syscalls=11 ctx_switches=986 lock_waits=0 page_faults=4 evictions=0 swap_ins=0 swap_outs=0 dirty_writebacks=0 pipe_bytes=0 pipe_blocks=0 limit_denials=0 limit_kills=0
+Powering off...
