@@ -17,6 +17,8 @@ struct frame
     void *kpage;                /* Kernel virtual address of the frame. */
     struct spt_entry *page;     /* The user page occupying it. */
     bool pinned;                /* If set, never chosen for eviction. */
+    bool evicting;              /* The evictor holds this frame mid-write-out;
+                                   no one else may free or hand it out. */
     struct list_elem elem;      /* In frame_list. */
   };
 
@@ -131,19 +133,23 @@ evict (void)
     f = random_unpinned ();
 
   if (f == NULL)
-    PANIC ("frame: no evictable frame found");
+    return NULL;                /* Everything is pinned: caller must cope,
+                                   never panic the kernel (ADR-003). */
 
   /* Write the victim out with the table unlocked (swap/file I/O must not
-     be held under frame_lock).  Mark the page evicting first so that if
-     its owner faults on it meanwhile, frame_await_eviction makes it wait
-     until the data's new home (swap slot / file) is recorded below. */
+     be held under frame_lock).  Mark the page AND the frame evicting first:
+     a faulting owner waits in frame_pin_resident, and a teardown waits in
+     frame_release, until the data's new home (swap slot / file) is recorded
+     below, so no one loads a half-evicted page or frees the frame under us. */
   struct spt_entry *victim = f->page;
   f->pinned = true;
+  f->evicting = true;
   victim->evicting = true;
   lock_release (&frame_lock);
   page_evict (victim, f->kpage);
   lock_acquire (&frame_lock);
   victim->evicting = false;
+  f->evicting = false;
   cond_broadcast (&frame_cond, &frame_lock);
   f->page = NULL;
   return f;
@@ -170,13 +176,21 @@ frame_alloc (struct spt_entry *p)
     }
   else
     {
-      /* Memory full: reuse an evicted frame. */
+      /* Memory full: reuse an evicted frame.  If every frame is pinned,
+         eviction is impossible; return NULL so the caller fails this one
+         request (kills the offending process) rather than the kernel. */
       f = evict ();
+      if (f == NULL)
+        {
+          lock_release (&frame_lock);
+          return NULL;
+        }
       kpage = f->kpage;
       memset (kpage, 0, PGSIZE);
     }
   f->page = p;
   f->pinned = true;             /* Caller unpins after installing the mapping. */
+  f->evicting = false;
   lock_release (&frame_lock);
   return kpage;
 }
@@ -189,6 +203,7 @@ frame_free (void *kpage)
   f = frame_for (kpage);
   if (f != NULL)
     {
+      ASSERT (!f->evicting);    /* Only the evictor frees a frame it evicts. */
       if (clock_hand == &f->elem)
         clock_hand = list_next (clock_hand);
       list_remove (&f->elem);
@@ -212,11 +227,48 @@ set_pin (void *kpage, bool pinned)
 void frame_pin (void *kpage) { set_pin (kpage, true); }
 void frame_unpin (void *kpage) { set_pin (kpage, false); }
 
+bool
+frame_pin_resident (struct spt_entry *p)
+{
+  bool resident = false;
+  lock_acquire (&frame_lock);
+  while (p->evicting)
+    cond_wait (&frame_cond, &frame_lock);
+  if (p->kpage != NULL)
+    {
+      struct frame *f = frame_for (p->kpage);
+      if (f != NULL)
+        {
+          ASSERT (!f->evicting);
+          f->pinned = true;
+          resident = true;
+        }
+    }
+  lock_release (&frame_lock);
+  return resident;
+}
+
 void
-frame_await_eviction (struct spt_entry *p)
+frame_release (struct spt_entry *p)
 {
   lock_acquire (&frame_lock);
   while (p->evicting)
     cond_wait (&frame_cond, &frame_lock);
+  if (p->kpage != NULL)
+    {
+      struct frame *f = frame_for (p->kpage);
+      if (p->owner->pagedir != NULL)
+        pagedir_clear_page (p->owner->pagedir, p->upage);
+      if (f != NULL)
+        {
+          ASSERT (!f->evicting);
+          if (clock_hand == &f->elem)
+            clock_hand = list_next (clock_hand);
+          list_remove (&f->elem);
+          palloc_free_page (f->kpage);
+          free (f);
+        }
+      p->kpage = NULL;
+    }
   lock_release (&frame_lock);
 }
