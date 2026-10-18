@@ -22,14 +22,21 @@ enum rlimit_resource
 
 #define RLIMIT_NONE (-1)        /* No limit. */
 
-/* Subtree resource group, shared by a process and its descendants. */
+/* Subtree resource group, shared by a process and its descendants.
+   Groups form a tree: lowering a subtree limit (setlimit) makes a CHILD
+   group under the current one, and a process is counted in that group and
+   in every ancestor up to the root.  Admission and page charges walk from
+   the leaf to the root and succeed only if every level is under its cap,
+   so a descendant can never escape an ancestor's limit by splitting off a
+   fresh group (docs/adr/ADR-004). */
 struct rgroup
   {
+    struct rgroup *parent;     /* Enclosing group, or NULL at the root. */
     int max_procs;             /* Cap, or RLIMIT_NONE. */
-    int procs;                 /* Live members. */
+    int procs;                 /* Live members in this subtree. */
     int32_t max_pages;         /* Cap, or RLIMIT_NONE. */
-    int32_t pages;             /* User pages charged. */
-    int refs;                  /* Members plus transient holders. */
+    int32_t pages;             /* User pages charged in this subtree. */
+    int refs;                  /* Leaf members plus child groups. */
   };
 
 struct thread;

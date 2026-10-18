@@ -156,6 +156,11 @@ page_fault (struct intr_frame *f)
   if (not_present && thread_current ()->is_user)
     {
       void *esp = user ? f->esp : thread_current ()->user_esp;
+      /* A kernel-mode fault taken while holding filesys_lock would deadlock
+         when the faulting page is file-backed (the lock is not recursive).
+         Correct pinning keeps every buffer touched under the lock resident,
+         so this must never happen; assert it to catch a regression (B4). */
+      ASSERT (user || !lock_held_by_current_thread (&filesys_lock));
       if (esp != NULL && page_fault_handler (fault_addr, esp, write))
         return;
     }

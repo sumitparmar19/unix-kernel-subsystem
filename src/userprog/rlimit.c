@@ -6,30 +6,48 @@
 /* All counters are touched with interrupts off: the critical sections
    are a few instructions, and some run from the timer interrupt. */
 
+/* Creates an empty group under PARENT (NULL for the root), holding a
+   reference on PARENT.  Members and charges are added by the caller. */
 static struct rgroup *
-rgroup_create (int max_procs, int32_t max_pages)
+rgroup_create (struct rgroup *parent, int max_procs, int32_t max_pages)
 {
   struct rgroup *g = malloc (sizeof *g);
   if (g != NULL)
     {
+      g->parent = parent;
       g->max_procs = max_procs;
-      g->procs = 1;             /* The creating process is the first member. */
+      g->procs = 0;
       g->max_pages = max_pages;
       g->pages = 0;
       g->refs = 1;
+      if (parent != NULL)
+        {
+          enum intr_level old = intr_disable ();
+          parent->refs++;
+          intr_set_level (old);
+        }
     }
   return g;
 }
 
+/* Drops one reference on G, freeing it when the last goes away and, in
+   turn, dropping G's reference on its parent. */
 static void
 rgroup_unref (struct rgroup *g)
 {
-  bool last;
-  enum intr_level old = intr_disable ();
-  last = --g->refs == 0;
-  intr_set_level (old);
-  if (last)
-    free (g);
+  while (g != NULL)
+    {
+      struct rgroup *parent;
+      bool last;
+      enum intr_level old = intr_disable ();
+      last = --g->refs == 0;
+      intr_set_level (old);
+      if (!last)
+        break;
+      parent = g->parent;
+      free (g);
+      g = parent;               /* Release the ref this group held on it. */
+    }
 }
 
 /* Gives the initial process an unlimited root group and no per-process
@@ -37,7 +55,8 @@ rgroup_unref (struct rgroup *g)
 void
 rlimit_init_root (struct thread *t)
 {
-  t->rgroup = rgroup_create (RLIMIT_NONE, RLIMIT_NONE);
+  t->rgroup = rgroup_create (NULL, RLIMIT_NONE, RLIMIT_NONE);
+  t->rgroup->procs = 1;         /* The initial process is the first member. */
   t->max_fds = RLIMIT_NONE;
   t->cpu_budget = RLIMIT_NONE;
   t->charged_pages = 0;
@@ -61,21 +80,24 @@ rlimit_join (struct thread *child, struct rgroup *group,
   child->over_cpu = false;
 }
 
-/* Releases T's group membership and returns the pages it charged. */
+/* Releases T's group membership and the pages it charged, at every level
+   from its leaf group up to the root. */
 void
 rlimit_exit (struct thread *t)
 {
-  enum intr_level old = intr_disable ();
-  if (t->rgroup != NULL)
+  struct rgroup *leaf = t->rgroup;
+  if (leaf != NULL)
     {
-      t->rgroup->procs--;
-      t->rgroup->pages -= t->charged_pages;
+      struct rgroup *g;
+      enum intr_level old = intr_disable ();
+      for (g = leaf; g != NULL; g = g->parent)
+        {
+          g->procs--;
+          g->pages -= t->charged_pages;
+        }
       t->charged_pages = 0;
-    }
-  intr_set_level (old);
-  if (t->rgroup != NULL)
-    {
-      rgroup_unref (t->rgroup);
+      intr_set_level (old);
+      rgroup_unref (leaf);
       t->rgroup = NULL;
     }
 }
@@ -117,19 +139,22 @@ rlimit_set (struct thread *t, enum rlimit_resource res, int value)
               return false;
             pg = value;
           }
-        g = rgroup_create (mp, pg);
+        /* Make a CHILD group under the current one and move into it.  The
+           caller stays counted in old_g and every ancestor, so its tighter
+           cap can only ever be below theirs -- it cannot hand itself a fresh
+           full allowance.  old_g is NOT decremented; the child holds it as
+           its parent. */
+        g = rgroup_create (old_g, mp, pg);
         if (g == NULL)
           return false;
-        /* Carry this process's existing page charge into the new group. */
-        g->pages = t->charged_pages;
+        g->procs = 1;                   /* This process. */
+        g->pages = t->charged_pages;    /* Its pages, now also counted here. */
         {
           enum intr_level old = intr_disable ();
           t->rgroup = g;
-          old_g->procs--;
-          old_g->pages -= t->charged_pages;
           intr_set_level (old);
         }
-        rgroup_unref (old_g);
+        rgroup_unref (old_g);           /* Drop T's old leaf ref; parent keeps it. */
         return true;
       }
     default:
@@ -150,16 +175,20 @@ rlimit_get (struct thread *t, enum rlimit_resource res)
     }
 }
 
-/* Admits one more process to T's group if under the cap. */
+/* Admits one more process to T's subtree if every level from T's group
+   up to the root is under its cap.  All-or-nothing. */
 bool
 rlimit_admit_proc (struct thread *t)
 {
-  struct rgroup *g = t->rgroup;
-  bool ok;
+  struct rgroup *g;
+  bool ok = true;
   enum intr_level old = intr_disable ();
-  ok = g->max_procs == RLIMIT_NONE || g->procs < g->max_procs;
+  for (g = t->rgroup; g != NULL; g = g->parent)
+    if (g->max_procs != RLIMIT_NONE && g->procs >= g->max_procs)
+      { ok = false; break; }
   if (ok)
-    g->procs++;
+    for (g = t->rgroup; g != NULL; g = g->parent)
+      g->procs++;
   intr_set_level (old);
   return ok;
 }
@@ -168,22 +197,27 @@ rlimit_admit_proc (struct thread *t)
 void
 rlimit_drop_proc (struct thread *t)
 {
+  struct rgroup *g;
   enum intr_level old = intr_disable ();
-  t->rgroup->procs--;
+  for (g = t->rgroup; g != NULL; g = g->parent)
+    g->procs--;
   intr_set_level (old);
 }
 
-/* Charges N user pages to T's group, if under the cap. */
+/* Charges N user pages to T's subtree if every level is under its cap. */
 bool
 rlimit_charge_pages (struct thread *t, int n)
 {
-  struct rgroup *g = t->rgroup;
-  bool ok;
+  struct rgroup *g;
+  bool ok = true;
   enum intr_level old = intr_disable ();
-  ok = g->max_pages == RLIMIT_NONE || g->pages + n <= g->max_pages;
+  for (g = t->rgroup; g != NULL; g = g->parent)
+    if (g->max_pages != RLIMIT_NONE && g->pages + n > g->max_pages)
+      { ok = false; break; }
   if (ok)
     {
-      g->pages += n;
+      for (g = t->rgroup; g != NULL; g = g->parent)
+        g->pages += n;
       t->charged_pages += n;
     }
   intr_set_level (old);
@@ -193,8 +227,10 @@ rlimit_charge_pages (struct thread *t, int n)
 void
 rlimit_uncharge_pages (struct thread *t, int n)
 {
+  struct rgroup *g;
   enum intr_level old = intr_disable ();
-  t->rgroup->pages -= n;
+  for (g = t->rgroup; g != NULL; g = g->parent)
+    g->pages -= n;
   t->charged_pages -= n;
   intr_set_level (old);
 }
