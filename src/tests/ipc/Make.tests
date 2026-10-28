@@ -1,5 +1,5 @@
 # -*- makefile -*-
-# Inter-process communication tests (kernel-v2, docs/adr/ADR-005).
+# Inter-process communication tests (docs/adr/ADR-005).
 
 tests/%.output: FILESYSSOURCE = --filesys-size=2
 tests/%.output: PUTFILES = $(filter-out kernel.bin loader.bin, $^)

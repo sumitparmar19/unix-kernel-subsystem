@@ -1,5 +1,5 @@
 # -*- makefile -*-
-# Resource-limit tests (kernel-v2, docs/adr/ADR-004).
+# Resource-limit tests (docs/adr/ADR-004).
 
 tests/%.output: FILESYSSOURCE = --filesys-size=2
 tests/%.output: PUTFILES = $(filter-out kernel.bin loader.bin, $^)

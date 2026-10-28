@@ -1,5 +1,5 @@
 # -*- makefile -*-
-# Hardening regression tests (kernel-v2.1): one per kernel bug B1-B4.
+# Hardening regression tests: one per kernel bug B1-B4.
 
 tests/%.output: FILESYSSOURCE = --filesys-size=2
 tests/%.output: PUTFILES = $(filter-out kernel.bin loader.bin, $^)

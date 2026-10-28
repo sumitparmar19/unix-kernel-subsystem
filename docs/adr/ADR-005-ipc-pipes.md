@@ -1,6 +1,6 @@
 # ADR-005: Inter-process communication: pipes, redirection and `dup2`
 
-**Status:** accepted (M3) · **Code:** `src/userprog/ofile.[ch]`, `src/userprog/pipe.[ch]`,
+**Status:** accepted · **Code:** `src/userprog/ofile.[ch]`, `src/userprog/pipe.[ch]`,
 `src/userprog/syscall.c`, `src/userprog/process.c` · **Claim:** C5, "IPC"
 
 ## Context
@@ -78,6 +78,6 @@ exactly once.
 ## Consequences
 - Every descriptor operation is O(1). The table grows by doubling, bounded by the per-process descriptor
   limit (ADR-004).
-- The fuzzer (M4) must avoid self-deadlock: a process that reads its own empty pipe while it still holds
+- The fuzzer must avoid self-deadlock: a process that reads its own empty pipe while it still holds
   the write end blocks forever, which is the correct POSIX behaviour. The fuzzer keeps a model of the
   pipes it creates and only issues reads and writes that can't block on itself.

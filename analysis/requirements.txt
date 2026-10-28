@@ -1,4 +1,4 @@
-# For analysis/analyze.py and analysis/simulate.py (M7 benchmarks).
+# For analysis/analyze.py and analysis/simulate.py (benchmarks).
 # The benchmark driver (scripts/bench.sh) and the kernel need none of this.
 pandas>=2.0
 matplotlib>=3.7

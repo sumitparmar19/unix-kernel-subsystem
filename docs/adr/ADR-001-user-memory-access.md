@@ -1,6 +1,6 @@
 # ADR-001: Validating every user pointer against the page tables
 
-**Status:** accepted (M2) · **Code:** `src/userprog/umem.[ch]`, `src/userprog/syscall.c`,
+**Status:** accepted · **Code:** `src/userprog/umem.[ch]`, `src/userprog/syscall.c`,
 `src/userprog/exception.c` · **Claim:** C7, "page-table validation of every user pointer"
 
 ## Context
@@ -10,7 +10,7 @@ kernel faults (in the course version, `kill` then **panics the whole kernel**) o
 kernel memory.
 
 The course version checked only the first byte of the stack pointer, of strings, and the two ends of
-buffers. It never checked the argument slots (`*(esp + 1)`). Phase 1 measured the consequences:
+buffers. It never checked the argument slots (`*(esp + 1)`). An audit of the course version measured the consequences:
 `sc-bad-arg` exited with a value read from kernel memory, and `sc-boundary-3`, `exec-bound-2` and
 `exec-bound-3` panicked the kernel.
 
@@ -53,5 +53,5 @@ one really is a kernel bug.
 ## Consequences
 - Cost: one page-table lookup per page touched, plus a byte scan for strings. Negligible next to the
   file system.
-- Every new system call (IPC in ADR-005, limits in ADR-004) must use these functions. The fuzzer (M4)
+- Every new system call (IPC in ADR-005, limits in ADR-004) must use these functions. The fuzzer
   enforces it: any panic means a missing check.

@@ -1,4 +1,4 @@
-Resource limits (kernel-v2):
+Resource limits:
 1	fork-bomb
 1	fd-exhaust
 1	cpu-spin

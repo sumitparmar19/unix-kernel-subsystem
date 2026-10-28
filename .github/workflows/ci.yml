@@ -1,4 +1,4 @@
-name: kernel-v2 CI
+name: CI
 
 # Builds the kernel in Docker and runs the test suites, a short fuzz,
 # and static analysis.  Fails on any regression against
@@ -6,7 +6,7 @@ name: kernel-v2 CI
 
 on:
   push:
-    branches: [kernel-v2, main]
+    branches: [main]
   pull_request:
 
 jobs:
@@ -73,7 +73,7 @@ jobs:
       - name: cppcheck
         run: |
           sudo apt-get update && sudo apt-get install -y cppcheck
-          # Analyse the kernel-v2 modules; fail on a genuine error.
+          # Analyse the kernel modules; fail on a genuine error.
           cppcheck --std=c99 --error-exitcode=1 --quiet \
             --suppress=missingIncludeSystem --suppress=unusedFunction \
             src/userprog/umem.c src/userprog/ofile.c src/userprog/pipe.c \

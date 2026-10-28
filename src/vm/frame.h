@@ -8,7 +8,7 @@
 
 struct spt_entry;
 
-/* Eviction policies, selectable at boot with -evict=NAME (M7). */
+/* Eviction policies, selectable at boot with -evict=NAME. */
 enum evict_policy { EVICT_CLOCK, EVICT_FIFO, EVICT_RANDOM };
 extern enum evict_policy frame_policy;
 

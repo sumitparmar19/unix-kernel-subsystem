@@ -1,4 +1,4 @@
-/* fuzz: a system-call fuzzer for the kernel-v2 kernel (M4).
+/* fuzz: a system-call fuzzer for the kernel.
 
    Proves isolation: a user program making random and adversarial
    system calls must never crash or hang the kernel.

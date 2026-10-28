@@ -1,4 +1,4 @@
-/* minish: a minimal shell with pipelines (kernel-v2, ADR-005).
+/* minish: a minimal shell with pipelines (ADR-005).
 
    Runs `prog1 args | prog2 args | ...' by connecting each stage's
    standard output to the next stage's standard input with pipe()

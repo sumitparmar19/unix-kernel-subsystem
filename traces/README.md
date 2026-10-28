@@ -2,6 +2,7 @@
 
 Sample kernel event traces, for https://ui.perfetto.dev (drag the `.json` in).
 Produced by running Pintos with the `-trace` kernel option and converting the
+dump with `scripts/trace2perfetto.py` (see the ADRs in `docs/adr/`).
 
 | File | What it shows |
 |---|---|

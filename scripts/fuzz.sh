@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Run the system-call fuzzer in Pintos and report whether the kernel
 # survived (no panic, no hang, children all exit cleanly, file ops still
-# work afterwards).  Used in M4 and in CI.
+# work afterwards).  Used in CI.
 #
 #   scripts/fuzz.sh [-k userprog|ipc] [-s SEED0] [-n NSEEDS] [-i ITERS] [-t SECS]
 #

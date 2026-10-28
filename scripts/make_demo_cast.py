@@ -4,7 +4,7 @@ kernel running, inlined into the benchmark site's self-contained player by
 analysis/build_site.py.
 
 The terminal output below is the *real* output the kernel produced in the
-M7 test runs (analysis/test-results/m7/.../*.output) and the M7 benchmark
+recorded test runs (analysis/test-results/m7/.../*.output) and the page-replacement benchmark
 (analysis/benchmarks/bench.jsonl); this script only adds playback timing and
 prompt framing so a visitor can watch it. It is a replay, not a live shell.
 

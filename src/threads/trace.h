@@ -1,7 +1,7 @@
 #ifndef THREADS_TRACE_H
 #define THREADS_TRACE_H
 
-/* Kernel event tracing (kernel-v2, M4).  With the `-trace' kernel
+/* Kernel event tracing.  With the `-trace' kernel
    option, events go into a fixed-size ring buffer, timestamped with
    the CPU's time-stamp counter, and are dumped over the serial port
    at power-off.  scripts/trace2perfetto.py turns the dump into Chrome

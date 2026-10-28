@@ -1,4 +1,4 @@
-Pipes, redirection and dup2 (kernel-v2):
+Pipes, redirection and dup2:
 1	pipe-basic
 1	pipe-eof
 1	pipe-full

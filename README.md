@@ -6,12 +6,15 @@ each other, bounding what each may consume, giving them real inter-process commu
 paging a working set larger than physical RAM to disk. Every capability is backed by tests, and the
 page-replacement design is backed by measurements.
 
-**Live benchmark site + demo:** https://sumitparmar19.github.io/unix-kernel-subsystem/ (once Pages is enabled; the page is prebuilt under `docs/`).
+**Live benchmark site + demo:** https://sumitparmar19.github.io/unix-kernel-subsystem/ (the page is prebuilt under `docs/`).
 
-> **Authorship.** The course submission (Pintos projects 1–2, scheduling + system calls) is my own
-> university coursework, frozen at the tag [`course-submission-2025-11`](../../tree/course-submission-2025-11)
-> and credited to Stanford Pintos (`pintos-anon` @ `9f013d0`). Everything after that — milestones
-> design decisions, the diagnoses, and the review are mine; I can explain every line
+> **Origin.** This project builds on Stanford's **Pintos** teaching OS (`pintos-anon` @ `9f013d0`),
+> whose license and copyright notices are kept intact under `src/`. The starting point was my
+> university coursework (Pintos projects 1–2: scheduling and system calls), preserved unchanged on the
+> [`archive/course-submission-2025-11`](../../tree/archive/course-submission-2025-11) branch.
+> Everything described below — the user-memory safety work, real IPC (pipes, `dup2`, redirect), the
+> "cgroups-lite" resource limits, demand-paged virtual memory, the syscall fuzzer, and the
+> eviction-policy benchmarks — I designed and built on top of that base.
 
 ---
 
@@ -31,8 +34,7 @@ page-replacement design is backed by measurements.
 
 ## Test results
 
-Every suite is re-run each milestone and the raw logs are committed under `analysis/test-results/`.
-Current (M7/M8):
+Every suite's raw logs are committed under `analysis/test-results/`:
 
 | Suite | Result | Stock Pintos |
 |---|---|---|
@@ -41,7 +43,7 @@ Current (M7/M8):
 | `ipc` (pipes, dup2, redirect) | **11 / 11** | n/a (new) |
 | `vm` (demand paging, swap, mmap) | **113 / 113** | n/a (new) |
 | `limits` (resource caps) | **6 / 6** | n/a (new) |
-| `hardening` (bug-fix regressions, v2.1) | **7 / 7** | n/a (new) |
+| `hardening` (bug-fix regressions) | **7 / 7** | n/a (new) |
 
 The syscall fuzzer makes ~125k random/boundary calls with **zero kernel panics**; malformed calls
 kill only the offending process.
@@ -136,11 +138,16 @@ src/            the kernel (threads/ userprog/ vm/ filesys/ + new ipc/ limits/ t
 docs/adr/       architecture decision records (one per subsystem, written before the code)
 docs/SYSCALLS.md    every system call, its semantics, and its POSIX comparison
 docs/benchmarks/    prebuilt GitHub Pages site (eviction measurements + a replayable demo)
-analysis/       benchmarks, test-result logs per milestone, interview prep, resume evidence
+analysis/       benchmarks, the eviction simulator, and per-suite test-result logs
 scripts/        test / benchmark / fuzz / trace tooling
 ```
 
 ## Credits
 
-Built on Stanford Pintos (`pintos-anon` @ `9f013d0`); course projects 1–2 are my university
-coursework. Post-course milestones M1–M9 were developed as a portfolio project with AI
+Built on Stanford Pintos (`pintos-anon` @ `9f013d0`); its license and copyright notices are kept
+intact under `src/`. Pintos projects 1–2 (scheduling and system calls) are my university coursework,
+preserved on the [`archive/course-submission-2025-11`](../../tree/archive/course-submission-2025-11)
+branch. Everything built on top of that base is described above, with the design rationale recorded
+in [`docs/adr/`](docs/adr/), the measurements in
+[`analysis/benchmarks/`](analysis/benchmarks/BENCHMARKS.md), and the concurrency bugs found and fixed
+in [`analysis/benchmarks/BUGS-FOUND.md`](analysis/benchmarks/BUGS-FOUND.md).

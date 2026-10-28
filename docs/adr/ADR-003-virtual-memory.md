@@ -1,6 +1,6 @@
 # ADR-003: Demand-paged virtual memory
 
-**Status:** accepted (M6), hardened (v2.1: B2–B4) · **Code:** `src/vm/{page,frame,swap,mmap}.[ch]`,
+**Status:** accepted, hardened (B2–B4) · **Code:** `src/vm/{page,frame,swap,mmap}.[ch]`,
 `userprog/process.c`, `userprog/exception.c`, `userprog/syscall.c`, `userprog/umem.c` · **Claim:** C9 ·
 **Result:** vm 113/113, hardening 7/7
 
@@ -41,7 +41,7 @@ then:
 The `dirtied` flag fixes the subtle bug that a naive design hits: after a written anonymous page is
 swapped out and later swapped back in, its only copy of the data is in RAM. If it were then treated as a
 "clean zero page" and dropped on the next eviction, the data would be lost. `dirtied` makes such a page
-swap every time. (Found and fixed during M6; the symptom was `page-linear` reporting `byte 0 != 0x5a`.)
+swap every time. (Found and fixed while building the VM; the symptom was `page-linear` reporting `byte 0 != 0x5a`.)
 
 ### Page fault handler
 `exception.c` sends a not-present fault from a user process to `page_fault_handler(fault_addr, esp,
@@ -59,7 +59,7 @@ pinned frame. After the I/O the pages are unpinned. `umem`'s `copy_in`/`copy_out
 the same way for arguments, paths and command lines. **Lock order:** a thread holding `frame_lock` never
 takes `filesys_lock` or `swap_lock`.
 
-**Bounded pinning (B2, v2.1).** `read`/`write` must not pin their *whole* buffer: a buffer larger than
+**Bounded pinning (B2).** `read`/`write` must not pin their *whole* buffer: a buffer larger than
 the user frame pool would pin every frame, leaving the evictor no victim — `evict()` used to
 `PANIC`. Now `read`/`write` pin at most `PIN_CHUNK` pages (64 KB) at a time, do that chunk's I/O,
 unpin, and continue, stopping at end of file or a short transfer. And `evict()` **returns NULL instead
@@ -67,9 +67,9 @@ of panicking** when everything is pinned; `frame_alloc` propagates NULL, the fau
 killed (exit −1), and only a true kernel invariant still panics. A blocked pipe reader therefore holds
 only a bounded pin across its wait (`tests/hardening/pin-read`, `pin-write`, `pin-pipe`).
 
-### Two paging races (found by the M7 benchmark)
+### Two paging races (found by the page-replacement benchmark)
 Dropping `frame_lock` across eviction I/O is necessary for lock order but opens two windows that the
-M7 benchmark's parallel-fault stress (`tests/vm/page-parallel`, five faulting processes) exposed as
+page-replacement benchmark's parallel-fault stress (`tests/vm/page-parallel`, five faulting processes) exposed as
 nondeterministic corruption — a parent returning into `eip=0`. Both are fixed (`analysis/benchmarks/BUGS-FOUND.md`):
 - **`swap_in` freed the slot before reading it.** A concurrent `swap_out` could reclaim the slot and
   overwrite it mid-read, mixing two pages. Fixed by reading the page out *before* clearing the bitmap bit.
@@ -78,8 +78,8 @@ nondeterministic corruption — a parent returning into `eip=0`. Both are fixed 
   with an **eviction barrier**: the evictor marks the victim `evicting` under `frame_lock`, and a
   faulting owner waits on a condition variable until the evictor has recorded where the data went.
 
-### Three more races the barrier alone did not close (B3, B4, v2.1)
-The M7 barrier covered only the *fault→load* path. Reading the eviction code again found that eviction
+### Three more races the barrier alone did not close (B3, B4)
+That first barrier covered only the *fault→load* path. Reading the eviction code again found that eviction
 races the *teardown* and *pin* paths too (`analysis/benchmarks/BUGS-FOUND.md`):
 - **B3 — use-after-free on exit / `munmap` during eviction.** `page_free` (and the `munmap` path) freed
   a page's frame without waiting out an in-progress eviction, so it could free a frame the evictor was
@@ -102,10 +102,10 @@ These make "a read-into-unloaded-buffer deadlock eliminated by construction" act
 PTEs, release swap slots) **before** `pagedir_destroy`, so the two never double-free a physical page.
 
 ### Connections to earlier milestones
-- **M2 (ADR-001):** `umem` validates a range by bringing its pages in and pinning them, so the resume's
+- **User-memory access (ADR-001):** `umem` validates a range by bringing its pages in and pinning them, so the resume's
   "page-table validation of every user pointer" now means *pinned, resident, and checked* for the whole
   system call — and the read-into-unloaded-buffer deadlock is impossible by construction.
-- **M5 (ADR-004):** `LIMIT_PAGES` is charged when an SPT entry is created (the process's virtual page
+- **Resource limits (ADR-004):** `LIMIT_PAGES` is charged when an SPT entry is created (the process's virtual page
   footprint) and returned when it is freed, so a memory hog that grows its stack or `mmap`s is capped
   (`tests/limits/mem-hog`).
 
@@ -114,12 +114,12 @@ PTEs, release swap slots) **before** `pagedir_destroy`, so the two never double-
 - **Fault-based user access (`get_user`/`put_user`) instead of pinning:** would reintroduce the
   filesys-lock deadlock for buffered I/O; pinning is the standard fix.
 - **FIFO or random eviction:** kept as boot-time options (`-evict=fifo|random`, `src/vm/frame.c`) for the
-  M7 benchmark; clock is the default because it approximates LRU cheaply. The M7 measurements
+  page-replacement benchmark; clock is the default because it approximates LRU cheaply. The measurements
   (`analysis/benchmarks/`) confirm the choice: clock does ~3.5x fewer evictions and almost no swap-ins
   than FIFO on a sequential scan, and FIFO thrashes the write-heavy mergesort past its time budget.
 
 ## Consequences
 - Every user frame now flows through the frame table; `frame_alloc` is the single choke point for the
   page limit and eviction.
-- The VM suite passes 113/113 and the fuzzer still makes zero kernel panics. M7 measures the eviction
+- The VM suite passes 113/113 and the fuzzer still makes zero kernel panics. The benchmark measures the eviction
   policy trade-offs these modules make possible.

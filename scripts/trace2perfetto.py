@@ -106,7 +106,7 @@ def convert(clock, names, recs):
         events.append({"ph": "X", "pid": PID, "tid": tid, "name": "running",
                        "cat": "sched", "ts": ts, "dur": round(end - ts, 3)})
     return {"traceEvents": events, "displayTimeUnit": "ms",
-            "metadata": {"source": "Pintos kernel-v2 -trace",
+            "metadata": {"source": "Pintos kernel -trace",
                          "records": len(recs), "tsc_per_us": round(rate, 1)}}
 
 

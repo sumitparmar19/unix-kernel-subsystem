@@ -18,7 +18,7 @@ ls_SRC = ls.c
 recursor_SRC = recursor.c
 rm_SRC = rm.c
 
-# kernel-v2 IPC demos (pipes, exec_redirect).
+# IPC demos (pipes, exec_redirect).
 fuzz_SRC = fuzz.c
 minish_SRC = minish.c
 upper_SRC = upper.c

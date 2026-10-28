@@ -1,11 +1,11 @@
-# Kernel bugs found and fixed (M7 + v2.1 hardening)
+# Kernel bugs found and fixed
 
 Every bug below was found by the project's own tooling or by deliberately reading the concurrency and
 resource-exhaustion paths the green test suites had not reached — the point of the measurement and
 hardening work. Each has a regression test; where a bug produces a clean, repeatable failure on the
 pre-fix kernel, the "before" is shown.
 
-## Found by the M7 benchmark (parallel-fault stress on `tests/vm/page-parallel`)
+## Found by the page-replacement benchmark (parallel-fault stress on `tests/vm/page-parallel`)
 
 Running the eviction benchmark under five parallel faulting processes produced a nondeterministic
 parent crash at `eip=0` (a corrupted return address). Two races in the swap path:
@@ -17,7 +17,7 @@ parent crash at `eip=0` (a corrupted return address). Two races in the swap path
    and recording `has_swap`, the owner could fault and the loader would zero-fill a page whose data was
    still heading to swap. Fixed with an "evicting" barrier on a condition variable.
 
-## Found by the v2.1 hardening review
+## Found by the hardening review
 
 Reading the new VM and limits code against the cases the suite never hit found four more bugs; the
 extended fuzzer then found a fifth. Regression tests are in `src/tests/hardening/`.
@@ -28,7 +28,7 @@ brand-new full-sized group, detached from its parent — so every descendant cou
 subtree grew without bound. The main sandbox claim was false.
 **Fix.** Hierarchical resource groups: `setlimit` makes a *child* group, and admission/charging walk
 from the leaf to the root, so every ancestor's cap binds (ADR-004).
-**Before / after.** `tests/hardening/esc-procs` builds a 30-deep escaping chain. On v2.0 it is **not**
+**Before / after.** `tests/hardening/esc-procs` builds a 30-deep escaping chain. Before the fix it is **not**
 contained (the test fails, `exit(1)`); after the fix it is contained at the cap and passes. `esc-pages`
 is the same for memory.
 
@@ -39,7 +39,7 @@ is the same for memory.
 **Fix.** Pin at most a 64 KB chunk at a time, I/O it, unpin, continue; and `evict()` returns NULL
 instead of panicking, so an impossible allocation kills the offending process, not the kernel (ADR-003).
 **Before / after.** `tests/hardening/pin-read` reads a 200-byte file through a 3 MB buffer.
-On v2.0: `Kernel PANIC at ../../vm/frame.c:134 in evict(): frame: no evictable frame found`.
+Before the fix: `Kernel PANIC at ../../vm/frame.c:134 in evict(): frame: no evictable frame found`.
 After the fix: `read` returns 200, contents intact, kernel healthy. `pin-write` and `pin-pipe` likewise.
 
 ### B3 — use-after-free on exit / `munmap` during eviction (`vm`, `page.c`/`frame.c`/`mmap.c`)
@@ -50,7 +50,7 @@ twice.
 only then frees; the evicted frame is marked `f->evicting` and `frame_free` asserts no one else frees
 it. Rule: *only the evictor frees a frame it is evicting* (ADR-003).
 **Status.** The window (during the evictor's swap I/O, lock dropped) is narrow; it was found by code
-review, matches the "marginal-memory nondeterminism" noted in M7, and the fix is correct by
+review, matches the "marginal-memory nondeterminism" noted during the benchmark, and the fix is correct by
 construction. `tests/hardening/exit-evict` runs 30 rounds of staggered exits under heavy paging and
 passes; debug asserts in `frame_free`/`frame_release` guard the invariant. (The pre-fix panic is
 probabilistic and was not reproduced in ~12 isolated runs, so this bug is documented as a
@@ -77,7 +77,7 @@ straight to `filesys_open`.
 **Fix.** `load` fails cleanly when there is no program name, returning an error instead of calling the
 file system with NULL.
 **Before / after.** `tests/hardening/exec-empty` runs `exec("")`, `exec("   ")` and `exec_redirect("")`.
-On v2.0 the first one panics the kernel; after the fix all three return `PID_ERROR` and the kernel
+Before the fix the first one panics the kernel; after the fix all three return `PID_ERROR` and the kernel
 stays healthy. The fuzzer campaign (100k calls each on userprog, vm, limits) is now clean.
 
 ## Takeaway

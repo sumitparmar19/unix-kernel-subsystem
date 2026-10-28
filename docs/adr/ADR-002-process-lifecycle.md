@@ -1,9 +1,9 @@
 # ADR-002: Process lifecycle, child records and file-system locking
 
-**Status:** accepted (M1) · **Code:** `src/userprog/process.[ch]`, `src/threads/thread.[ch]`
+**Status:** accepted · **Code:** `src/userprog/process.[ch]`, `src/threads/thread.[ch]`
 
 ## Context
-The course version (tag `course-submission-2025-11`) had four lifecycle defects, all measured in Phase 1:
+The course version (tag `course-submission-2025-11`) had four lifecycle defects, all measured on the course version:
 
 1. `exec` returned the child's pid **before** the child had loaded, so `exec("no-such-file")` returned
    a valid pid (`exec-missing`).

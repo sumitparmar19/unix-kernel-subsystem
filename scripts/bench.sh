@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# M7 page-replacement benchmark.  Runs a matrix of
+# Page-replacement benchmark.  Runs a matrix of
 #   eviction policy x workload x physical-RAM x random-seed
 # against the demand-paged VM kernel and records, for each run, the
 # kernel's own KSTAT counters (evictions, swap-ins/outs, page faults,

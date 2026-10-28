@@ -1,7 +1,7 @@
-name: kernel-v2 CodeQL config
+name: CodeQL config
 # Analyse the kernel; the imported Stanford Pintos base and the test
-# programs are not our code to fix, so scope queries to what kernel-v2
-# changed plus the core kernel it touches.
+# programs are not our code to fix, so scope queries to the kernel
+# modules this project added plus the core kernel they touch.
 paths:
   - src/userprog
   - src/threads

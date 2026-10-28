@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build the pintos-kernel image and run the M7 benchmark (scripts/bench.sh)
+# Build the pintos-kernel image and run the page-replacement benchmark (scripts/bench.sh)
 # inside it, writing analysis/benchmarks/bench.jsonl on the host.
 #
 #   scripts/bench-run.sh            # full matrix (SEEDS="1 2 3 4 5")

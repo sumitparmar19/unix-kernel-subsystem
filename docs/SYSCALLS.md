@@ -34,7 +34,7 @@ at most 14 characters.
 | `bool pipe (int fds[2])` | Creates a pipe with a 4096-byte buffer; `fds[0]` reads, `fds[1]` writes (lowest free descriptors). False if out of memory or descriptors. | `pipe` | **same** |
 | `int dup2 (int oldfd, int newfd)` | Makes `newfd` share `oldfd`'s open-file object (and offset), closing `newfd` first. Returns `newfd`; `oldfd == newfd` returns `newfd` without change. −1 if `oldfd` isn't open or `newfd` is out of range (0–1023). | `dup2` | **same** |
 
-## Resource limits (kernel-v2, docs/adr/ADR-004)
+## Resource limits (docs/adr/ADR-004)
 
 | Call | Behaviour | POSIX counterpart | Comparison |
 |---|---|---|---|
@@ -60,6 +60,6 @@ virtual memory.
 
 ## Limits
 
-- Descriptors: 0–1023 per process (like `RLIMIT_NOFILE` = 1024). M5 makes this configurable per process.
+- Descriptors: 0–1023 per process (like `RLIMIT_NOFILE` = 1024). The resource-limits work makes this configurable per process.
 - Path names: 127 bytes at the system-call layer; the Pintos file system itself allows 14.
 - Command lines: one page (4096 bytes), including arguments.

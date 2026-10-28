@@ -1,7 +1,7 @@
 #ifndef THREADS_KSTAT_H
 #define THREADS_KSTAT_H
 
-/* Kernel statistics counters (kernel-v2, M4).  Printed at power-off
+/* Kernel statistics counters.  Printed at power-off
    as one machine-readable `KSTAT name=value ...' line, after the
    point the test checker reads, so tests are unaffected. */
 

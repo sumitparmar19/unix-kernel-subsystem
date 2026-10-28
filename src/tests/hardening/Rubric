@@ -1,4 +1,4 @@
-Hardening regression (kernel-v2.1):
+Hardening regression:
 1	esc-procs
 1	esc-pages
 1	pin-read

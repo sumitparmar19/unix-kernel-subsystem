@@ -1,4 +1,4 @@
-/* B5 regression (found by the v2.1 fuzzer): exec of an empty or all-spaces
+/* B5 regression (found by the hardening fuzzer): exec of an empty or all-spaces
    command line has no program name.  The loader used to pass the resulting
    NULL straight to the file system, panicking `dir_lookup`.  It must now
    fail the load cleanly and return PID_ERROR, leaving the kernel healthy. */
